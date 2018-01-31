@@ -1,16 +1,19 @@
-class Alarma:
-    def __init__(self, tiempo=0, sonido=''):
-        self.__tiempo = tiempo
-        self.__sonido = sonido
+from db import db
 
-    def getTiempo(self):
-        return self.__tiempo
+class Alarma(db.Model):
+    id_alarma = db.Column(db.Integer, primary_key=True)
+    tiempo = db.Column(db.Integer)
+    sonido = db.Column(db.String(500))
 
-    def getSonido(self):
-        return  self.__sonido
+    def __init__(self, tiempo, sonido):
+        self.tiempo = tiempo
+        self.sonido = sonido
 
-    def setTiempo(self, tiempo):
-        self.__tiempo = tiempo
+    def __repr__(self):
+        return '<Sonido %r>' %self.sonido
 
-    def setSonido(self, sonido):
-        self.__sonido = sonido
+    def post_alarma(self):
+        alarma = Alarma(self.tiempo, self.sonido)
+
+        db.session.add(alarma)
+        db.session.commit()
