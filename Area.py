@@ -13,9 +13,34 @@ class Area(db.Model):
     def post_area(self):
         area = Area(nombre=self.nombre)
         db.session.add(area)
+
         db.session.commit()
+        return area
 
     def get_area(self, id):
         area = Area.query.filter_by(id_area=id).first()
         return area
 
+
+    def get_ult_area(self):
+        areas = Area.query.all()
+
+        numAreas = len(areas)
+        area = areas[numAreas-1]
+
+        return area
+
+    def put_area(self, nombre):
+        area = Area.query.filter_by(id_area=self.id_area).first()
+        area.nombre = nombre
+        db.session.commit()
+
+        return area
+
+    def delete_area(self):
+        area = Area.query.filter_by(id_area=self.id_area).first()
+
+        db.session.delete(area)
+        db.session.commit()
+
+        return "OK"
