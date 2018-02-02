@@ -1,25 +1,17 @@
-from Usuario import Usuario
+from db import db
 
-class Organizacion:
-    def __init__(self, id_organizacion=0, nombre='', usuarios=[]):
-        self.__id_organizacion = id_organizacion
-        self.__nombre = nombre
-        self.__usuarios = usuarios
+class Organizacion(db.Model):
+    id_organizacion = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
+    usuarios = db.Column(db.String(255))
+    ecoes = db.Column(db.Integer)
 
-    def getIdOrganizacion(self):
-        return self.__id_organizacion
+    def __init__(self, nombre='', usuarios=[], ecoes=[]):
+        self.nombre = nombre
+        self.usuarios = usuarios
+        self.ecoes = ecoes
 
-    def getNombre(self):
-        return self.__nombre
 
-    def getUsuarios(self):
-        return self.__usuarios
-
-    def setIdOrganizacion(self, id_organizacion):
-        self.__id_organizacion = id_organizacion
-
-    def setNombre(self, nombre):
-        self.__nombre = nombre
-
-    def setUsuarios(self, usuarios):
-        self.__usuarios = usuarios
+    def get_organizacion(self, id):
+        organizacion = Organizacion.query.filter_by(id_organizacion=id).first()
+        return organizacion
