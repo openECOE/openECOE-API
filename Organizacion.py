@@ -3,6 +3,8 @@ from db import db
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
+
+    #TODO hacer que usuarios y ecoes sean relationship
     usuarios = db.Column(db.String(255))
     ecoes = db.Column(db.Integer)
 

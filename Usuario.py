@@ -4,6 +4,8 @@ class Usuario(db.Model):
     id_usuario = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     apellidos = db.Column(db.String(255))
+
+    #TODO hacer que permisos sea relationship
     permisos = db.Column(db.Integer)
 
     def __init__(self, nombre='', apellidos='', permisos=[]):
@@ -24,7 +26,7 @@ class Usuario(db.Model):
         return usuario
 
     #Edita nombre de Usuario
-    def put_organizacion(self, nombre):
+    def put_organizacionNombre(self, nombre):
         usuario = Usuario.query.filter_by(id_usuario=self.id_usuario).first()
         usuario.nombre = nombre
         db.session.commit()
@@ -32,7 +34,7 @@ class Usuario(db.Model):
         return usuario
 
     #Edita apellido de Usuario
-    def put_organizacion(self, apellidos):
+    def put_organizacionApellidos(self, apellidos):
         usuario = Usuario.query.filter_by(id_usuario=self.id_usuario).first()
         usuario.apellidos = apellidos
         db.session.commit()
