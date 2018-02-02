@@ -22,7 +22,6 @@ class Organizacion(db.Model):
         db.session.commit()
         return organizacion
 
-    #Editamos el nombre de la Organiación.
     def put_organizacion(self, nombre):
         organizacion = Organizacion.query.filter_by(id_organizacion=self.id_organizacion).first()
         organizacion.nombre = nombre
@@ -37,3 +36,5 @@ class Organizacion(db.Model):
         db.session.commit()
 
         return "OK"
+
+    #TODO falta los metodos relacionados con el Array de Usuarios
