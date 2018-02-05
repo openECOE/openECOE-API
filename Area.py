@@ -10,14 +10,12 @@ class Area(db.Model):
         self.id_ecoe = id_ecoe
 
     def __repr__(self):
-        return '<Area %r>' %self.area
+        return '<Area %r>' %self.nombre
 
     def post_area(self):
-        area = Area(nombre=self.nombre, id_ecoe=self.id_ecoe)
-        db.session.add(area)
 
+        db.session.add(self)
         db.session.commit()
-        return area
 
     def get_area(self, id):
         area = Area.query.filter_by(id_area=id).first()
@@ -32,16 +30,10 @@ class Area(db.Model):
         return area
 
     def put_area(self, nombre):
-        area = Area.query.filter_by(id_area=self.id_area).first()
-        area.nombre = nombre
+        self.nombre = nombre
         db.session.commit()
 
-        return area
 
     def delete_area(self):
-        area = Area.query.filter_by(id_area=self.id_area).first()
-
-        db.session.delete(area)
+        db.session.delete(self)
         db.session.commit()
-
-        return "OK"

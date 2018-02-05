@@ -1,24 +1,17 @@
+from db import db
+
 class Alumno:
-    def __init__(self, id_alumno='', nombre='', DNI=''):
-        self.__id_alumno = id_alumno
-        self.__nombre = nombre
-        self.__DNI = DNI
+    id_alumno = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
+    dni = db.Column(db.String(25))
+  #  id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
 
-    def getIdAlumno(self):
-        return self.__id_alumno
+    def __init__(self, id_alumno='', nombre='', DNI='', id_ecoe=0):
+        self.nombre = nombre
+        self.DNI = DNI
+   #     self.id_ecoe = id_ecoe
 
-    def getNombre(self):
-        return  self.__nombre
-
-    def getDNI(self):
-        return  self.__DNI
+    def __repr__(self):
+        return '<Alumno %r>' %self.nombre
 
 
-    def setIdAlumno(self, idAlumno):
-        self.__id_alumno = idAlumno
-
-    def setNombre(self, nombre):
-        self.__nombre = nombre
-
-    def setDNI(self, DNI):
-        self.__DNI = DNI
