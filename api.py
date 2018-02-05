@@ -1,6 +1,7 @@
 
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+
 from db import app
 
 from Alarma import Alarma
@@ -22,25 +23,33 @@ def insertaECOE():
 
     ecoe = ECOE().get_ult_ecoe()
     return jsonify({"id" : ecoe.id, "nombre" : ecoe.nombre})
-   # return "Hola Mundo"
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
-def obtenAreas(ecoe_id):
-    r = ECOE.query.filter_by(id=ecoe_id).first()
-    r.areas.all()
-
-    for i in r.areas.all():
-        print(i.nombre)
-    return "Hola"
 
 # Rutas de Area, (faltan por insertar los id de las ECOE)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
+def obtenAreas(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    arrAreasID = []
+    arrAreasNombre = []
+
+    for i in ecoe.areas.all():
+       arrAreasID.append(i.id_area)
+       arrAreasNombre.append(i.nombre)
+
+    return jsonify({"id" : ecoe.id, "nombre" : ecoe.nombre, "id_areas" : arrAreasID, "nombres_areas" : arrAreasNombre})
 
 
-@app.route('/api/v1.0/areas/<int:area_id>/', methods=['GET'])
-def obtenArea(area_id):
-    area = Area().get_area(area_id)
-    return jsonify({"id_area" : area.id_area, "nombre" : area.nombre})
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
+def obtenArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
 
+    for i in ecoe.areas.all():
+        if area_id == i.id_area:
+            area = Area().get_area(area_id)
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+
+    return "Error"
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['POST'])
 def insertaArea(ecoe_id):
@@ -56,23 +65,32 @@ def insertaArea(ecoe_id):
     return jsonify({"id_area" : area.id_area, "nombre" : area.nombre, "id_ecoe" : area.id_ecoe})
     #return "Hola mundo"
 
-@app.route('/api/v1.0/areas/<int:area_id>/', methods=['PUT'])
-def modificaArea(area_id):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
+def modificaArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
     value = request.json
     nombre = value["nombre"]
 
-    area = Area().get_area(area_id)
-    area.put_area(nombre)
+    for i in ecoe.areas.all():
+        if area_id == i.id_area:
+            area = Area().get_area(area_id)
+            area.put_area(nombre)
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
 
-    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-
-
-@app.route('/api/v1.0/areas/<int:area_id>/', methods=['DELETE'])
-def eliminaArea(area_id):
-    area = Area().get_area(area_id)
-    area.delete_area()
+    return "Error"
 
 
-    return "OK"
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['DELETE'])
+def eliminaArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    for i in ecoe.areas.all():
+        if area_id == i.id_area:
+            area = Area().get_area(area_id)
+            area.delete_area()
+            return "OK"
+
+    return "Error"
 
 app.run(port=5000, debug=True)

@@ -6,6 +6,7 @@ from Cronometro import Cronometro
 
 from db import db
 
+
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
@@ -21,6 +22,10 @@ class ECOE(db.Model):
 
     def __repr__(self):
         return '<ECOE %r>' %self.nombre
+
+    def get_ECOE(self, id):
+        ecoe = ECOE.query.filter_by(id=id).first()
+        return ecoe
 
     def get_ult_ecoe(self):
         ecoes = ECOE.query.all()
