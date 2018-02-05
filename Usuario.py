@@ -1,32 +1,52 @@
-from Permiso import Permiso
+from db import db
 
-class Usuario:
-    def __init__(self, id_usuario=0, nombre='', apellidos='', permisos=[]):
-        self.__id_usuario = id_usuario
-        self.__nombre = nombre
-        self.__apellidos = apellidos
-        self.__permisos = permisos
+class Usuario(db.Model):
+    id_usuario = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
+    apellidos = db.Column(db.String(255))
 
-    def getIdUsuario(self):
-        return self.__id_usuario
+    #TODO hacer que permisos sea relationship
+    permisos = db.Column(db.Integer)
 
-    def getNombre(self):
-        return self.__id_usuario
+    def __init__(self, nombre='', apellidos='', permisos=[]):
+        self.nombre = nombre
+        self.apellidos = apellidos
+        self.permisos = permisos
 
-    def getApellidos(self):
-        return self.__apellidos
+    def get_usuario(self, id):
+        usuario = Usuario.query.filter_by(id_usuario=id).first()
+        return usuario
 
-    def getPermisos(self):
-        return self.__permisos
+    def post_usuario(self):
+        usuario = Usuario(nombre=self.nombre)
+        usuario = Usuario(apellidos=self.apellidos)
+        db.session.add(usuario)
 
-    def setIdUsuario(self, id_usuario):
-        self.__id_usuario = id_usuario
+        db.session.commit()
+        return usuario
 
-    def setNombre(self, nombre):
-        self.__nombre = nombre
+    #Edita nombre de Usuario
+    def put_organizacionNombre(self, nombre):
+        usuario = Usuario.query.filter_by(id_usuario=self.id_usuario).first()
+        usuario.nombre = nombre
+        db.session.commit()
 
-    def setApellidos(self, apellidos):
-        self.__apellidos = apellidos
+        return usuario
 
-    def setPermisos(self, permisos):
-        self.__permisos = permisos
+    #Edita apellido de Usuario
+    def put_organizacionApellidos(self, apellidos):
+        usuario = Usuario.query.filter_by(id_usuario=self.id_usuario).first()
+        usuario.apellidos = apellidos
+        db.session.commit()
+
+        return usuario
+
+    def delete_usuario(self):
+        usuario = Usuario.query.filter_by(id_usuario=self.id_usuario).first()
+
+        db.session.delete(usuario)
+        db.session.commit()
+
+        return "OK"
+
+    #TODO faltan los métodos relacionados con Permisos
