@@ -1,23 +1,33 @@
-class Opcion:
-    def __init__(self, id_opcion, valor=0, descripcion=''):
-        self.__id_opcion = id_opcion
-        self.__valor = valor
-        self.__descripcion = descripcion
+from db import db
 
-    def getIdOpcion(self):
-        return self.__id_opcion
+class Opcion(db.Model):
+    id_opcion = db.Column(db.Integer, primary_key=True)
+    puntos = db.Column(db.Integer)
+    descripcion = db.Column(db.String(255))
 
-    def getValor(self):
-        return self.__valor
+    def __init__(self, puntos, descripcion):
+        self.puntos = puntos
+        self.descripcion = descripcion
 
-    def getDescripcion(self):
-        return self.__descripcion
+    def get_opcion(self, id):
+        opcion = Opcion.query.filter_by(id_opcion=id).first()
+        return opcion
 
-    def setIdOpcion(self, id_opcion):
-        self.__id_opcion = id_opcion
+    def post_opcion(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setValor(self, valor):
-        self.__valor = valor
+    #Edita puntos de opcion
+    def put_opcionPuntos(self, puntos):
+        self.puntos = puntos
+        db.session.commit()
 
-    def setDescripcion(self, descripcion):
-        self.__descripcion = descripcion
+    #Edita descripcion de opcion
+    def put_opcionDescripcion(self, descripcion):
+        self.descripcion = descripcion
+        db.session.commit()
+
+    def delete_opcion(self):
+        db.session.delete(self)
+        db.session.commit()
+
