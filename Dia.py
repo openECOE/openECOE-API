@@ -2,7 +2,7 @@ from db import db
 
 
 class Dia(db.Model):
-    cod_dia = db.Column(db.Integer, primary_key=True)
+    cod_dia = db.Column(db.String(255), primary_key=True)
     fecha = db.Column(db.Integer)
 
     # TODO hacer que turnos sea relationship
@@ -10,7 +10,6 @@ class Dia(db.Model):
 
 
     def __init__(self, fecha, turnos):
-        self.cod_dia = cod_dia
         self.fecha = fecha
         self.turnos = turnos
 
@@ -25,7 +24,7 @@ class Dia(db.Model):
         db.session.commit()
         return dia
 
-    def put_dia(self, cod_dia):
+    def put_dia(self, fecha):
         dia = Dia.query.filter_by(cod_dia=self.cod_dia).first()
         dia.fecha = fecha
         db.session.commit()
