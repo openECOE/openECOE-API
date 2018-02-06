@@ -18,7 +18,7 @@ class Permiso(db.Model):
         return permiso
 
     def post_permiso(self):
-        permiso = Permiso(id_tipoPermiso=self.id_tipoPermiso)
+        permiso = Permiso(id_permiso=self.id_permiso)
         db.session.add(permiso)
 
         db.session.commit()

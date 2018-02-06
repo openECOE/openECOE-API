@@ -1,26 +1,43 @@
-from Turno import Turno
+from db import db
 
 
-class Dia:
-    def __init__(self, cod_dia='', fecha='', turnos = []):
-        self.__cod_dia = cod_dia
-        self.__fecha = fecha
-        self.__turnos = turnos
+class Dia(db.Model):
+    cod_dia = db.Column(db.Integer, primary_key=True)
+    fecha = db.Column(db.Integer)
 
-    def getCodDia(self):
-        return self.__cod_dia
+    # TODO hacer que turnos sea relationship
+    turnos = db.Column(db.Integer)
 
-    def getFecha(self):
-        return self.__fecha
 
-    def getTurnos(self):
-        return self.__turnos
+    def __init__(self, fecha, turnos):
+        self.cod_dia = cod_dia
+        self.fecha = fecha
+        self.turnos = turnos
 
-    def setCodDia(self, cod_dia):
-        self.__cod_dia = cod_dia
+    def get_dia(self, cod):
+        dia = Dia.query.filter_by(cod_dia=cod).first()
+        return dia
 
-    def setFecha(self, fecha):
-        self.__fecha = fecha
+    def post_dia(self):
+        dia = Dia(cod_dia=self.cod_dia)
+        db.session.add(dia)
 
-    def setTurnos(self, turnos):
-        self.__turnos = turnos
+        db.session.commit()
+        return dia
+
+    def put_dia(self, cod_dia):
+        dia = Dia.query.filter_by(cod_dia=self.cod_dia).first()
+        dia.fecha = fecha
+        db.session.commit()
+
+        return dia
+
+    def delete_dia(self):
+        dia = Dia.query.filter_by(cod_dia=self.cod_dia).first()
+
+        db.session.delete(dia)
+        db.session.commit()
+
+        return "OK"
+
+    #TODO faltan los métodos relacionados con Turno
