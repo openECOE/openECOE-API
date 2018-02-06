@@ -5,6 +5,7 @@ from Dia import Dia
 from Cronometro import Cronometro
 
 from db import db
+import numpy as np
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -22,6 +23,18 @@ class ECOE(db.Model):
     def __repr__(self):
         return '<ECOE %r>' %self.nombre
 
+    def get_ECOEs_id(self):
+        ids = ECOE.query.with_entities(ECOE.id).all()
+        return list(np.squeeze(ids))
+
+    def get_ECOEs_nombres(self):
+        nombres = ECOE.query.with_entities(ECOE.nombre).all()
+        return list(np.squeeze(nombres))
+
+    def get_ECOE(self, id):
+        ecoe = ECOE.query.filter_by(id=id).first()
+        return ecoe;
+
     def get_ult_ecoe(self):
         ecoes = ECOE.query.all()
 
@@ -37,3 +50,10 @@ class ECOE(db.Model):
         db.session.add(ecoe)
         db.session.commit()
 
+    def put_ecoe(self, nombre):
+        self.nombre = nombre
+        db.session.commit()
+
+    def delete_ecoe(self):
+        db.session.delete(self)
+        db.session.commit()
