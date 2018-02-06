@@ -1,25 +1,30 @@
-from Alumno import Alumno
+from db import db
 
-class Rueda:
-    def __init__(self, cod_rueda=0, descripcion='', alumnos = []):
-        self.__cod_rueda = cod_rueda
-        self.__descripcion = descripcion
-        self.__alumnos = alumnos
+class Rueda(db.Model):
+    cod_rueda = db.Column(db.String(255), primary_key=True)
+    descripcion = db.Column(db.String(500))
 
-    def getCodRueda(self):
-        return self.__cod_rueda
+    # TODO hacer que alumnos sea relationship
+    alumnos = db.Column(db.Integer)
 
-    def getDescripcion(self):
-        return  self.__descripcion
+    def __init__(self, descripcion, alumnos):
+        self.descripcion = descripcion
+        self.alumnos = alumnos
 
-    def getAlumnos(self):
-        return  self.__alumnos
+    def get_rueda(self, cod):
+        rueda = Rueda.query.filter_by(cod_rueda=cod).first()
+        return rueda
 
-    def setCodRueda(self, cod_rueda):
-        self.__cod_rueda = cod_rueda
+    def post_rueda(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setDescripcion(self, descripcion):
-        self.__descripcion = descripcion
+    def put_rueda(self, descripcion):
+        self.descripcion = descripcion
+        db.session.commit()
 
-    def setAlumnos(self, tiempoTotal):
-        self.__alumnos = tiempoTotal
+    def delete_rueda(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    #TODO faltan los métodos relacionados con Rueda

@@ -1,25 +1,32 @@
-from Rueda import Rueda
+from db import db
 
-class Turno:
-    def __init__(self, cod_turno='', horaInicio=0, ruedas = []):
-        self.__cod_turno = cod_turno
-        self.__horaInicio = horaInicio
-        self.__ruedas = ruedas
+class Turno(db.Model):
+    cod_turno = db.Column(db.String(255), primary_key=True)
+    hora_inicio = db.Column(db.Integer)
 
-    def getCodTurno(self):
-        return self.cod_turno
+    # TODO hacer que ruedas sea relationship
+    ruedas = db.Column(db.Integer)
 
-    def getHoraInicio(self):
-        return  self.__horaInicio
+    def __init__(self, hora_inicio, ruedas):
+        self.hora_inicio = hora_inicio
+        self.ruedas = ruedas
 
-    def getRuedas(self):
-        return  self.__ruedas
+    def get_turno(self, cod):
+        turno = Turno.query.filter_by(cod_turno = cod).first()
+        return turno
 
-    def setCodTurno(self, cod_turno):
-        self.__cod_turno = cod_turno
+    def post_turno(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setHoraInicio(self, horaInicio):
-        self.__horaInicio = horaInicio
+    def put_turno(self, hora_inicio):
+        self.hora_inicio = hora_inicio
+        db.session.commit()
 
-    def setRuedas(self, ruedas):
-        self.__ruedas = ruedas
+
+    def delete_turno(self):
+        db.session.delete(self)
+        db.session.commit()
+
+
+    #TODO faltan los métodos relacionados con Rueda
