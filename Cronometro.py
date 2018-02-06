@@ -1,32 +1,36 @@
-from Alarma import Alarma
+from db import db
 
-class Cronometro:
-    def __init__(self, id_cronometro=0, nombre='', tiempoTotal=0, alarmas = []):
-        self.__id_cronometro = id_cronometro
-        self.__nombre = nombre
-        self.__tiempoTotal = tiempoTotal
-        self.__alarmas = alarmas
+class Cronometro(db.Model):
+    id_cronometro = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
+    tiempo_total = db.Column(db.Integer)
 
-    def getCronometro(self):
-        return self.__id_cronometro
+    # TODO hacer que alarmas sea relationship
+    alarmas = db.Column(db.Integer)
 
-    def getNombre(self):
-        return  self.__nombre
+    def __init__(self, nombre, tiempo_total, alarmas):
+        self.nombre = nombre
+        self.tiempo_total = tiempo_total
+        self.alarmas = alarmas
 
-    def getTiempoTotal(self):
-        return  self.__tiempoTotal
+    def get_cronometro(self, id):
+        cronometro = Cronometro.query.filter_by(id_cronometro=id).first()
+        return cronometro
 
-    def getAlarmas(self):
-        return  self.__alarmas
+    def post_cronometro(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setCronometro(self, id_cronometro):
-        self.__id_cronometro = id_cronometro
+    def put_cronometroNombre(self, nombre):
+        self.nombre = nombre
+        db.session.commit()
 
-    def setNombre(self, nombre):
-        self.__nombre = nombre
+    def put_cronometroTiempoTotal(self, tiempo_total):
+        self.tiempo_total = tiempo_total
+        db.session.commit()
 
-    def setTiempoTotal(self, tiempoTotal):
-        self.__tiempoTotal = tiempoTotal
+    def delete_cronometro(self):
+        db.session.delete(self)
+        db.session.commit()
 
-    def setAlarmas(self, alarmas):
-        self.__alarmas = alarmas
+    #TODO faltan los métodos relacionados con alarma
