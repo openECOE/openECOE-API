@@ -16,24 +16,17 @@ class Turno(db.Model):
         return turno
 
     def post_turno(self):
-        turno = Turno(cod_turno=self.cod_turno)
-        db.session.add(turno)
+        db.session.add(self)
         db.session.commit()
-
-        return turno
 
     def put_turno(self, hora_inicio):
-        turno = Turno.query.filter_by(cod_turno=self.cod_turno).first()
-        turno.hora_inicio = hora_inicio
+        self.hora_inicio = hora_inicio
         db.session.commit()
 
-        return turno
 
     def delete_turno(self):
-        turno = Turno.query.filter_by(cod_turno=self.cod_turno).first()
-        db.session.delete(turno)
+        db.session.delete(self)
         db.session.commit()
 
-        return "OK"
 
     #TODO faltan los métodos relacionados con Rueda

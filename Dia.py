@@ -18,25 +18,15 @@ class Dia(db.Model):
         return dia
 
     def post_dia(self):
-        dia = Dia(cod_dia=self.cod_dia)
-        db.session.add(dia)
-
+        db.session.add(self)
         db.session.commit()
-        return dia
 
     def put_dia(self, fecha):
-        dia = Dia.query.filter_by(cod_dia=self.cod_dia).first()
-        dia.fecha = fecha
+        self.fecha = fecha
         db.session.commit()
-
-        return dia
 
     def delete_dia(self):
-        dia = Dia.query.filter_by(cod_dia=self.cod_dia).first()
-
-        db.session.delete(dia)
+        db.session.delete(self)
         db.session.commit()
-
-        return "OK"
 
     #TODO faltan los métodos relacionados con Turno
