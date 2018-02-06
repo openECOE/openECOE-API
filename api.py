@@ -5,14 +5,75 @@ from flask_sqlalchemy import SQLAlchemy
 from db import app
 from werkzeug.exceptions import abort, Response
 
-
-from Alarma import Alarma
-from Area import Area
+from Organizacion import Organizacion
 from ECOE import ECOE
+from Area import Area
+from Alarma import Alarma
+
 
 @app.route('/')
 def holaMundo():
     return 'Hola Mundo'
+
+#Rutas de Organizacion
+@app.route('/api/v1.0/organizacion/', methods=['GET'])
+def muestraOrganizaciones():
+    ids = Organizacion().get_organizacion_ids()
+    nombres = Organizacion().get_organizacion_nombres()
+
+    return jsonify({"id_organizaciones": ids, "nombres": nombres})
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['GET'])
+def muestraOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+
+    else:
+        abort(404)
+        # abort(Response("Error"))
+
+
+
+@app.route('/api/v1.0/organizacion/', methods=['POST'])
+def insertaOrganizacion():
+    value = request.json
+    nombre = value["nombre"]
+
+    orgIn = Organizacion(nombre)
+    orgIn.post_organizacion()
+
+    org = Organizacion().get_ult_organizacion()
+    return jsonify({"id" : org.id_organizacion, "nombre" : org.nombre})
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['PUT'])
+def modificaOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        value = request.json
+        nombre = value["nombre"]
+
+        organizacion.put_organizacion(nombre)
+
+        return jsonify({"id_organizacion" : organizacion.id_organizacion, "nombre" : organizacion.nombre})
+    else:
+        abort(404)
+
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['DELETE'])
+def eliminaOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        organizacion.delete_organizacion()
+        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+    else:
+        abort(404)
+
 
 #Rutas de ECOE
 @app.route('/api/v1.0/ECOE/', methods=['GET'])
@@ -21,6 +82,7 @@ def muestraECOEs():
     nombres = ECOE().get_ECOEs_nombres()
 
     return jsonify({"ids" : ids, "nombres" : nombres})
+
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/', methods=['GET'])
 def muestraECOE(ecoe_id):

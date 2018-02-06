@@ -1,42 +1,53 @@
 from db import db
+import numpy as np
 
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
+    #usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
+    #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
-    #TODO hacer que usuarios y ecoes sean relationship
-    usuarios = db.Column(db.String(255))
-    ecoes = db.Column(db.Integer)
-
-    def __init__(self, nombre='', usuarios=[], ecoes=[]):
+    def __init__(self, nombre=''):
         self.nombre = nombre
-        self.usuarios = usuarios
-        self.ecoes = ecoes
+       # self.usuarios = usuarios
+       # self.ecoes = ecoes
+
+    def get_organizacion_ids(self):
+        ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
+        return list(np.squeeze(ids))
+
+    def get_organizacion_nombres(self):
+        nombres = Organizacion.query.with_entities(Organizacion.nombre).all()
+        return list(np.squeeze(nombres))
 
     def get_organizacion(self, id):
         organizacion = Organizacion.query.filter_by(id_organizacion=id).first()
         return organizacion
 
-    def post_organizacion(self):
-        organizacion = Organizacion(nombre=self.nombre)
-        db.session.add(organizacion)
+    def get_ult_organizacion(self):
+        organizaciones = Organizacion.query.all()
 
-        db.session.commit()
+        numOrg = len(organizaciones)
+        organizacion = organizaciones[numOrg - 1]
+
         return organizacion
+
+    def post_organizacion(self):
+        db.session.add(self)
+        db.session.commit()
+
 
     def put_organizacion(self, nombre):
-        organizacion = Organizacion.query.filter_by(id_organizacion=self.id_organizacion).first()
-        organizacion.nombre = nombre
+        self.nombre = nombre
         db.session.commit()
 
-        return organizacion
+
 
     def delete_organizacion(self):
-        organizacion = Organizacion.query.filter_by(id_organizacion=self.id_organizacion).first()
 
-        db.session.delete(organizacion)
+        db.session.delete(self)
         db.session.commit()
 
-        return "OK"
+
 
     #TODO falta los metodos relacionados con el Array de Usuarios
