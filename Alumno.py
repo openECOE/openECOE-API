@@ -1,17 +1,34 @@
 from db import db
 
-class Alumno:
+class Alumno(db.Model):
     id_alumno = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     dni = db.Column(db.String(25))
-    id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
+    #id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
 
-    def __init__(self, id_alumno='', nombre='', DNI='', id_ecoe=0):
+    def __init__(self, nombre, dni):
         self.nombre = nombre
-        self.DNI = DNI
-   #     self.id_ecoe = id_ecoe
+        self.dni = dni
 
-    def __repr__(self):
-        return '<Alumno %r>' %self.nombre
+    def get_alumno(self, id):
+        alumno = Alumno.query.filter_by(id_alumno=id).first()
+        return alumno
 
+    def post_alumno(self):
+        db.session.add(self)
+        db.session.commit()
+
+     #Edita nombre de Alumno
+    def put_alumnoNombre(self, nombre):
+        self.nombre = nombre
+        db.session.commit()
+
+     #Edita dni de Alumno
+    def put_alumnoDni(self, dni):
+        self.dni = dni
+        db.session.commit()
+
+    def delete_alumno(self):
+        db.session.delete(self)
+        db.session.commit()
 

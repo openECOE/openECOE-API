@@ -17,10 +17,12 @@ class Alarma(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    #Edita tiempo de alarma
     def put_alarmaTiempo(self, tiempo):
         self.tiempo = tiempo
         db.session.commit()
 
+    #Edita sonido de alarma
     def put_alarmaSonido(self, sonido):
         self.sonido = sonido
         db.session.commit()
