@@ -1,33 +1,32 @@
-from Grupo import Grupo
-from Cronometro import Cronometro
+from db import db
 
-class Estacion:
-    def __init__(self, id_estacion=0, nombre='', grupos=[], cronometros=[]):
-        self.__id_estacion = id_estacion
-        self.__nombre = nombre
-        self.__grupos = grupos
-        self.__cronometros = cronometros
+class Estacion(db.Model):
+    id_estacion = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
 
-    def getIdEstacion(self):
-        return self.__id_estacion
+    # TODO hacer que grupos y cronometros sea relationship
+    grupos = db.Column(db.Integer)
+    cronometros = db.Column(db.Integer)
 
-    def getNombre(self):
-        return self.__nombre
+    def __init__(self, nombre, grupos=[], cronometros=[]):
+        self.nombre = nombre
+        self.grupos = grupos
+        self.cronometros = cronometros
 
-    def getGrupos(self):
-        return self.__grupos
+    def get_estacion(self, id):
+        estacion = Estacion.query.filter_by(id_estacion=id).first()
+        return estacion
 
-    def getCronometros(self):
-        return self.__cronometros
+    def post_estacion(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setIdEstacion(self, id_estacion):
-        self.__id_estacion = id_estacion
+    def put_estacion(self, nombre):
+        self.nombre = nombre
+        db.session. commit()
 
-    def setNombre(self, nombre):
-        self.__nombre = nombre
+    def delete_estacion(self):
+        db.session.delete(self)
+        db.session.commit()
 
-    def setGrupos(self, grupos):
-        self.__grupos = grupos
-
-    def setCronometros(self, cronometros):
-        self.__cronometros = cronometros
+    #TODO faltan los métodos relacionados con Grupos y Cronometros

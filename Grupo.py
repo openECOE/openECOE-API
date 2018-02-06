@@ -1,26 +1,30 @@
-from Preguntas import Pregunta
+from db import db
 
-class Grupo:
-    def __init__(self, id_grupo, nombre='', preguntas=[]):
-        self.__id_grupo = id_grupo
-        self.__nombre = nombre
-        self.__preguntas = preguntas
+class Grupo(db.Model):
+    id_grupo = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(255))
 
-    def getIdGrupo(self):
-        return self.__id_grupo
+    # TODO hacer que preguntas sea relationship
+    preguntas = db.Column(db.Integer)
 
-    def getNombre(self):
-        return self.__nombre
+    def __init__(self, nombre, preguntas):
+        self.nombre = nombre
+        self.preguntas = preguntas
 
-    def getPreguntas(self):
-        return self.__preguntas
+    def get_grupo(self, id):
+        grupo = Grupo.query.filter_by(id_grupos=id).first()
+        return grupo
 
-    def setIdGrupo(self, id_grupo):
-        self.__id_grupo = id_grupo
+    def post_grupo(self):
+        db.session.add(self)
+        db.session.commit()
 
-    def setNombre(self, nombre):
-        self.__nombre = nombre
+    def put_grupo(self, nombre):
+        self.nombre = nombre
+        db.session.commit()
 
-    def setPreguntas(self, preguntas):
-        self.__preguntas = preguntas
+    def delete_grupo(self):
+        db.session.delete(self)
+        db.session.commit()
 
+    #TODO faltan los métodos relacionados con Preguntas
