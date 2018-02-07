@@ -15,3 +15,7 @@ class Alumno:
         return '<Alumno %r>' %self.nombre
 
 
+#Rutas de Alumno
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumnos/', methods=['GET'])
+def muestraAlumnos(ecoe_id):
+    return "Hola Mundo"

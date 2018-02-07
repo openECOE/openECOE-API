@@ -1,10 +1,17 @@
 from db import db
+from db import app
 import numpy as np
+from Usuario import Usuario
+
+from werkzeug.exceptions import abort, Response
+
+
+from flask import Flask, jsonify, request
 
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
-    #usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
+    usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
     #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
     def __init__(self, nombre=''):
@@ -49,5 +56,58 @@ class Organizacion(db.Model):
         db.session.commit()
 
 
+@app.route('/api/v1.0/organizacion/', methods=['GET'])
+def muestraOrganizaciones():
+    return "Hola"
 
-    #TODO falta los metodos relacionados con el Array de Usuarios
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['GET'])
+def muestraOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+
+    else:
+        abort(404)
+        # abort(Response("Error"))
+
+
+@app.route('/api/v1.0/organizacion/', methods=['POST'])
+def insertaOrganizacion():
+    value = request.json
+    nombre = value["nombre"]
+
+    orgIn = Organizacion(nombre)
+    orgIn.post_organizacion()
+
+    org = Organizacion().get_ult_organizacion()
+    return jsonify({"id": org.id_organizacion, "nombre": org.nombre})
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['PUT'])
+def modificaOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        value = request.json
+        nombre = value["nombre"]
+
+        organizacion.put_organizacion(nombre)
+
+        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['DELETE'])
+def eliminaOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        organizacion.delete_organizacion()
+        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+    else:
+        abort(404)
+
+

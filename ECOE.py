@@ -1,3 +1,6 @@
+import numpy as np
+
+
 from Area import Area
 from Alumno import Alumno
 from Estacion import Estacion
@@ -57,3 +60,58 @@ class ECOE(db.Model):
     def delete_ecoe(self):
         db.session.delete(self)
         db.session.commit()
+
+
+#Rutas de ECOE
+@app.route('/api/v1.0/ECOE/', methods=['GET'])
+def muestraECOEs():
+    ids = ECOE().get_ECOEs_id()
+    nombres = ECOE().get_ECOEs_nombres()
+
+    return jsonify({"ids" : ids, "nombres" : nombres})
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/', methods=['GET'])
+def muestraECOE(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+    if(ecoe):
+        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+    else:
+        abort(404)
+        #abort(Response("Error"))
+
+@app.route('/api/v1.0/ECOE/', methods=['POST'])
+def insertaECOE():
+    value = request.json
+    nombre = value["nombre"]
+
+    ecoeIn = ECOE(nombre)
+    ecoeIn.post_ecoe()
+
+    ecoe = ECOE().get_ult_ecoe()
+    return jsonify({"id" : ecoe.id, "nombre" : ecoe.nombre})
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/', methods=['PUT'])
+def actualizaECOE(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        value = request.json
+        nombre = value["nombre"]
+
+        ecoe.put_ecoe(nombre)
+        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/', methods=['DELETE'])
+def eliminaECOE(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        ecoe.delete_ecoe()
+        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+    else:
+        abort(404)

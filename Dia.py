@@ -29,4 +29,3 @@ class Dia(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    #TODO faltan los métodos relacionados con Turno
