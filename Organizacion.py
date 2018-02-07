@@ -1,17 +1,18 @@
 from db import db
 from db import app
-import numpy as np
+
 from Usuario import Usuario
 
+import numpy as np
+import json
+
 from werkzeug.exceptions import abort, Response
-
-
 from flask import Flask, jsonify, request
 
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
-    usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
+   # usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
     #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
     def __init__(self, nombre=''):
@@ -58,7 +59,16 @@ class Organizacion(db.Model):
 
 @app.route('/api/v1.0/organizacion/', methods=['GET'])
 def muestraOrganizaciones():
-    return "Hola"
+    organizaciones = Organizacion.query.all()
+    estructura = []
+
+    for organizacion in organizaciones:
+        estructura.append({
+            "id_organizacion": organizacion.id_organizacion,
+            "nombre": organizacion.nombre,
+        })
+
+        return json.dumps(organizaciones, indent=1, ensure_ascii=False).encode('utf8')
 
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['GET'])
@@ -70,7 +80,6 @@ def muestraOrganizacion(organizacion_id):
 
     else:
         abort(404)
-        # abort(Response("Error"))
 
 
 @app.route('/api/v1.0/organizacion/', methods=['POST'])

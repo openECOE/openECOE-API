@@ -1,4 +1,6 @@
 from db import app
+from Organizacion import Organizacion
+from Usuario import Usuario
 
 @app.route('/')
 def holaMundo():

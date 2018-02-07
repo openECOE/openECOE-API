@@ -3,19 +3,21 @@ from db import db
 import numpy as np
 from flask import Flask, jsonify, request
 from werkzeug.exceptions import abort, Response
-from Organizacion import Organizacion
+
+import numpy as np
+import json
 
 class Usuario(db.Model):
     id_usuario = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     apellidos = db.Column(db.String(255))
-    id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
+   # id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
  #   permisos = db.relationship('Permiso', backref='permisos', lazy='dynamic')
 
     def __init__(self, nombre='', apellidos='', id_organizacion=0):
         self.nombre = nombre
         self.apellidos = apellidos
-        self.id_organizacion = id_organizacion
+      #  self.id_organizacion = id_organizacion
         #self.permisos = permisos
 
     def get_usuario(self, id):
@@ -49,19 +51,33 @@ class Usuario(db.Model):
         db.session.commit()
 
 
-@app.route('/api/v1.0/usuarios/', method=['GET'])
+@app.route('/api/v1.0/usuarios/', methods=['GET'])
 def muestraUsuarios():
-    usuarios=[]
+    usuarios = []
 
     for usuario in Usuario.query.all():
         usuarios.append({
             "id_usuario": usuario.id_usuario,
             "nombre": usuario.nombre,
             "apellidos": usuario.apellidos,
-            "id_organizacion": usuario.id_organizacion,
-
         })
-    return jsonify(usuarios)
+
+    return json.dumps(usuarios, indent=1, ensure_ascii=False).encode('utf8')
+
+
+@app.route('/api/v1.0/usuarios/', methods=['POST'])
+def insertaUsuario():
+    value = request.json
+
+    nombre = value["nombre"]
+    apellidos = value["apellidos"]
+
+    usuarioIn = Usuario(nombre, apellidos)
+    usuarioIn.post_usuario()
+
+    usuario = Usuario().get_ult_usuario()
+    return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos})
+
 
 @app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['PUT'])
 def actualizaUsuario(usuario_id):
@@ -73,58 +89,20 @@ def actualizaUsuario(usuario_id):
         apellidos = value["apellidos"]
 
         usuario = Usuario().get_usuario(usuario_id)
-        usuario.post_usuario(nombre, apellidos)
+        usuario.put_usuario(nombre, apellidos)
 
-        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos, "id_organizacion": usuario.id_organizacion})
+        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
     else:
       abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['GET'])
-def muestraUsuarios(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['DELETE'])
+def eliminaUsuario(usuario_id):
+    usuario = Usuario().get_usuario(usuario_id)
 
-    if (organizacion):
-        usuarios = []
-
-        for usuario in organizacion.usuarios.all():
-            usuarios.append({
-                "id_usuario": usuario.id_usuario,
-                "nombre": usuario.nombre,
-                "apellidos": usuario.apellidos,
-                "id_organizacion": usuario.id_organizacion,
-            })
-
-        return jsonify(usuarios)
+    if (usuario):
+        usuario.delete_usuario()
+        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
     else:
         abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['GET'])
-def muestraUsuario(organizacion_id, usuario_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        for usuario in organizacion.usuarios.all():
-            if usuario_id == usuario.id_usuario:
-                usuario = Usuario().get_usuario(usuario_id)
-                return jsonify(
-                    {"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos,
-                     "id_organizacion": usuario.id_organizacion})
-        abort(404)
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['POST'])
-def insertaUsuario(organizacion_id):
-    value = request.json
-    nombre = value["nombre"]
-    apellidos = value["apellidos"]
-
-    usuarioIn = Usuario(nombre, apellidos, organizacion_id)
-    usuarioIn.post_usuario()
-
-    usuario = Usuario().get_ult_usuario()
-    return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos, "id_organizacion" : usuario.id_organizacion})
 
