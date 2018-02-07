@@ -11,13 +11,11 @@ class Usuario(db.Model):
     id_usuario = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     apellidos = db.Column(db.String(255))
-   # id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
  #   permisos = db.relationship('Permiso', backref='permisos', lazy='dynamic')
 
     def __init__(self, nombre='', apellidos='', id_organizacion=0):
         self.nombre = nombre
         self.apellidos = apellidos
-      #  self.id_organizacion = id_organizacion
         #self.permisos = permisos
 
     def get_usuario(self, id):

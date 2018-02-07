@@ -1,18 +1,22 @@
 from db import db
 from db import app
 
-from Usuario import Usuario
-
 import numpy as np
 import json
 
 from werkzeug.exceptions import abort, Response
 from flask import Flask, jsonify, request
+from flask_sqlalchemy import SQLAlchemy
+
+from Usuario import Usuario
+
+OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
+
 
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
-   # usuarios = db.relationship('Usuario', backref='usuarios', lazy='dynamic' )
+    usuarios = db.relationship('Usuario', secondary=OrgUsu, lazy ='subquery', backref=db.backref('usuarios', lazy = 'dynamic'))
     #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
     def __init__(self, nombre=''):
@@ -59,11 +63,10 @@ class Organizacion(db.Model):
 
 @app.route('/api/v1.0/organizacion/', methods=['GET'])
 def muestraOrganizaciones():
-    organizaciones = Organizacion.query.all()
-    estructura = []
+    organizaciones = []
 
-    for organizacion in organizaciones:
-        estructura.append({
+    for organizacion in Organizacion.query.all():
+        organizaciones.append({
             "id_organizacion": organizacion.id_organizacion,
             "nombre": organizacion.nombre,
         })
@@ -118,5 +121,55 @@ def eliminaOrganizacion(organizacion_id):
         return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
     else:
         abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['GET'])
+def muestraUsuariosOrg(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        usuarios = []
+
+        for usuario in organizacion.usuarios.all():
+            usuarios.append({
+                "id_usuario": usuario.id_usuario,
+                "nombre": usuario.nombre,
+                "apellidos": usuario.apellidos,
+            })
+
+        return jsonify(usuarios)
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['GET'])
+def muestraUsuarioOrg(organizacion_id, usuario_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        for usuario in organizacion.usuarios.all():
+            if usuario_id == usuario.id_usuario:
+                usuario = Usuario().get_usuario(usuario_id)
+                return jsonify(
+                    {"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos,
+                     "id_organizacion": usuario.id_organizacion})
+        abort(404)
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['POST'])
+def insertaUsuarioOrg(organizacion_id):
+    value = request.json
+    nombre = value["nombre"]
+    apellidos = value["apellidos"]
+
+    usuarioIn = Usuario(nombre, apellidos)
+    usuarioIn.post_usuario()
+
+   # usuario = Usuario().get_ult_usuario()
+
+
+    return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos})
 
 
