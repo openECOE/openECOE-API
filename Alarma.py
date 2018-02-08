@@ -9,11 +9,24 @@ class Alarma(db.Model):
         self.tiempo = tiempo
         self.sonido = sonido
 
-    def __repr__(self):
-        return '<Sonido %r>' %self.sonido
+    def get_alarma(self, id):
+        alarma = Alarma.query.filter_by(id_alarma = id).first()
+        return alarma
 
     def post_alarma(self):
-        alarma = Alarma(self.tiempo, self.sonido)
+        db.session.add(self)
+        db.session.commit()
 
-        db.session.add(alarma)
+    #Edita tiempo de alarma
+    def put_alarmaTiempo(self, tiempo):
+        self.tiempo = tiempo
+        db.session.commit()
+
+    #Edita sonido de alarma
+    def put_alarmaSonido(self, sonido):
+        self.sonido = sonido
+        db.session.commit()
+
+    def delete_alarma(self):
+        db.session.delete(self)
         db.session.commit()
