@@ -62,6 +62,11 @@ def muestraUsuarios():
 
     return json.dumps(usuarios, indent=1, ensure_ascii=False).encode('utf8')
 
+@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['GET'])
+def muestraUsuario(usuario_id):
+    usuario = Usuario().get_usuario(usuario_id)
+
+    return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
 
 @app.route('/api/v1.0/usuarios/', methods=['POST'])
 def insertaUsuario():
