@@ -5,10 +5,10 @@ import numpy as np
 import json
 
 from werkzeug.exceptions import abort, Response
-from flask import Flask, jsonify, request
-from flask_sqlalchemy import SQLAlchemy
+from flask import jsonify, request
 
 from Usuario import Usuario
+from ECOE import ECOE
 
 OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
 
@@ -17,6 +17,7 @@ class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     usuarios = db.relationship('Usuario', secondary=OrgUsu, lazy ='subquery', backref=db.backref('usuarios', lazy = 'dynamic'))
+    ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
     #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
     def __init__(self, nombre='', usuarios=[]):
@@ -82,7 +83,13 @@ class Organizacion(db.Model):
 
         return organizaciones
 
+    def existe_organizacion_ecoe(self, id_ecoe):
+        for ecoe in self.ecoes:
+            if(ecoe.id==id_ecoe):
+                return True
+        return False
 
+#Rutas de Organizacion
 @app.route('/api/v1.0/organizacion/', methods=['GET'])
 def muestraOrganizaciones():
     organizaciones = []
@@ -145,6 +152,7 @@ def eliminaOrganizacion(organizacion_id):
         abort(404)
 
 
+#Rutas de Organizacion-Usuarios
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['GET'])
 def muestraUsuariosOrg(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
@@ -225,6 +233,8 @@ def eliminaUsuarioOrg(organizacion_id, usuario_id):
     else:
         abort(404)
 
+
+#Rutas de Usuarios-Organizacion
 @app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
 def muestraOrganizacionesUsu(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
@@ -327,3 +337,52 @@ def eliminaOrganizacionUsuario(usuario_id, organizacion_id):
 
     else:
         abort(404)
+
+
+#Rutas de Organizacion-ECOE
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['GET'])
+def muestraEcoesOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    organizaciones=[]
+
+    if(organizacion):
+        for org in organizacion.ecoes:
+            organizaciones.append({
+                "id_organizacion" : org.id_organizacion,
+                "nombre" : org.nombre,
+            })
+
+        return json.dumps(organizaciones, indent=1, ensure_ascii=False).encode('utf8')
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
+def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if(organizacion):
+        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
+            ecoe = ECOE.get_ECOE(ecoe_id)
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+        else:
+            abort(404)
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['POST'])
+def creaEcoeOrganizacion(organizacion_id):
+
+
+    return "A"
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
+def insertaEcoeOrganizacion(organizacion_id, ecoe_id):
+    return "A"
+
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
+def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
+    return "A"
