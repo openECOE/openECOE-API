@@ -344,16 +344,16 @@ def eliminaOrganizacionUsuario(usuario_id, organizacion_id):
 def muestraEcoesOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
-    organizaciones=[]
+    ecoes=[]
 
     if(organizacion):
-        for org in organizacion.ecoes:
-            organizaciones.append({
-                "id_organizacion" : org.id_organizacion,
-                "nombre" : org.nombre,
+        for ecoe in organizacion.ecoes:
+            ecoes.append({
+                "id" : ecoe.id,
+                "nombre" : ecoe.nombre,
             })
 
-        return json.dumps(organizaciones, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(ecoes, indent=1, ensure_ascii=False).encode('utf8')
 
     else:
         abort(404)
@@ -365,7 +365,7 @@ def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
 
     if(organizacion):
         if(organizacion.existe_organizacion_ecoe(ecoe_id)):
-            ecoe = ECOE.get_ECOE(ecoe_id)
+            ecoe = ECOE().get_ECOE(ecoe_id)
             return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
             abort(404)
@@ -375,14 +375,49 @@ def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['POST'])
 def creaEcoeOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+    if(organizacion):
+        value = request.json
+        nombre = value["nombre"]
 
+        ecoe = ECOE(nombre, organizacion_id)
+        ecoe.post_ecoe()
 
-    return "A"
+        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+    else:
+        abort(404)
+
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
 def insertaEcoeOrganizacion(organizacion_id, ecoe_id):
-    return "A"
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if(organizacion):
+        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
+            value = request.json
+            nombre = value["nombre"]
+
+            ecoe = ECOE().get_ECOE(ecoe_id)
+            ecoe.put_ecoe(nombre)
+
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+        else:
+            abort(404)
+    else:
+        abort(404)
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
 def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
-    return "A"
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+
+    if (organizacion):
+        if (organizacion.existe_organizacion_ecoe(ecoe_id)):
+
+            ecoe = ECOE().get_ECOE(ecoe_id)
+            ecoe.delete_ecoe()
+
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+        else:
+            abort(404)
+    else:
+        abort(404)
