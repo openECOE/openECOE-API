@@ -1,6 +1,9 @@
 from db import db
-from ECOE import ECOE
-
+from db import app
+import numpy as np
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort, Response
 
 class Area(db.Model):
     id_area = db.Column(db.Integer, primary_key=True)
@@ -40,70 +43,3 @@ class Area(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-# Rutas de Area, (faltan por insertar los id de las ECOE)
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
-def obtenAreas(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    arrAreasID = []
-    arrAreasNombre = []
-
-    for i in ecoe.areas.all():
-       arrAreasID.append(i.id_area)
-       arrAreasNombre.append(i.nombre)
-
-    return jsonify({"id" : ecoe.id, "nombre" : ecoe.nombre, "id_areas" : arrAreasID, "nombres_areas" : arrAreasNombre})
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
-def obtenArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    for i in ecoe.areas.all():
-        if area_id == i.id_area:
-            area = Area().get_area(area_id)
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-
-    abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['POST'])
-def insertaArea(ecoe_id):
-
-    value = request.json
-    nombre = value["nombre"]
-
-    areaIn = Area(nombre=nombre, id_ecoe=ecoe_id)
-    areaIn.post_area()
-
-    area = Area().get_ult_area()
-
-    return jsonify({"id_area" : area.id_area, "nombre" : area.nombre, "id_ecoe" : area.id_ecoe})
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
-def modificaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    value = request.json
-    nombre = value["nombre"]
-
-    for i in ecoe.areas.all():
-        if area_id == i.id_area:
-            area = Area().get_area(area_id)
-            area.put_area(nombre)
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-
-    abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['DELETE'])
-def eliminaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    for i in ecoe.areas.all():
-        if area_id == i.id_area:
-            area = Area().get_area(area_id)
-            area.delete_area()
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre, "id_ecoe": area.id_ecoe})
-
-    abort(404)

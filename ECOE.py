@@ -5,10 +5,12 @@ from flask import jsonify, request
 import json
 from werkzeug.exceptions import abort, Response
 
+from Area import Area
+
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
-    #areas = db.relationship('Area', backref='areas', lazy='dynamic')
+    areas = db.relationship('Area', backref='areas', lazy='dynamic')
     #alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
     #estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
     #dias = db.relationship('Dia', backref='dias', lazy='dynamic')
@@ -51,4 +53,96 @@ class ECOE(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def existe_ecoe_area(self, id_area):
+        for area in self.areas:
+            if(area.id_area==id_area):
+                return True
+        return False
+
+# Rutas de Area, (faltan por insertar los id de las ECOE)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
+def obtenAreas(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        areas = []
+        for area in ecoe.areas:
+            areas.append({
+                "id_area" : area.id_area,
+                "nombre" : area.nombre,
+        })
+
+        return json.dumps(areas, indent=1, ensure_ascii=False).encode('utf8')
+    else:
+        abort(404)
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
+def obtenArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        if(ecoe.existe_ecoe_area(area_id)):
+            area = Area().get_area()
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['POST'])
+def insertaArea(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        value = request.json
+        nombre = value["nombre"]
+
+        areaIn = Area(nombre=nombre, id_ecoe=ecoe_id)
+        areaIn.post_area()
+
+        area = Area().get_ult_area()
+
+        return jsonify({"id_area" : area.id_area, "nombre" : area.nombre})
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
+def modificaArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_area(area_id)):
+            value = request.json
+            nombre = value["nombre"]
+
+            area = Area().get_area(area_id)
+            area.put_area(nombre)
+
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['DELETE'])
+def eliminaArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_area(area_id)):
+            area = Area().get_area(area_id)
+            area.delete_area()
+
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
 
