@@ -6,12 +6,13 @@ import json
 from werkzeug.exceptions import abort, Response
 
 from Area import Area
+from Alumno import Alumno
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     areas = db.relationship('Area', backref='areas', lazy='dynamic')
-    #alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
+    alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
     #estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
     #dias = db.relationship('Dia', backref='dias', lazy='dynamic')
     #cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
@@ -59,7 +60,13 @@ class ECOE(db.Model):
                 return True
         return False
 
-# Rutas de Area, (faltan por insertar los id de las ECOE)
+    def existe_ecoe_alumno(self, id_alumno):
+        for alumno in self.alumnos:
+            if(alumno.id_alumno==id_alumno):
+                return True
+        return False
+
+#Relacion ECOE-Area
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
 def obtenAreas(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
@@ -75,6 +82,7 @@ def obtenAreas(ecoe_id):
         return json.dumps(areas, indent=1, ensure_ascii=False).encode('utf8')
     else:
         abort(404)
+
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
 def obtenArea(ecoe_id, area_id):
@@ -146,3 +154,93 @@ def eliminaArea(ecoe_id, area_id):
     else:
         abort(404)
 
+
+#Relacion ECOE-Alumno
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['GET'])
+def obtenAlumnos(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        alumnos = []
+        for alumno in ecoe.alumnos:
+            alumno.append({
+                "id_area" : alumno.id_alumno,
+                "nombre" : alumno.nombre,
+                "DNI" : alumno.dni
+        })
+
+        return json.dumps(alumnos, indent=1, ensure_ascii=False).encode('utf8')
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['GET'])
+def obtenAlumno(ecoe_id, alumno_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        if(ecoe.existe_ecoe_alumno(alumno_id)):
+            alumno = Alumno().get_alumno(alumno_id)
+            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni" : alumno.dni})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['POST'])
+def insertaAlumno(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        value = request.json
+        nombre = value["nombre"]
+        dni = value["dni"]
+
+        alumnoIn = Alumno(nombre=nombre, dni=dni, id_ecoe=ecoe_id)
+        alumnoIn.post_alumno()
+
+        alumno = Alumno().get_ult_alumno()
+
+        return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['PUT'])
+def modificaAlumno(ecoe_id, alumno_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_area(alumno_id)):
+            value = request.json
+            nombre = value["nombre"]
+            dni = value["dni"]
+
+            alumno = Alumno().get_alumno(alumno_id)
+            alumno.put_alumno(dni, nombre)
+
+            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['DELETE'])
+def eliminaAlumno(ecoe_id, alumno_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_alumno(alumno_id)):
+            alumno = Alumno().get_alumno(alumno_id)
+            alumno.delete_alumno()
+
+            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+        else:
+            abort(404)
+
+    else:
+        abort(404)

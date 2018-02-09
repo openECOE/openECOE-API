@@ -2,6 +2,7 @@ from db import app
 from Organizacion import Organizacion
 from Usuario import Usuario
 from ECOE import ECOE
+from Alumno import Alumno
 
 @app.route('/')
 def holaMundo():
