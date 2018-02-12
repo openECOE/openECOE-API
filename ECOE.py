@@ -46,8 +46,12 @@ class ECOE(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def put_ecoe(self, nombre):
+    def put_ecoe_nombre(self, nombre):
         self.nombre = nombre
+        db.session.commit()
+
+    def put_ecoe_id_organizacion(self, id_organizacion):
+        self.id_organizacion = id_organizacion
         db.session.commit()
 
     def delete_ecoe(self):
@@ -90,7 +94,7 @@ def obtenArea(ecoe_id, area_id):
 
     if(ecoe):
         if(ecoe.existe_ecoe_area(area_id)):
-            area = Area().get_area()
+            area = Area().get_area(area_id)
             return jsonify({"id_area": area.id_area, "nombre": area.nombre})
         else:
             abort(404)
@@ -117,8 +121,8 @@ def insertaArea(ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
-def modificaArea(ecoe_id, area_id):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/nombre/', methods=['PUT'])
+def modificaAreaNombre(ecoe_id, area_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if (ecoe):
@@ -127,7 +131,26 @@ def modificaArea(ecoe_id, area_id):
             nombre = value["nombre"]
 
             area = Area().get_area(area_id)
-            area.put_area(nombre)
+            area.put_area_nombre(nombre)
+
+            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/id_ecoe/', methods=['PUT'])
+def modificaAreaIdArea(ecoe_id, area_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_area(area_id)):
+            value = request.json
+            id_ecoe = value["id_ecoe"]
+
+            area = Area().get_area(area_id)
+            area.put_area_id_ecoe(id_ecoe)
 
             return jsonify({"id_area": area.id_area, "nombre": area.nombre})
         else:
@@ -163,7 +186,7 @@ def obtenAlumnos(ecoe_id):
     if(ecoe):
         alumnos = []
         for alumno in ecoe.alumnos:
-            alumno.append({
+            alumnos.append({
                 "id_area" : alumno.id_alumno,
                 "nombre" : alumno.nombre,
                 "DNI" : alumno.dni
@@ -198,7 +221,7 @@ def insertaAlumno(ecoe_id):
         nombre = value["nombre"]
         dni = value["dni"]
 
-        alumnoIn = Alumno(nombre=nombre, dni=dni, id_ecoe=ecoe_id)
+        alumnoIn = Alumno(nombre, dni, ecoe_id)
         alumnoIn.post_alumno()
 
         alumno = Alumno().get_ult_alumno()
@@ -208,18 +231,57 @@ def insertaAlumno(ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['PUT'])
-def modificaAlumno(ecoe_id, alumno_id):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/nombre/', methods=['PUT'])
+def modificaAlumnoNombre(ecoe_id, alumno_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if (ecoe):
-        if (ecoe.existe_ecoe_area(alumno_id)):
+        if (ecoe.existe_ecoe_alumno(alumno_id)):
             value = request.json
             nombre = value["nombre"]
+
+            alumno = Alumno().get_alumno(alumno_id)
+            alumno.put_alumno_nombre(nombre)
+
+            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/dni/', methods=['PUT'])
+def modificaAlumnoDNI(ecoe_id, alumno_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_alumno(alumno_id)):
+            value = request.json
             dni = value["dni"]
 
             alumno = Alumno().get_alumno(alumno_id)
-            alumno.put_alumno(dni, nombre)
+            alumno.put_alumno_dni(dni)
+
+            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+        else:
+            abort(404)
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/id_ecoe/', methods=['PUT'])
+def modificaAlumnoIdEcoe(ecoe_id, alumno_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if (ecoe):
+        if (ecoe.existe_ecoe_alumno(alumno_id)):
+            value = request.json
+            id_ecoe = value["id_ecoe"]
+
+            alumno = Alumno().get_alumno(alumno_id)
+            alumno.put_alumno_id_ecoe(id_ecoe)
 
             return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
         else:
