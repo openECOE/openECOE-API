@@ -3,7 +3,7 @@ from db import db
 class Alumno(db.Model):
     id_alumno = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
-    apellidos = db.Column(db.String(255))
+   # apellidos = db.Column(db.String(255))
     dni = db.Column(db.String(25))
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
 
@@ -20,18 +20,12 @@ class Alumno(db.Model):
         db.session.add(self)
         db.session.commit()
 
-
-    def put_alumno_nombre(self, nombre):
-        self.nombre = nombre
-        db.session.commit()
-
-    def put_alumno_dni(self, dni):
+    def put_alumno(self, nombre, dni, id_ecoe):
         self.dni = dni
-        db.session.commit()
-
-    def put_alumno_id_ecoe(self, id_ecoe):
+        self.nombre = nombre
         self.id_ecoe = id_ecoe
         db.session.commit()
+
 
     def delete_alumno(self):
         db.session.delete(self)

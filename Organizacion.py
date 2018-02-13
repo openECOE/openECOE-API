@@ -65,13 +65,10 @@ class Organizacion(db.Model):
         return False
 
 
-    def put_organizacion_usuario_nombre(self, usuario):
+    def put_organizacion_usuario(self, usuario):
         self.usuarios.append(usuario)
         db.session.commit()
 
-    def put_organizacion_usuario_id_organizacion(self, usuario):
-        self.usuarios.append(usuario)
-        db.session.commit()
 
     def delete_organizacion_usuario(self, usuario):
         self.usuarios.remove(usuario)
@@ -393,41 +390,26 @@ def creaEcoeOrganizacion(organizacion_id):
 
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/nombre/', methods=['PUT'])
-def modificaEcoeOrganizacionNombre(organizacion_id, ecoe_id):
+def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
     if(organizacion):
         if(organizacion.existe_organizacion_ecoe(ecoe_id)):
             value = request.json
             nombre = value["nombre"]
-
-            ecoe = ECOE().get_ECOE(ecoe_id)
-            ecoe.put_ecoe_nombre(nombre)
-
-            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/id_organizacion/', methods=['PUT'])
-def insertaEcoeOrganizacionIdOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if(organizacion):
-        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
-            value = request.json
             id_organizacion = value["id_organizacion"]
 
             ecoe = ECOE().get_ECOE(ecoe_id)
-            ecoe.put_ecoe_id_organizacion(id_organizacion)
+            ecoe.put_ecoe(nombre, id_organizacion)
 
             return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
             abort(404)
     else:
         abort(404)
+
+
+
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
 def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):

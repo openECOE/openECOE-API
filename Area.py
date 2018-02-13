@@ -34,13 +34,11 @@ class Area(db.Model):
 
         return area
 
-    def put_area_nombre(self, nombre):
+    def put_area(self, nombre, id_ecoe):
         self.nombre = nombre
-        db.session.commit()
-
-    def put_area_id_ecoe(self, id_ecoe):
         self.id_ecoe = id_ecoe
         db.session.commit()
+
 
     def delete_area(self):
         db.session.delete(self)

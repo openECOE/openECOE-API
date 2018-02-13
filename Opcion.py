@@ -17,15 +17,12 @@ class Opcion(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    #Edita puntos de opcion
-    def put_opcionPuntos(self, puntos):
-        self.puntos = puntos
-        db.session.commit()
 
-    #Edita descripcion de opcion
-    def put_opcionDescripcion(self, descripcion):
+    def put_opcion(self, puntos, descripcion):
+        self.puntos = puntos
         self.descripcion = descripcion
         db.session.commit()
+
 
     def delete_opcion(self):
         db.session.delete(self)

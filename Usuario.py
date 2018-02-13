@@ -37,13 +37,11 @@ class Usuario(db.Model):
         db.session.commit()
 
 
-    def put_usuario_nombre(self, nombre):
+    def put_usuario(self, nombre, apellidos):
         self.nombre = nombre
-        db.session.commit()
-
-    def put_usuario_apellidos(self, apellidos):
         self.apellidos = apellidos
         db.session.commit()
+
 
     def delete_usuario(self):
         db.session.delete(self)
@@ -83,37 +81,21 @@ def insertaUsuario():
     return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos})
 
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/nombre/', methods=['PUT'])
-def actualizaUsuarioNombre(usuario_id):
+@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['PUT'])
+def actualizaUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
     if(usuario):
         value = request.json
         nombre = value["nombre"]
-
-        usuario = Usuario().get_usuario(usuario_id)
-        usuario.put_usuario_nombre(nombre)
-
-        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
-    else:
-      abort(404)
-
-
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/apellidos/', methods=['PUT'])
-def actualizaUsuarioApellidos(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
-
-    if(usuario):
-        value = request.json
         apellidos = value["apellidos"]
 
         usuario = Usuario().get_usuario(usuario_id)
-        usuario.put_usuario_apellidos(apellidos)
+        usuario.put_usuario(nombre, apellidos)
 
         return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
     else:
       abort(404)
-
 
 
 @app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['DELETE'])
