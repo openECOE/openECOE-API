@@ -3,7 +3,7 @@ from db import db
 class Alarma(db.Model):
     id_alarma = db.Column(db.Integer, primary_key=True)
     tiempo = db.Column(db.Integer)
-    sonido = db.Column(db.String(500))
+    sonido = db.Column(db.String(550))
     id_cronometro = db.Column(db.Integer, db.ForeignKey('cronometro.id_cronometro'))
 
     def __init__(self, tiempo=0, sonido='', id_cronometro=0):
