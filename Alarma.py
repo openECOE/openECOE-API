@@ -4,28 +4,36 @@ class Alarma(db.Model):
     id_alarma = db.Column(db.Integer, primary_key=True)
     tiempo = db.Column(db.Integer)
     sonido = db.Column(db.String(500))
+    id_cronometro = db.Column(db.Integer, db.ForeignKey('cronometro.id_cronometro'))
 
-    def __init__(self, tiempo, sonido):
+    def __init__(self, tiempo=0, sonido='', id_cronometro=0):
         self.tiempo = tiempo
         self.sonido = sonido
+        self.id_cronometro = id_cronometro
 
     def get_alarma(self, id):
         alarma = Alarma.query.filter_by(id_alarma = id).first()
+        return alarma
+
+    def get_ult_alarma(self):
+        alarmas = Alarma.query.all()
+
+        numAlarmas = len(alarmas)
+        alarma = alarmas[numAlarmas - 1]
+
         return alarma
 
     def post_alarma(self):
         db.session.add(self)
         db.session.commit()
 
-    #Edita tiempo de alarma
-    def put_alarmaTiempo(self, tiempo):
+
+    def put_alarma(self, tiempo, sonido, id_cronometro):
         self.tiempo = tiempo
+        self.sonido = sonido
+        self.id_cronometro = id_cronometro
         db.session.commit()
 
-    #Edita sonido de alarma
-    def put_alarmaSonido(self, sonido):
-        self.sonido = sonido
-        db.session.commit()
 
     def delete_alarma(self):
         db.session.delete(self)
