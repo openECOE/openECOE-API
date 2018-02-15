@@ -9,5 +9,6 @@ from Estacion import Estacion
 from Grupo import Grupo
 from Cronometro import Cronometro
 from Alarma import Alarma
+from Permiso import Permiso
 
 db.create_all()

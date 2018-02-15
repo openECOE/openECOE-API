@@ -1,4 +1,12 @@
+from db import app
 from db import db
+import numpy as np
+from flask import Flask, jsonify, request
+from werkzeug.exceptions import abort, Response
+
+import numpy as np
+import json
+
 
 class Permiso(db.Model):
     id_permiso = db.Column(db.Integer, primary_key=True)
@@ -17,49 +25,102 @@ class Permiso(db.Model):
         permiso = Permiso.query.filter_by(id_permiso=id).first()
         return permiso
 
-    def post_permiso(self):
-        permiso = Permiso(id_permiso=self.id_permiso)
-        db.session.add(permiso)
+    def get_ult_permiso(self):
+        permisos = Permiso.query.all()
 
-        db.session.commit()
+        numPerm = len(permisos)
+        permiso = permisos[numPerm - 1]
+
         return permiso
+
+    def post_permiso(self):
+        db.session.add(self)
+        db.session.commit()
+
+
 
     #Edita el tipo de permiso.
-    def put_permisoTipoPermiso(self, id_tipoPermiso):
-        permiso = Permiso.query.filter_by(id_permiso=self.id_permiso).first()
-        permiso.id_tipoPermiso = id_tipoPermiso
+    def put_permiso(self, id_tipoPermiso, id_organizacion, id_ecoe, id_estacion):
+        self.id_tipoPermiso = id_tipoPermiso
+        self.id_organizacion = id_organizacion
+        self.id_ecoe = id_ecoe
+        self.id_estacion = id_estacion
+
         db.session.commit()
 
-        return permiso
-
-    #Edita el id de la organizacion
-    def put_permisoOrganizacion(self, id_organizacion):
-        permiso = Permiso.query.filter_by(id_permiso=self.id_permiso).first()
-        permiso.id_organizacion = id_organizacion
-        db.session.commit()
-
-        return permiso
-
-    #Edita el id de la ecoe
-    def put_permisoEcoe(self, id_ecoe):
-        permiso = Permiso.query.filter_by(id_permiso=self.id_permiso).first()
-        permiso.id_ecoe = id_ecoe
-        db.session.commit()
-
-        return permiso
-
-    #Edita el id de la estacion
-    def put_permisoEstacion(self, id_estacion):
-        permiso = Permiso.query.filter_by(id_permiso=self.id_permiso).first()
-        permiso.id_estacion = id_estacion
-        db.session.commit()
-
-        return permiso
 
     def delete_permiso(self):
-        permiso = Permiso.query.filter_by(id_permiso=self.id_permiso).first()
-
-        db.session.delete(permiso)
+        db.session.delete(self)
         db.session.commit()
 
-        return "OK"
+@app.route('/api/v1.0/permisos/', methods=['GET'])
+def muestraPermisos():
+    permisos = []
+
+    for permiso in Permiso.query.all():
+        permisos.append({
+            "id_permiso": permiso.id_tipoPermiso,
+            "id_tipoPermiso": permiso.id_tipoPermiso,
+            "id_organizacion": permiso.id_organizacion,
+            "id_ecoe": permiso.id_ecoe,
+            "id_estacion": permiso.id_estacion
+        })
+
+    return json.dumps(permisos, indent=1, ensure_ascii=False).encode('utf8')
+
+@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['GET'])
+def muestraPermiso(permiso_id):
+    permiso = Permiso().get_permiso(permiso_id)
+
+    if(permiso):
+        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    else:
+        abort(404)
+
+@app.route('/api/v1.0/permisos/', methods=['POST'])
+def insertaPermiso():
+    value = request.json
+
+    id_tipoPermiso = value["id_tipoPermiso"]
+    id_organizacion = value["id_organizacion"]
+    id_ecoe = value["id_ecoe"]
+    id_estacion = value["id_estacion"]
+
+    permisoIn = Permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
+    permisoIn.post_permiso()
+
+    permiso = Permiso().get_ult_per()
+    return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+
+
+@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['PUT'])
+def actualizaPermiso(permiso_id):
+    permiso = Permiso().get_usuario(permiso_id)
+
+    if(permiso):
+        value = request.json
+
+        id_tipoPermiso = value["id_tipoPermiso"]
+        id_organizacion = value["id_organizacion"]
+        id_ecoe = value["id_ecoe"]
+        id_estacion = value["id_estacion"]
+
+        permiso = Permiso().get_permiso(permiso_id)
+        permiso.put_permiso()
+        permiso.put_permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
+
+        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['DELETE'])
+def eliminaPermiso(permiso_id):
+    permiso = Permiso().get_permiso(permiso_id)
+
+    if (permiso):
+        permiso.delete_usuario()
+        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    else:
+        abort(404)
+

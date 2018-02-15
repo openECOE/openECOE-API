@@ -7,16 +7,21 @@ from werkzeug.exceptions import abort, Response
 import numpy as np
 import json
 
+from Permiso import Permiso
+
+UsuPerm = db.Table('UsuPerm', db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True), db.Column('id_permiso', db.Integer, db.ForeignKey('permiso.id_permiso'), primary_key=True))
+
+
 class Usuario(db.Model):
     id_usuario = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     apellidos = db.Column(db.String(255))
- #   permisos = db.relationship('Permiso', backref='permisos', lazy='dynamic')
+    permisos = db.relationship('Permiso', secondary=UsuPerm, lazy='subquery',backref=db.backref('permisos', lazy='dynamic'))
 
     def __init__(self, nombre='', apellidos='', id_organizacion=0):
         self.nombre = nombre
         self.apellidos = apellidos
-        #self.permisos = permisos
+
 
     def get_usuario(self, id):
         usuario = Usuario.query.filter_by(id_usuario=id).first()
@@ -65,7 +70,10 @@ def muestraUsuarios():
 def muestraUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
-    return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
+    if(usuario):
+        return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
+    else:
+        abort(404)
 
 @app.route('/api/v1.0/usuarios/', methods=['POST'])
 def insertaUsuario():
@@ -91,6 +99,7 @@ def actualizaUsuario(usuario_id):
         apellidos = value["apellidos"]
 
         usuario = Usuario().get_usuario(usuario_id)
+
         usuario.put_usuario(nombre, apellidos)
 
         return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
