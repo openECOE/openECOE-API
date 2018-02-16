@@ -1,10 +1,19 @@
 from db import db
+from Area import Area
+
+from db import db
+from db import app
+import numpy as np
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort, Response
 
 class Pregunta(db.Model):
     id_pregunta = db.Column(db.Integer, primary_key=True)
     ref = db.Column(db.String(500))
     tipo_pregunta = db.Column(db.String(255))
     id_grupo = db.Column(db.Integer, db.ForeignKey('grupo.id_grupo'))
+
 
     #area_pregunta = db.Column(db.Integer)
     #opciones = db.Column(db.Integer)
@@ -44,4 +53,3 @@ class Pregunta(db.Model):
         db.session.commit()
 
 
-#TODO Area

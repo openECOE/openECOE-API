@@ -15,7 +15,7 @@ class Permiso(db.Model):
     id_ecoe = db.Column(db.Integer)
     id_estacion = db.Column(db.Integer)
 
-    def __init__(self, id_tipoPermiso, id_organizacion, id_ecoe, id_estacion):
+    def __init__(self, id_tipoPermiso=0, id_organizacion=0, id_ecoe=0, id_estacion=0):
         self.id_tipoPermiso = id_tipoPermiso
         self.id_organizacion = id_organizacion
         self.id_ecoe = id_ecoe
@@ -59,7 +59,7 @@ def muestraPermisos():
 
     for permiso in Permiso.query.all():
         permisos.append({
-            "id_permiso": permiso.id_tipoPermiso,
+            "id_permiso": permiso.id_permiso,
             "id_tipoPermiso": permiso.id_tipoPermiso,
             "id_organizacion": permiso.id_organizacion,
             "id_ecoe": permiso.id_ecoe,
@@ -89,13 +89,13 @@ def insertaPermiso():
     permisoIn = Permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
     permisoIn.post_permiso()
 
-    permiso = Permiso().get_ult_per()
+    permiso = Permiso().get_ult_permiso()
     return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
 
 
 @app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['PUT'])
 def actualizaPermiso(permiso_id):
-    permiso = Permiso().get_usuario(permiso_id)
+    permiso = Permiso().get_permiso(permiso_id)
 
     if(permiso):
         value = request.json
@@ -106,7 +106,6 @@ def actualizaPermiso(permiso_id):
         id_estacion = value["id_estacion"]
 
         permiso = Permiso().get_permiso(permiso_id)
-        permiso.put_permiso()
         permiso.put_permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
 
         return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
@@ -119,7 +118,7 @@ def eliminaPermiso(permiso_id):
     permiso = Permiso().get_permiso(permiso_id)
 
     if (permiso):
-        permiso.delete_usuario()
+        permiso.delete_permiso()
         return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
     else:
         abort(404)

@@ -165,8 +165,7 @@ def muestraUsuariosOrg(organizacion_id):
             usuarios.append({
                 "id_usuario": usuario.id_usuario,
                 "nombre": usuario.nombre,
-                "apellidos": usuario.apellidos,
-                "id_organizacion": organizacion_id
+                "apellidos": usuario.apellidos
             })
 
         return json.dumps(usuarios, indent=1, ensure_ascii=False).encode('utf8')
@@ -181,7 +180,7 @@ def muestraUsuarioOrg(organizacion_id, usuario_id):
     if (organizacion):
         if(organizacion.existe_organizacion_usuario(usuario_id)):
             usuario = Usuario().get_usuario(usuario_id)
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos, "id_organizacion" : organizacion_id})
+            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
         else:
             abort(404)
     else:
@@ -190,19 +189,23 @@ def muestraUsuarioOrg(organizacion_id, usuario_id):
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['POST'])
 def insertaUsuarioOrg(organizacion_id):
-    value = request.json
-    nombre = value["nombre"]
-    apellidos = value["apellidos"]
-
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
-    usuarioIn = Usuario(nombre, apellidos)
-    usuarioIn.post_usuario()
+    if(organizacion):
+        value = request.json
+        nombre = value["nombre"]
+        apellidos = value["apellidos"]
 
-    usuario = Usuario().get_ult_usuario()
-    organizacion.put_organizacion_usuario(usuario)
+        usuarioIn = Usuario(nombre, apellidos)
+        usuarioIn.post_usuario()
 
-    return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos, "id_organizacion" : organizacion_id})
+        usuario = Usuario().get_ult_usuario()
+        organizacion.put_organizacion_usuario(usuario)
+
+        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
+    else:
+        abort(404)
+
 
 
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['PUT'])
@@ -212,9 +215,8 @@ def anyadeUsuarioOrg(organizacion_id, usuario_id):
     if(organizacion):
         usuario = Usuario().get_usuario(usuario_id)
         if(usuario):
-            usuario = Usuario().get_usuario(usuario_id)
             organizacion.put_organizacion_usuario(usuario)
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos, "id_organizacion" : organizacion_id})
+            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
         else:
             abort(404)
     else:
@@ -228,7 +230,7 @@ def eliminaUsuarioOrg(organizacion_id, usuario_id):
             usuario = Usuario().get_usuario(usuario_id)
             organizacion.delete_organizacion_usuario(usuario)
 
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos, "id_organizacion" : organizacion_id})
+            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
         else:
             abort(404)
     else:
@@ -254,90 +256,6 @@ def muestraOrganizacionesUsu(usuario_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
-def muestraOrganizacionesUsus(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
-    if(usuario):
-        organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
-        estructura = []
-
-        for organizacion in organizaciones:
-            estructura.append({
-                "id_organizacion": organizacion.id_organizacion,
-                "nombre": organizacion.nombre,
-            })
-
-        return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
-
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/<int:organizacion_id>/', methods=['GET'])
-def muestraOrganizacionUsu(usuario_id, organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        if (organizacion.existe_organizacion_usuario(usuario_id)):
-            return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['POST'])
-def creaOrganizacionUsuario(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
-
-    if(usuario):
-        value = request.json
-        nombre = value["nombre"]
-
-        organizacion = Organizacion(nombre)
-        organizacion.post_organizacion()
-        organizacion.put_organizacion_usuario(usuario)
-
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/<int:organizacion_id>/', methods=['PUT'])
-def insertaOrganizacionUsuario(usuario_id, organizacion_id):
-    usuario = Usuario().get_usuario(usuario_id)
-
-    if(usuario):
-        organizacion = Organizacion().get_organizacion(organizacion_id)
-        if(organizacion):
-            organizacion.put_organizacion_usuario(usuario)
-
-            return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/<int:organizacion_id>/', methods=['DELETE'])
-def eliminaOrganizacionUsuario(usuario_id, organizacion_id):
-    usuario = Usuario().get_usuario(usuario_id)
-
-    if (usuario):
-        organizacion = Organizacion().get_organizacion(organizacion_id)
-        if(organizacion):
-            if (organizacion.existe_organizacion_usuario(usuario_id)):
-                organizacion.delete_organizacion_usuario(usuario)
-                return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-
-            else:
-                abort(404)
-
-        else:
-            abort(404)
-
-    else:
-        abort(404)
 
 
 #Rutas de Organizacion-ECOE
