@@ -210,8 +210,12 @@ def anyadeUsuarioPerm(usuario_id, permiso_id):
     if(usuario):
         permiso = Permiso().get_permiso(permiso_id)
         if(permiso):
-            usuario.put_usuario_permisos(permiso)
-            return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+            if(usuario.existe_usuario_permiso(permiso_id)==False):
+                usuario.put_usuario_permisos(permiso)
+                return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+            else:
+                abort(405)
+
         else:
             abort(404)
     else:

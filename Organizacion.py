@@ -215,8 +215,11 @@ def anyadeUsuarioOrg(organizacion_id, usuario_id):
     if(organizacion):
         usuario = Usuario().get_usuario(usuario_id)
         if(usuario):
-            organizacion.put_organizacion_usuario(usuario)
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
+            if (organizacion.existe_organizacion_usuario(usuario_id) == False):
+                organizacion.put_organizacion_usuario(usuario)
+                return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
+            else:
+                abort(405)
         else:
             abort(404)
     else:
