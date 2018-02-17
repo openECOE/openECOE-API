@@ -7,9 +7,7 @@ import json
 from werkzeug.exceptions import abort, Response
 from flask import jsonify, request
 
-from ECOE import ECOE
 from Turno import Turno
-from Alumno import Alumno
 
 class Rueda(db.Model):
     id_rueda = db.Column(db.Integer, primary_key=True)

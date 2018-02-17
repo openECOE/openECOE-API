@@ -8,8 +8,6 @@ from werkzeug.exceptions import abort, Response
 from flask import jsonify, request
 
 from ECOE import ECOE
-from Turno import Turno
-from Rueda import Rueda
 
 class Dia(db.Model):
     id_dia = db.Column(db.Integer, primary_key=True)
