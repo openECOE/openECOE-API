@@ -52,7 +52,7 @@ class Pregunta(db.Model):
         db.session.commit()
 
 #RUTAS DE PREGUNTA
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<string:grupo_nombre>/preguntas/<int:pregunta_id>', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>', methods=['GET'])
 def muestraPregunta(pregunta_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
 
@@ -62,7 +62,7 @@ def muestraPregunta(pregunta_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<string:grupo_nombre>/preguntas/<int:pregunta_id>/opciones', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones', methods=['GET'])
 def obtenOpciones(pregunta_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
 
