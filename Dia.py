@@ -55,8 +55,6 @@ def muestraDia(ecoe_id, dia_id):
     dia = Dia().get_dia(dia_id)
 
     if(ecoe):
-        #comprobar la relación
-
 
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
 

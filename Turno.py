@@ -47,10 +47,12 @@ class Turno(db.Model):
 
 # RUTAS DE TURNO
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/turnos/<int:turno_id>', methods=['GET'])
-def muestraTurno(turno_id):
+def muestraTurno(dia_id, turno_id):
+    dia = Dia().get_dia(dia_id)
     turno = Turno().get_turno(turno_id)
 
-    if(turno):
+
+    if(dia):
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio})
 
     else:
@@ -78,36 +80,42 @@ def insertaTurno(dia_id):
 
     if(dia):
         value = request.json
-        hora_inicio = value["hora_inicio"]
+        if ((not request.json) or (not "hora_inicio" in request.json)):
 
-        turnoIn = Turno(hora_inicio=hora_inicio, id_dia=dia_id)
-        turnoIn.post_turno()
+            hora_inicio = value["hora_inicio"]
 
-        turno = Turno().get_ult_turno()
+            turnoIn = Turno(hora_inicio=hora_inicio, id_dia=dia_id)
+            turnoIn.post_turno()
+
+            turno = Turno().get_ult_turno()
 
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio})
     else:
         abort(404)
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id/dias/int:dia_id>/turnos/<int:turno_id>', methods=['PUT'])
-def modificaTurno(turno_id):
+def modificaTurno(dia_id, turno_id):
+    dia = Dia().get_dia(dia_id)
     turno = Turno().get_turno(turno_id)
 
-    if(turno):
+    if(dia):
         value = request.json
-        hora_inicio = value["hora_inicio"]
+        if ((not request.json) or (not "hora_inicio" in request.json)):
 
-        turno.put_turno(hora_inicio)
+            hora_inicio = value["hora_inicio"]
+
+            turno.put_turno(hora_inicio)
 
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio})
     else:
         abort(404)
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/turnos/<int:turno_id>', methods=['DELETE'])
-def eliminaTurno(turno_id):
+def eliminaTurno(dia_id, turno_id):
+    dia = Dia().get_dia(dia_id)
     turno = Turno().get_turno(turno_id)
 
-    if(turno):
+    if(dia):
         turno.delete_turno()
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio})
     else:
