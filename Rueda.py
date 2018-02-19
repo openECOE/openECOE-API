@@ -115,7 +115,7 @@ def eliminaRueda(turno_id, rueda_id):
     turno = Turno().get_turno(turno_id)
     rueda = Rueda().get_rueda(rueda_id)
 
-    if(rueda):
+    if(turno):
         rueda.delete_rueda()
         return jsonify({"id_rueda": rueda.id_rueda, "descripcion": rueda.descripcion})
     else:
