@@ -104,6 +104,9 @@ def muestraUsuario(usuario_id):
 def insertaUsuario():
     value = request.json
 
+    if ((not request.json) or (not "nombre" in request.json) or (not "apellidos" in request.json)):
+        abort(400)
+
     nombre = value["nombre"]
     apellidos = value["apellidos"]
 
@@ -120,6 +123,10 @@ def actualizaUsuario(usuario_id):
 
     if(usuario):
         value = request.json
+
+        if ((not request.json) or (not "nombre"  in request.json) or (not "apellidos" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
         apellidos = value["apellidos"]
 
@@ -173,7 +180,7 @@ def muestraUsuarioPerm(usuario_id, permiso_id):
             permiso = Permiso().get_permiso(permiso_id)
             return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion" : permiso.id_estacion})
         else:
-            abort(403)
+            abort(404)
     else:
         abort(404)
 
@@ -184,6 +191,9 @@ def insertaUsuarioPerm(usuario_id):
 
     if(usuario):
         value = request.json
+
+        if ((not request.json) or (not "id_tipoPermiso"  in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+            abort(400)
 
         id_tipoPermiso = value["id_tipoPermiso"]
         id_organizacion = value["id_organizacion"]

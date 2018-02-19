@@ -81,6 +81,9 @@ def muestraPermiso(permiso_id):
 def insertaPermiso():
     value = request.json
 
+    if ((not request.json) or (not "id_tipoPermiso" in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+        abort(400)
+
     id_tipoPermiso = value["id_tipoPermiso"]
     id_organizacion = value["id_organizacion"]
     id_ecoe = value["id_ecoe"]
@@ -99,6 +102,9 @@ def actualizaPermiso(permiso_id):
 
     if(permiso):
         value = request.json
+
+        if ((not request.json) or (not "id_tipoPermiso"  in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+            abort(400)
 
         id_tipoPermiso = value["id_tipoPermiso"]
         id_organizacion = value["id_organizacion"]

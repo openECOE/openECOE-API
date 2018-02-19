@@ -25,6 +25,13 @@ class Organizacion(db.Model):
         self.usuarios = usuarios
        # self.ecoes = ecoes
 
+    def get_organizacion_ids(self):
+        ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
+        return list(np.squeeze(ids))
+
+    def get_organizacion_nombres(self):
+        nombres = Organizacion.query.with_entities(Organizacion.nombre).all()
+        return list(np.squeeze(nombres))
 
     def get_organizacion(self, id):
         organizacion = Organizacion.query.filter_by(id_organizacion=id).first()
@@ -111,6 +118,10 @@ def muestraOrganizacion(organizacion_id):
 @app.route('/api/v1.0/organizacion/', methods=['POST'])
 def insertaOrganizacion():
     value = request.json
+
+    if not request.json or not "nombre" in request.json:
+        abort(400)
+
     nombre = value["nombre"]
 
     orgIn = Organizacion(nombre)
@@ -126,7 +137,13 @@ def modificaOrganizacion(organizacion_id):
 
     if (organizacion):
         value = request.json
+
+        if not request.json or not "nombre" in request.json:
+            abort(400)
+
         nombre = value["nombre"]
+
+
 
         organizacion.put_organizacion(nombre)
 
@@ -186,6 +203,10 @@ def insertaUsuarioOrg(organizacion_id):
 
     if(organizacion):
         value = request.json
+
+        if ((not request.json) or (not "nombre"  in request.json) or (not "apellidos" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
         apellidos = value["apellidos"]
 
@@ -293,6 +314,10 @@ def creaEcoeOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
     if(organizacion):
         value = request.json
+
+        if not request.json or not "nombre" in request.json:
+            abort(400)
+
         nombre = value["nombre"]
 
         ecoe = ECOE(nombre, organizacion_id)
@@ -303,13 +328,17 @@ def creaEcoeOrganizacion(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/nombre/', methods=['PUT'])
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
 def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
     if(organizacion):
         if(organizacion.existe_organizacion_ecoe(ecoe_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_organizacion" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             id_organizacion = value["id_organizacion"]
 

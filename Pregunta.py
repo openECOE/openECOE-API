@@ -1,3 +1,4 @@
+
 from db import db
 from db import app
 import numpy as np
@@ -7,8 +8,6 @@ from werkzeug.exceptions import abort, Response
 
 class Pregunta(db.Model):
     id_pregunta = db.Column(db.Integer, primary_key=True)
-    ref = db.Column(db.String(500))
-    tipo_pregunta = db.Column(db.String(255))
     id_grupo = db.Column(db.Integer, db.ForeignKey('grupo.id_grupo'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id_area'))
     area = db.relationship('Area', backref='area')
@@ -35,7 +34,6 @@ class Pregunta(db.Model):
         pregunta = preguntas[numpreguntas-1]
 
         return pregunta
-
 
     def post_pregunta(self):
         db.session.add(self)
@@ -141,6 +139,4 @@ def eliminaAreaPregunta(pregunta_id):
         return jsonify({"id_area": area.id_area, "nombre": area.nombre})
     else:
         abort(404)
-
-
 

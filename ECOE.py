@@ -8,6 +8,7 @@ from werkzeug.exceptions import abort, Response
 from Area import Area
 from Alumno import Alumno
 from Estacion import Estacion
+from Dia import Dia
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -15,7 +16,7 @@ class ECOE(db.Model):
     areas = db.relationship('Area', backref='areas', lazy='dynamic')
     alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
     estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
-    #dias = db.relationship('Dia', backref='dias', lazy='dynamic')
+    dias = db.relationship('Dia', backref='dias', lazy='dynamic')
     #cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
     id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
 
@@ -116,6 +117,10 @@ def insertaArea(ecoe_id):
 
     if(ecoe):
         value = request.json
+
+        if not request.json or not "nombre" in request.json:
+            abort(400)
+
         nombre = value["nombre"]
 
         areaIn = Area(nombre=nombre, id_ecoe=ecoe_id)
@@ -135,6 +140,10 @@ def modificaArea(ecoe_id, area_id):
     if (ecoe):
         if (ecoe.existe_ecoe_area(area_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             id_ecoe = value["id_ecoe"]
 
@@ -207,6 +216,10 @@ def insertaAlumno(ecoe_id):
 
     if(ecoe):
         value = request.json
+
+        if ((not request.json) or (not "nombre" in request.json) or (not "dni" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
         dni = value["dni"]
 
@@ -228,6 +241,10 @@ def modificaAlumno(ecoe_id, alumno_id):
     if (ecoe):
         if (ecoe.existe_ecoe_alumno(alumno_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json)  or (not "dni" in request.json) or (not "id_ecoe" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             dni = value["dni"]
             id_ecoe = value["id_ecoe"]
@@ -299,6 +316,10 @@ def insertaEstacion(ecoe_id):
 
     if(ecoe):
         value = request.json
+
+        if ((not request.json) or (not "nombre" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
 
         estacionIn = Estacion(nombre, ecoe_id)
@@ -317,6 +338,10 @@ def modificaEstacion(ecoe_id, estacion_id):
     if (ecoe):
         if (ecoe.existe_ecoe_estacion(estacion_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             id_ecoe = value["id_ecoe"]
 
@@ -346,3 +371,64 @@ def eliminaEstacion(ecoe_id, estacion_id):
 
     else:
         abort(404)
+
+#RUTAS DE DIA (En desarrollo)
+
+#No esta la ruta para visualizar todos los dias
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['GET'])
+def muestraDia(dia_id):
+    ecoe = ECOE().get_ECOE()
+
+    if(ecoe):
+
+
+        return "AAAAAAAA"
+
+    else:
+        abort(404)
+
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias', methods=['POST'])
+def insertaDia(ecoe_id):
+    ecoe = ECOE().get_ECOE(ecoe_id)
+
+    if(ecoe):
+        value = request.json
+        fecha = value["fecha"]
+
+        diaIn = Dia(fecha=fecha, id_ecoe=ecoe_id)
+        diaIn.post_dia()
+
+        dia = Dia().get_ult_dia()
+
+        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
+    else:
+        abort(404)
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['PUT'])
+def modificaDia(dia_id):
+    dia = Dia().get_dia(dia_id)
+
+    if(dia):
+        value = request.json
+        fecha = value["fecha"]
+
+        dia.put_dia(fecha)
+
+        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
+    else:
+        abort(404)
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['DELETE'])
+def eliminaDia(dia_id):
+    dia = Dia().get_dia(dia_id)
+
+    if(dia):
+        dia.delete_dia()
+        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
+    else:
+        abort(404)
+
+

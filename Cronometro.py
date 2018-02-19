@@ -93,8 +93,14 @@ def insertaAlarma(cronometro_id):
 
     if (cronometro):
         value = request.json
+
+        if ((not request.json) or (not "tiempo" in request.json) or (not "sonido" in request.json) or (not "id_cronometro" in request.json)):
+            abort(400)
+
         tiempo = value["tiempo"]
         sonido = value["sonido"]
+
+
 
         alarmaIn = Alarma(tiempo, sonido, cronometro_id)
         alarmaIn.post_alarma()
@@ -112,6 +118,10 @@ def modificaAlarma(cronometro_id, alarma_id):
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):
             value = request.json
+
+            if ((not request.json) or (not "tiempo" in request.json)  or (not "sonido" in request.json) (not "id_cronometro" in request.json)):
+                abort(400)
+
             tiempo = value["tiempo"]
             sonido = value["sonido"]
             id_cronometro = value["id_cronometro"]

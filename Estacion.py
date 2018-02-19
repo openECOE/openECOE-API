@@ -96,6 +96,10 @@ def insertaCronometro(estacion_id):
 
     if (estacion):
         value = request.json
+
+        if ((not request.json) or (not "nombre" in request.json) or (not "tiempo_total" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
         tiempo_total = value["tiempo_total"]
 
@@ -115,6 +119,10 @@ def modificaCronometro(estacion_id, cronometro_id):
     if (estacion):
         if (estacion.existe_estacion_cronometro(cronometro_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json) or (not "tiempo_total" in request.json) or (not "id_estacion" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             tiempo_total = value["tiempo_total"]
             id_estacion = value["id_estacion"]
@@ -184,7 +192,12 @@ def insertaGrupo(estacion_id):
     estacion = Estacion().get_estacion(estacion_id)
 
     if (estacion):
+
         value = request.json
+
+        if ((not request.json) or (not "nombre" in request.json)):
+            abort(400)
+
         nombre = value["nombre"]
 
         grupoIn = Grupo(nombre=nombre, id_estacion=estacion_id)
@@ -205,6 +218,10 @@ def modificaGrupo(estacion_id, grupo_id):
     if (estacion):
         if (estacion.existe_estacion_grupos(grupo_id)):
             value = request.json
+
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_estacion" in request.json)):
+                abort(400)
+
             nombre = value["nombre"]
             id_estacion = value["id_estacion"]
 
