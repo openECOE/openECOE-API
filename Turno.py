@@ -93,7 +93,7 @@ def insertaTurno(dia_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id/dias/int:dia_id>/turnos/<int:turno_id>', methods=['PUT'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/int:dia_id>/turnos/<int:turno_id>', methods=['PUT'])
 def modificaTurno(dia_id, turno_id):
     dia = Dia().get_dia(dia_id)
     turno = Turno().get_turno(turno_id)
