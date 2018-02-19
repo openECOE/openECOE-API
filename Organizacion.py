@@ -25,13 +25,6 @@ class Organizacion(db.Model):
         self.usuarios = usuarios
        # self.ecoes = ecoes
 
-    def get_organizacion_ids(self):
-        ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
-        return list(np.squeeze(ids))
-
-    def get_organizacion_nombres(self):
-        nombres = Organizacion.query.with_entities(Organizacion.nombre).all()
-        return list(np.squeeze(nombres))
 
     def get_organizacion(self, id):
         organizacion = Organizacion.query.filter_by(id_organizacion=id).first()
