@@ -5,7 +5,7 @@ from flask import jsonify, request
 import json
 from werkzeug.exceptions import abort, Response
 
-from Alarma import Alarma
+from Estacion import Estacion
 
 class Cronometro(db.Model):
     id_cronometro = db.Column(db.Integer, primary_key=True)
@@ -56,98 +56,99 @@ class Cronometro(db.Model):
                 return True
         return False
 
-@app.route('/api/v1.0/cronometros/<int:cronometro_id>/alarmas/', methods=['GET'])
-def obtenAlarmas(cronometro_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+#Relacion Estacion-Cronometro
+@app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/', methods=['GET'])
+def obtenCronometros(estacion_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (cronometro):
-        alarmas = []
-        for alarma in cronometro.alarmas:
-            alarmas.append({
-                "id_alarma": alarma.id_alarma,
-                "tiempo": alarma.tiempo,
-                "sonido": alarma.sonido
+    if (estacion):
+        cronometros = []
+        for cronometro in estacion.cronometros:
+            cronometros.append({
+                "id_cronometro": cronometro.id_cronometro,
+                "nombre": cronometro.nombre,
+                "tiempo_total": cronometro.tiempo_total
             })
 
-        return json.dumps(alarmas, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(cronometros, indent=1, ensure_ascii=False).encode('utf8')
     else:
         abort(404)
 
-@app.route('/api/v1.0/cronometros/<int:cronometro_id>/alarmas/<int:alarma_id>/', methods=['GET'])
-def obtenAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['GET'])
+def obtenCronometro(estacion_id, cronometro_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (cronometro):
-        if (cronometro.existe_cronometro_alarma(alarma_id)):
-            alarma = Alarma().get_alarma(alarma_id)
-            return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
+    if (estacion):
+        if (estacion.existe_estacion_cronometro(cronometro_id)):
+            cronometro = Cronometro().get_cronometro(cronometro_id)
+            return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total" : cronometro.tiempo_total})
         else:
             abort(404)
 
     else:
         abort(404)
 
-@app.route('/api/v1.0/cronometros/<int:cronometro_id>/alarmas/', methods=['POST'])
-def insertaAlarma(cronometro_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/', methods=['POST'])
+def insertaCronometro(estacion_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (cronometro):
+    if (estacion):
         value = request.json
 
-        if ((not request.json) or (not "tiempo" in request.json) or (not "sonido" in request.json) or (not "id_cronometro" in request.json)):
+        if ((not request.json) or (not "nombre" in request.json) or (not "tiempo_total" in request.json)):
             abort(400)
 
-        tiempo = value["tiempo"]
-        sonido = value["sonido"]
+        nombre = value["nombre"]
+        tiempo_total = value["tiempo_total"]
 
+        cronometroIn = Cronometro(nombre, tiempo_total, estacion_id)
+        cronometroIn.post_cronometro()
 
+        cronometro = Cronometro().get_ult_cronometro()
 
-        alarmaIn = Alarma(tiempo, sonido, cronometro_id)
-        alarmaIn.post_alarma()
-
-        alarma = Alarma().get_ult_alarma()
-
-        return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
+        return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total": cronometro.tiempo_total})
     else:
         abort(404)
 
-@app.route('/api/v1.0/cronometros/<int:cronometro_id>/alarmas/<int:alarma_id>/', methods=['PUT'])
-def modificaAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['PUT'])
+def modificaCronometro(estacion_id, cronometro_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (cronometro):
-        if (cronometro.existe_cronometro_alarma(alarma_id)):
+    if (estacion):
+        if (estacion.existe_estacion_cronometro(cronometro_id)):
             value = request.json
 
-            if ((not request.json) or (not "tiempo" in request.json)  or (not "sonido" in request.json) (not "id_cronometro" in request.json)):
+            if ((not request.json) or (not "nombre" in request.json) or (not "tiempo_total" in request.json) or (not "id_estacion" in request.json)):
                 abort(400)
 
-            tiempo = value["tiempo"]
-            sonido = value["sonido"]
-            id_cronometro = value["id_cronometro"]
+            nombre = value["nombre"]
+            tiempo_total = value["tiempo_total"]
+            id_estacion = value["id_estacion"]
 
-            alarma = Alarma().get_alarma(alarma_id)
-            alarma.put_alarma(tiempo, sonido, id_cronometro)
+            cronometro = Cronometro().get_cronometro(cronometro_id)
+            cronometro.put_cronometro(nombre, tiempo_total, id_estacion)
 
-            return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
+            return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total": cronometro.tiempo_total})
         else:
             abort(404)
 
     else:
         abort(404)
 
-@app.route('/api/v1.0/cronometros/<int:cronometro_id>/alarmas/<int:alarma_id>/', methods=['DELETE'])
-def eliminaAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['DELETE'])
+def eliminaCronometro(estacion_id, cronometro_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (cronometro):
-        if (cronometro.existe_cronometro_alarma(alarma_id)):
-            alarma = Alarma().get_alarma(alarma_id)
-            alarma.delete_alarma()
+    if (estacion):
+        if (estacion.existe_estacion_cronometro(cronometro_id)):
+            cronometro = Cronometro().get_cronometro(cronometro_id)
+            cronometro.delete_cronometro()
 
-            return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
+            return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total": cronometro.tiempo_total})
         else:
             abort(404)
 
     else:
         abort(404)
+
+

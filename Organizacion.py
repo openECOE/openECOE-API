@@ -7,7 +7,7 @@ import json
 from werkzeug.exceptions import abort, Response
 from flask import jsonify, request
 
-from Usuario import Usuario
+
 from ECOE import ECOE
 
 OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
@@ -163,100 +163,11 @@ def eliminaOrganizacion(organizacion_id):
         abort(404)
 
 
-#Rutas de Organizacion-Usuarios
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['GET'])
-def muestraUsuariosOrg(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        usuarios = []
-
-        for usuario in organizacion.usuarios:
-            usuarios.append({
-                "id_usuario": usuario.id_usuario,
-                "nombre": usuario.nombre,
-                "apellidos": usuario.apellidos
-            })
-
-        return json.dumps(usuarios, indent=1, ensure_ascii=False).encode('utf8')
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['GET'])
-def muestraUsuarioOrg(organizacion_id, usuario_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        if(organizacion.existe_organizacion_usuario(usuario_id)):
-            usuario = Usuario().get_usuario(usuario_id)
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['POST'])
-def insertaUsuarioOrg(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if(organizacion):
-        value = request.json
-
-        if ((not request.json) or (not "nombre"  in request.json) or (not "apellidos" in request.json)):
-            abort(400)
-
-        nombre = value["nombre"]
-        apellidos = value["apellidos"]
-
-        usuarioIn = Usuario(nombre, apellidos)
-        usuarioIn.post_usuario()
-
-        usuario = Usuario().get_ult_usuario()
-        organizacion.put_organizacion_usuario(usuario)
-
-        return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
-    else:
-        abort(404)
-
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['PUT'])
-def anyadeUsuarioOrg(organizacion_id, usuario_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if(organizacion):
-        usuario = Usuario().get_usuario(usuario_id)
-        if(usuario):
-            if (organizacion.existe_organizacion_usuario(usuario_id) == False):
-                organizacion.put_organizacion_usuario(usuario)
-                return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
-            else:
-                abort(405)
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['DELETE'])
-def eliminaUsuarioOrg(organizacion_id, usuario_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-    if(organizacion):
-        if(organizacion.existe_organizacion_usuario(usuario_id)):
-            usuario = Usuario().get_usuario(usuario_id)
-            organizacion.delete_organizacion_usuario(usuario)
-
-            return jsonify({"id_usuario": usuario.id_usuario, "nombre": usuario.nombre, "apellidos": usuario.apellidos})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
 
 #Rutas de Usuarios-Organizacion
 @app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
 def muestraOrganizacionesUsu(usuario_id):
+    from Usuario import Usuario
     usuario = Usuario().get_usuario(usuario_id)
     if(usuario):
         organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
@@ -275,97 +186,3 @@ def muestraOrganizacionesUsu(usuario_id):
 
 
 
-#Rutas de Organizacion-ECOE
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['GET'])
-def muestraEcoesOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    ecoes=[]
-
-    if(organizacion):
-        for ecoe in organizacion.ecoes:
-            ecoes.append({
-                "id" : ecoe.id,
-                "nombre" : ecoe.nombre,
-            })
-
-        return json.dumps(ecoes, indent=1, ensure_ascii=False).encode('utf8')
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
-def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if(organizacion):
-        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
-            ecoe = ECOE().get_ECOE(ecoe_id)
-            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['POST'])
-def creaEcoeOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-    if(organizacion):
-        value = request.json
-
-        if not request.json or not "nombre" in request.json:
-            abort(400)
-
-        nombre = value["nombre"]
-
-        ecoe = ECOE(nombre, organizacion_id)
-        ecoe.post_ecoe()
-
-        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
-def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if(organizacion):
-        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
-            value = request.json
-
-            if ((not request.json) or (not "nombre" in request.json) or (not "id_organizacion" in request.json)):
-                abort(400)
-
-            nombre = value["nombre"]
-            id_organizacion = value["id_organizacion"]
-
-            ecoe = ECOE().get_ECOE(ecoe_id)
-            ecoe.put_ecoe(nombre, id_organizacion)
-
-            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
-        else:
-            abort(404)
-    else:
-        abort(404)
-
-
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
-def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        if (organizacion.existe_organizacion_ecoe(ecoe_id)):
-
-            ecoe = ECOE().get_ECOE(ecoe_id)
-            ecoe.delete_ecoe()
-
-            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
-        else:
-            abort(404)
-    else:
-        abort(404)

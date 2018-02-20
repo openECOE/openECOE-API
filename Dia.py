@@ -61,21 +61,7 @@ def muestraDia(ecoe_id, dia_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/turnos', methods=['GET'])
-def obtenTurnos(dia_id):
-    dia = Dia().get_dia(dia_id)
 
-    if(dia):
-        turnos =[]
-        for turno in dia.turnos:
-            turnos.append({
-                "id_turno": turno.id_turno,
-                "hora inicio": turno.hora_inicio,
-            })
-
-            return json.dump(turnos, indent=1, ensure_ascii=False).encode('utf8')
-        else:
-            abort(404)
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias', methods=['POST'])
 def insertaDia(ecoe_id):

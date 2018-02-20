@@ -45,7 +45,7 @@ class Opcion(db.Model):
         db.session.commit()
 
 #RUTAS DE OPCION
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>', methods=['GET'])
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>', methods=['GET'])
 def muestraOpcion(pregunta_id, opcion_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
     opcion = Opcion().get_opcion(opcion_id)
@@ -56,7 +56,7 @@ def muestraOpcion(pregunta_id, opcion_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/opciones', methods=['POST'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones', methods=['POST'])
 def insertaOpcion(pregunta_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
 

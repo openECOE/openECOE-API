@@ -5,10 +5,7 @@ from flask import jsonify, request
 import json
 from werkzeug.exceptions import abort, Response
 
-from Area import Area
-from Alumno import Alumno
-from Estacion import Estacion
-from Dia import Dia
+from Organizacion import Organizacion
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -17,7 +14,7 @@ class ECOE(db.Model):
     alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
     estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
     dias = db.relationship('Dia', backref='dias', lazy='dynamic')
-    #cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
+    cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
     id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
 
     def __init__(self, nombre='', id_organizacion=0):
@@ -77,45 +74,44 @@ class ECOE(db.Model):
         return False
 
 
+#Rutas de Organizacion-ECOE
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['GET'])
+def muestraEcoesOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
 
-#Relacion ECOE-Area
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
-def obtenAreas(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+    ecoes=[]
 
-    if(ecoe):
-        areas = []
-        for area in ecoe.areas:
-            areas.append({
-                "id_area" : area.id_area,
-                "nombre" : area.nombre,
-        })
+    if(organizacion):
+        for ecoe in organizacion.ecoes:
+            ecoes.append({
+                "id" : ecoe.id,
+                "nombre" : ecoe.nombre,
+            })
 
-        return json.dumps(areas, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(ecoes, indent=1, ensure_ascii=False).encode('utf8')
+
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
-def obtenArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
+def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
 
-    if(ecoe):
-        if(ecoe.existe_ecoe_area(area_id)):
-            area = Area().get_area(area_id)
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+    if(organizacion):
+        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
+            ecoe = ECOE().get_ECOE(ecoe_id)
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
             abort(404)
-
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['POST'])
-def insertaArea(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['POST'])
+def creaEcoeOrganizacion(organizacion_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
+    if(organizacion):
         value = request.json
 
         if not request.json or not "nombre" in request.json:
@@ -123,254 +119,59 @@ def insertaArea(ecoe_id):
 
         nombre = value["nombre"]
 
-        areaIn = Area(nombre=nombre, id_ecoe=ecoe_id)
-        areaIn.post_area()
+        ecoe = ECOE(nombre, organizacion_id)
+        ecoe.post_ecoe()
 
-        area = Area().get_ult_area()
-
-        return jsonify({"id_area" : area.id_area, "nombre" : area.nombre})
+        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
-def modificaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
+def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_area(area_id)):
+    if(organizacion):
+        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
             value = request.json
 
-            if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_organizacion" in request.json)):
                 abort(400)
 
             nombre = value["nombre"]
-            id_ecoe = value["id_ecoe"]
+            id_organizacion = value["id_organizacion"]
 
-            area = Area().get_area(area_id)
-            area.put_area(nombre, id_ecoe)
+            ecoe = ECOE().get_ECOE(ecoe_id)
+            ecoe.put_ecoe(nombre, id_organizacion)
 
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
             abort(404)
-
     else:
         abort(404)
 
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['DELETE'])
-def eliminaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_area(area_id)):
-            area = Area().get_area(area_id)
-            area.delete_area()
+@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
+def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
+    organizacion = Organizacion().get_organizacion(organizacion_id)
 
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+    if (organizacion):
+        if (organizacion.existe_organizacion_ecoe(ecoe_id)):
+
+            ecoe = ECOE().get_ECOE(ecoe_id)
+            ecoe.delete_ecoe()
+
+            return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
             abort(404)
-
-    else:
-        abort(404)
-
-
-#Relacion ECOE-Alumno
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['GET'])
-def obtenAlumnos(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        alumnos = []
-        for alumno in ecoe.alumnos:
-            alumnos.append({
-                "id_area" : alumno.id_alumno,
-                "nombre" : alumno.nombre,
-                "DNI" : alumno.dni
-        })
-
-        return json.dumps(alumnos, indent=1, ensure_ascii=False).encode('utf8')
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['GET'])
-def obtenAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        if(ecoe.existe_ecoe_alumno(alumno_id)):
-            alumno = Alumno().get_alumno(alumno_id)
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni" : alumno.dni})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['POST'])
-def insertaAlumno(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        value = request.json
-
-        if ((not request.json) or (not "nombre" in request.json) or (not "dni" in request.json)):
-            abort(400)
-
-        nombre = value["nombre"]
-        dni = value["dni"]
-
-        alumnoIn = Alumno(nombre, dni, ecoe_id)
-        alumnoIn.post_alumno()
-
-        alumno = Alumno().get_ult_alumno()
-
-        return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
-    else:
-        abort(404)
-
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['PUT'])
-def modificaAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if (ecoe):
-        if (ecoe.existe_ecoe_alumno(alumno_id)):
-            value = request.json
-
-            if ((not request.json) or (not "nombre" in request.json)  or (not "dni" in request.json) or (not "id_ecoe" in request.json)):
-                abort(400)
-
-            nombre = value["nombre"]
-            dni = value["dni"]
-            id_ecoe = value["id_ecoe"]
-
-            alumno = Alumno().get_alumno(alumno_id)
-            alumno.put_alumno(nombre, dni, id_ecoe)
-
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
-        else:
-            abort(404)
-
     else:
         abort(404)
 
 
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['DELETE'])
-def eliminaAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if (ecoe):
-        if (ecoe.existe_ecoe_alumno(alumno_id)):
-            alumno = Alumno().get_alumno(alumno_id)
-            alumno.delete_alumno()
-
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-#Relacion ECOE-Estacion
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/', methods=['GET'])
-def obtenEstaciones(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        estaciones = []
-        for estacion in ecoe.estaciones:
-            estaciones.append({
-                "id_estacion" : estacion.id_estacion,
-                "nombre" : estacion.nombre
-        })
-
-        return json.dumps(estaciones, indent=1, ensure_ascii=False).encode('utf8')
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['GET'])
-def obtenEstacion(ecoe_id, estacion_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        if(ecoe.existe_ecoe_estacion(estacion_id)):
-            estacion = Estacion().get_estacion(estacion_id)
-            return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/', methods=['POST'])
-def insertaEstacion(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        value = request.json
-
-        if ((not request.json) or (not "nombre" in request.json)):
-            abort(400)
-
-        nombre = value["nombre"]
-
-        estacionIn = Estacion(nombre, ecoe_id)
-        estacionIn.post_estacion()
-
-        estacion = Estacion().get_ult_estacion()
-
-        return jsonify({"id_estacion" : estacion.id_estacion, "nombre" : estacion.nombre})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['PUT'])
-def modificaEstacion(ecoe_id, estacion_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if (ecoe):
-        if (ecoe.existe_ecoe_estacion(estacion_id)):
-            value = request.json
-
-            if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
-                abort(400)
-
-            nombre = value["nombre"]
-            id_ecoe = value["id_ecoe"]
-
-            estacion = Estacion().get_estacion(estacion_id)
-            estacion.put_estacion(nombre, id_ecoe)
-
-            return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre, "id_ecoe": estacion.id_ecoe})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['DELETE'])
-def eliminaEstacion(ecoe_id, estacion_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if (ecoe):
-        if (ecoe.existe_ecoe_estacion(estacion_id)):
-            estacion = Estacion().get_estacion(estacion_id)
-            estacion.delete_estacion()
-
-            return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre, "id_ecoe": estacion.id_ecoe})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
 
 #RUTAS DE DIA (En desarrollo)
 

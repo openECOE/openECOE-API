@@ -1,11 +1,11 @@
 from db import db
-from Pregunta import Pregunta
-
 from db import app
 import numpy as np
 from flask import jsonify, request
 import json
 from werkzeug.exceptions import abort, Response
+
+from Estacion import Estacion
 
 class Grupo(db.Model):
     id_grupo = db.Column(db.Integer, primary_key=True)
@@ -51,32 +51,32 @@ class Grupo(db.Model):
                 return True
         return False
 
-@app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['GET'])
-def obtenPreguntas(grupo_id):
-    grupo = Grupo().get_grupo(grupo_id)
+# Relacion Estacion-Grupos
+@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['GET'])
+def obtenGrupos(estacion_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (grupo):
-        preguntas = []
-        for pregunta in grupo.preguntas:
-            preguntas.append({
-                "id_pregunta" : pregunta.id_pregunta,
-                "ref" : pregunta.ref,
-                "tipo_pregunta" : pregunta.tipo_pregunta
+    if (estacion):
+        grupos = []
+        for grupo in estacion.grupos:
+            grupos.append({
+                "id_grupo": grupo.id_grupo,
+                "nombre": grupo.nombre
             })
 
-        return json.dumps(preguntas, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(grupos, indent=1, ensure_ascii=False).encode('utf8')
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['GET'])
-def obtenPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['GET'])
+def obtenGrupo(estacion_id, grupo_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (grupo):
-        if (grupo.existe_grupo_pregunta(pregunta_id)):
-            pregunta = Pregunta().get_pregunta(pregunta_id)
-            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_pregunta" : pregunta.tipo_pregunta})
+    if (estacion):
+        if (estacion.existe_estacion_grupos()):
+            grupo = Grupo().get_grupo(grupo_id)
+            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
         else:
             abort(404)
 
@@ -84,49 +84,48 @@ def obtenPregunta(grupo_id, pregunta_id):
         abort(404)
 
 
-@app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['POST'])
-def insertaPregunta(grupo_id):
-    grupo = Grupo().get_grupo(grupo_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['POST'])
+def insertaGrupo(estacion_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (grupo):
+    if (estacion):
+
         value = request.json
 
-        if ((not request.json) or (not "ref" in request.json) or (not "tipo_pregunta" in request.json)):
+        if ((not request.json) or (not "nombre" in request.json)):
             abort(400)
 
-        ref = value["ref"]
-        tipo_pregunta = value["tipo_pregunta"]
+        nombre = value["nombre"]
 
-        preguntaIn = Pregunta(ref, tipo_pregunta, grupo_id)
-        preguntaIn.post_pregunta()
+        grupoIn = Grupo(nombre=nombre, id_estacion=estacion_id)
+        grupoIn.post_grupo()
 
-        pregunta = Pregunta().get_ult_pregunta()
+        grupo = Grupo().get_ult_grupo()
 
-        return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_pregunta": pregunta.tipo_pregunta})
+        return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
 
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['PUT'])
-def modificaPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['PUT'])
+def modificaGrupo(estacion_id, grupo_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (grupo):
-        if (grupo.existe_grupo_pregunta(pregunta_id)):
+    if (estacion):
+        if (estacion.existe_estacion_grupos(grupo_id)):
             value = request.json
 
-            if ((not request.json) or (not "ref" in request.json) or (not "tipo_pregunta" in request.json) or (not "id_grupo" in request.json)):
+            if ((not request.json) or (not "nombre" in request.json) or (not "id_estacion" in request.json)):
                 abort(400)
 
-            ref = value["ref"]
-            tipo_pregunta = value["tipo_pregunta"]
-            id_grupo = value["id_grupo"]
+            nombre = value["nombre"]
+            id_estacion = value["id_estacion"]
 
-            pregunta = Pregunta().get_pregunta(pregunta_id)
-            pregunta.put_pregunta(ref, tipo_pregunta, id_grupo)
+            grupo = Grupo().get_grupo(grupo_id)
+            grupo.put_grupo(nombre, id_estacion)
 
-            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_pregunta" : pregunta.tipo_pregunta})
+            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
         else:
             abort(404)
 
@@ -134,20 +133,21 @@ def modificaPregunta(grupo_id, pregunta_id):
         abort(404)
 
 
-@app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['DELETE'])
-def eliminaPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['DELETE'])
+def eliminaGrupo(estacion_id, grupo_id):
+    estacion = Estacion().get_estacion(estacion_id)
 
-    if (grupo):
-        if (grupo.existe_grupo_pregunta(pregunta_id)):
-            pregunta = Pregunta().get_pregunta(pregunta_id)
-            pregunta.delete_pregunta()
+    if (estacion):
+        if (estacion.existe_estacion_grupos(grupo_id)):
+            grupo = Grupo().get_grupo(grupo_id)
+            grupo.delete_grupo()
 
-            return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_pregunta": pregunta.tipo_pregunta})
+            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
         else:
             abort(404)
 
     else:
         abort(404)
+
 
 
