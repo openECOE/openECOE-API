@@ -1,5 +1,3 @@
-from db import db
-
 from Alarma import Alarma
 from Alumno import Alumno
 from Area import Area

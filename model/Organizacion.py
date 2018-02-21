@@ -1,12 +1,6 @@
-from db import db
-from db import app
-
-import numpy as np
-import json
-
-from werkzeug.exceptions import abort, Response
-from flask import jsonify, request
-
+from ws import db
+from model import Usuario
+from ECOE import ECOE
 
 OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
 
@@ -20,13 +14,19 @@ class Organizacion(db.Model):
     def __init__(self, nombre=''):
         self.nombre = nombre
 
-    def get_organizacion_ids(self):
-        ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
-        return list(np.squeeze(ids))
+    #def get_organizacion_ids(self):
+     #   ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
+      #  return list(np.squeeze(ids))
 
-    def get_organizacion_nombres(self):
-        nombres = Organizacion.query.with_entities(Organizacion.nombre).all()
-        return list(np.squeeze(nombres))
+    def get_usuario_organizaciones(self, usuario_id):
+
+        ids = db.session.query(OrgUsu).filter_by(id_usuario=usuario_id)
+        organizaciones=[]
+
+        for id in ids:
+            organizaciones.append(Organizacion().get_organizacion(id.id_organizacion))
+
+        return organizaciones
 
     def get_organizacion(self, id):
         organizacion = Organizacion.query.filter_by(id_organizacion=id).first()
@@ -84,100 +84,4 @@ class Organizacion(db.Model):
             if(ecoe.id==id_ecoe):
                 return True
         return False
-
-#Rutas de Organizacion
-@app.route('/api/v1.0/organizacion/', methods=['GET'])
-def muestraOrganizaciones():
-    organizaciones = []
-
-    for organizacion in Organizacion.query.all():
-        organizaciones.append({
-            "id_organizacion": organizacion.id_organizacion,
-            "nombre": organizacion.nombre,
-        })
-
-    return json.dumps(organizaciones, indent=1, ensure_ascii=False).encode('utf8')
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['GET'])
-def muestraOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/', methods=['POST'])
-def insertaOrganizacion():
-    value = request.json
-
-    if not request.json or not "nombre" in request.json:
-        abort(400)
-
-    nombre = value["nombre"]
-
-    orgIn = Organizacion(nombre)
-    orgIn.post_organizacion()
-
-    org = Organizacion().get_ult_organizacion()
-    return jsonify({"id": org.id_organizacion, "nombre": org.nombre})
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['PUT'])
-def modificaOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        value = request.json
-
-        if not request.json or not "nombre" in request.json:
-            abort(400)
-
-        nombre = value["nombre"]
-
-
-
-        organizacion.put_organizacion(nombre)
-
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['DELETE'])
-def eliminaOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
-
-    if (organizacion):
-        organizacion.delete_organizacion()
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
-    else:
-        abort(404)
-
-
-
-#Rutas de Usuarios-Organizacion
-#@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
-#def muestraOrganizacionesUsu(usuario_id):
- #   from Usuario import Usuario
-  #  usuario = Usuario().get_usuario(usuario_id)
-   # if(usuario):
-#        organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
- #       estructura = []
-
-  #      for organizacion in organizaciones:
-   #         estructura.append({
-    #            "id_organizacion": organizacion.id_organizacion,
-     #           "nombre": organizacion.nombre,
-      #      })
-
-       # return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
-
-    #else:
-     #   abort(404)
-
-
 
