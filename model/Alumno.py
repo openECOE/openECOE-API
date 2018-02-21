@@ -6,7 +6,6 @@ import json
 from werkzeug.exceptions import abort, Response
 
 from ECOE import ECOE
-from Rueda import Rueda
 
 class Alumno(db.Model):
     id_alumno = db.Column(db.Integer, primary_key=True)
@@ -147,20 +146,3 @@ def eliminaAlumno(ecoe_id, alumno_id):
 
     else:
         abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/turnos/<int:turno_id>/ruedas/<int:rueda_id>/alumnos', methods=['GET'])
-def obtenAlumnos(rueda_id):
-    rueda = Rueda().get_rueda(rueda_id)
-
-    if(rueda):
-        alumnos =[]
-        for alumno in rueda.alumnos:
-            alumnos.append({
-                "id_alumno": alumno.id_alumno,
-                "Nombre": alumno.nombre,
-                "DNI": alumno.dni,
-            })
-
-            return json.dump(alumnos, indent=1, ensure_ascii=False).encode('utf8')
-        else:
-            abort(404)

@@ -12,9 +12,8 @@ from ECOE import ECOE
 class Dia(db.Model):
     id_dia = db.Column(db.Integer, primary_key=True)
     fecha = db.Column(db.Integer)
-
-    # TODO hacer que turnos sea relationship
-    turnos = db.Column(db.Integer)
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
+    turnos = db.relationship('Turno', backref='turnos', lazy='dynamic')
 
 
     def __init__(self, fecha, turnos):
@@ -49,7 +48,6 @@ class Dia(db.Model):
 #RUTAS DE DIA
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['GET'])
 def muestraDia(ecoe_id, dia_id):
-    #Comprobación de que ecoe existe
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     dia = Dia().get_dia(dia_id)

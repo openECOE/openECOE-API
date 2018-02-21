@@ -7,7 +7,6 @@ from werkzeug.exceptions import abort, Response
 import numpy as np
 import json
 
-from Organizacion import Organizacion
 
 UsuPerm = db.Table('UsuPerm', db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True), db.Column('id_permiso', db.Integer, db.ForeignKey('permiso.id_permiso'), primary_key=True))
 
@@ -243,25 +242,25 @@ def eliminaUsuarioOrg(organizacion_id, usuario_id):
 
 
 # API Permiso-Usuario
-@app.route('/api/v1.0/permisos/<int:permiso_id>/usuarios/', methods=['GET'])
-def muestraPermisosUsu(permiso_id):
-    from Permiso import Permiso
-    permiso = Permiso().get_permiso(permiso_id)
+#@app.route('/api/v1.0/permisos/<int:permiso_id>/usuarios/', methods=['GET'])
+#def muestraPermisosUsu(permiso_id):
+#    from Permiso import Permiso
+#    permiso = Permiso().get_permiso(permiso_id)
 
-    if(permiso):
-        usuarios = Usuario().get_peticion_usuarios(permiso_id)
-        estructura = []
+ #   if(permiso):
+ #       usuarios = Usuario().get_peticion_usuarios(permiso_id)
+ #       estructura = []
 
-        for usuario in usuarios:
-            estructura.append({
-                "id_usuario": usuario.id_usuario,
-                "nombre": usuario.nombre,
-                "apellidos": usuario.apellidos
-            })
+ #       for usuario in usuarios:
+ #           estructura.append({
+  #              "id_usuario": usuario.id_usuario,
+   #             "nombre": usuario.nombre,
+   #             "apellidos": usuario.apellidos
+    #        })
 
-        return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
+     #   return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
 
-    else:
-        abort(404)
+    #else:
+     #   abort(404)
 
 

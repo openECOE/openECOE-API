@@ -1,9 +1,6 @@
 from db import db
 from db import app
 import numpy as np
-from flask import jsonify, request
-import json
-from werkzeug.exceptions import abort, Response
 
 from Estacion import Estacion
 

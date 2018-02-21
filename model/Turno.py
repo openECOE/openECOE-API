@@ -12,9 +12,8 @@ from Dia import Dia
 class Turno(db.Model):
     id_turno = db.Column(db.Integer, primary_key=True)
     hora_inicio = db.Column(db.Integer)
-
-    # TODO hacer que ruedas sea relationship
-    ruedas = db.Column(db.Integer)
+    id_dia = db.Column(db.Integer, db.ForeignKey('dia.id_dia'))
+    ruedas = db.relationship('Rueda', backref='ruedas', lazy='dynamic')
 
     def __init__(self, hora_inicio, ruedas):
         self.hora_inicio = hora_inicio

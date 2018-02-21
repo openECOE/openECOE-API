@@ -12,9 +12,7 @@ from Turno import Turno
 class Rueda(db.Model):
     id_rueda = db.Column(db.Integer, primary_key=True)
     descripcion = db.Column(db.String(500))
-
-    # TODO hacer que alumnos sea relationship
-    alumnos = db.Column(db.Integer)
+    id_turno = db.Column(db.Integer, db.ForeignKey('turno.id_turno'))
 
     def __init__(self, descripcion, alumnos):
         self.descripcion = descripcion

@@ -8,8 +8,6 @@ from werkzeug.exceptions import abort, Response
 from flask import jsonify, request
 
 
-from ECOE import ECOE
-
 OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
 
 
@@ -18,12 +16,9 @@ class Organizacion(db.Model):
     nombre = db.Column(db.String(255))
     usuarios = db.relationship('Usuario', secondary=OrgUsu, lazy ='subquery', backref=db.backref('usuarios', lazy = 'dynamic'))
     ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
-    #ecoes = db.relationship('ECOE', backref='ecoes', lazy='dynamic')
 
-    def __init__(self, nombre='', usuarios=[]):
+    def __init__(self, nombre=''):
         self.nombre = nombre
-        self.usuarios = usuarios
-       # self.ecoes = ecoes
 
     def get_organizacion_ids(self):
         ids = Organizacion.query.with_entities(Organizacion.id_organizacion).all()
@@ -165,24 +160,24 @@ def eliminaOrganizacion(organizacion_id):
 
 
 #Rutas de Usuarios-Organizacion
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
-def muestraOrganizacionesUsu(usuario_id):
-    from Usuario import Usuario
-    usuario = Usuario().get_usuario(usuario_id)
-    if(usuario):
-        organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
-        estructura = []
+#@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
+#def muestraOrganizacionesUsu(usuario_id):
+ #   from Usuario import Usuario
+  #  usuario = Usuario().get_usuario(usuario_id)
+   # if(usuario):
+#        organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
+ #       estructura = []
 
-        for organizacion in organizaciones:
-            estructura.append({
-                "id_organizacion": organizacion.id_organizacion,
-                "nombre": organizacion.nombre,
-            })
+  #      for organizacion in organizaciones:
+   #         estructura.append({
+    #            "id_organizacion": organizacion.id_organizacion,
+     #           "nombre": organizacion.nombre,
+      #      })
 
-        return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
+       # return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
 
-    else:
-        abort(404)
+    #else:
+     #   abort(404)
 
 
 

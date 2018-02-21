@@ -7,7 +7,7 @@ from werkzeug.exceptions import abort, Response
 import numpy as np
 import json
 
-from Usuario import Usuario
+
 
 class Permiso(db.Model):
     id_permiso = db.Column(db.Integer, primary_key=True)

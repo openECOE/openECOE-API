@@ -5,7 +5,7 @@ from flask import jsonify, request
 import json
 from werkzeug.exceptions import abort, Response
 
-from Organizacion import Organizacion
+#from Organizacion import Organizacion
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -169,67 +169,5 @@ def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
     else:
         abort(404)
 
-
-
-
-
-#RUTAS DE DIA (En desarrollo)
-
-#No esta la ruta para visualizar todos los dias
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['GET'])
-def muestraDia(dia_id):
-    ecoe = ECOE().get_ECOE()
-
-    if(ecoe):
-
-
-        return "AAAAAAAA"
-
-    else:
-        abort(404)
-
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias', methods=['POST'])
-def insertaDia(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        value = request.json
-        fecha = value["fecha"]
-
-        diaIn = Dia(fecha=fecha, id_ecoe=ecoe_id)
-        diaIn.post_dia()
-
-        dia = Dia().get_ult_dia()
-
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['PUT'])
-def modificaDia(dia_id):
-    dia = Dia().get_dia(dia_id)
-
-    if(dia):
-        value = request.json
-        fecha = value["fecha"]
-
-        dia.put_dia(fecha)
-
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>', methods=['DELETE'])
-def eliminaDia(dia_id):
-    dia = Dia().get_dia(dia_id)
-
-    if(dia):
-        dia.delete_dia()
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha})
-    else:
-        abort(404)
 
 

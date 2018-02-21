@@ -7,6 +7,7 @@ from werkzeug.exceptions import abort, Response
 
 from ECOE import ECOE
 
+
 class Estacion(db.Model):
     id_estacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
