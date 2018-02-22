@@ -1,14 +1,16 @@
 from ws import db
-from model import Cronometro
+from model import Area, Alumno, Estacion, Dia, Cronometro
+
+ecoeCrono = db.Table('ecoeCrono', db.Column('id_ecoe', db.Integer, db.ForeignKey('ECOE.id'), primary_key=True), db.Column('id_cronometro', db.Integer, db.ForeignKey('cronometro.id_cronometro'), primary_key=True))
 
 class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     areas = db.relationship('Area', backref='areas', lazy='dynamic')
     alumnos = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
+    cronometros = db.relationship('Cronometro', secondary=ecoeCrono, lazy='subquery', backref=db.backref('ecoesCro', lazy='dynamic'))
     estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
     dias = db.relationship('Dia', backref='dias', lazy='dynamic')
-    #cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
     id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
 
     def __init__(self, nombre='', id_organizacion=0):
@@ -67,7 +69,19 @@ class ECOE(db.Model):
                 return True
         return False
 
+    def existe_ecoe_cronometro(self, id_cronometro):
+        for cronometro in self.cronometros:
+            if(cronometro.id_cronometro==id_cronometro):
+                return True
+        return False
 
+    def put_ecoe_cronometro(self, cronometro):
+        self.cronometros.append(cronometro)
+        db.session.commit()
+
+    def delete_ecoe_cronometro(self, cronometro):
+        self.cronometros.remove(cronometro)
+        db.session.commit()
 
 
 

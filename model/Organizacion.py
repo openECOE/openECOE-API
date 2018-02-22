@@ -1,9 +1,7 @@
 from ws import db
-from model import Usuario
-from ECOE import ECOE
+from model import Usuario, ECOE
 
 OrgUsu = db.Table('OrgUsu', db.Column('id_organizacion', db.Integer, db.ForeignKey('organizacion.id_organizacion'), primary_key=True), db.Column('id_usuario', db.Integer, db.ForeignKey('usuario.id_usuario'), primary_key=True))
-
 
 class Organizacion(db.Model):
     id_organizacion = db.Column(db.Integer, primary_key=True)

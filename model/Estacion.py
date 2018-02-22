@@ -1,11 +1,14 @@
 from ws import db
+from model import Cronometro
+
+estCrono = db.Table('estCrono', db.Column('id_estacion', db.Integer, db.ForeignKey('estacion.id_estacion'), primary_key=True), db.Column('id_cronometro', db.Integer, db.ForeignKey('cronometro.id_cronometro'), primary_key=True))
 
 class Estacion(db.Model):
     id_estacion = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
     grupos = db.relationship('Grupo', backref='grupos', lazy='dynamic')
-    cronometros = db.relationship('Cronometro', backref='cronometros', lazy='dynamic')
+    cronometros = db.relationship('Cronometro', secondary=estCrono, lazy='subquery', backref=db.backref('estCro', lazy='dynamic'))
 
     def __init__(self, nombre='', id_ecoe='', grupos=[], cronometros=[]):
         self.nombre = nombre
@@ -50,4 +53,11 @@ class Estacion(db.Model):
                 return True
         return False
 
+    def put_estacion_cronometro(self, cronometro):
+        self.cronometros.append(cronometro)
+        db.session.commit()
+
+    def delete_estacion_cronometro(self, cronometro):
+        self.cronometros.remove(cronometro)
+        db.session.commit()
 

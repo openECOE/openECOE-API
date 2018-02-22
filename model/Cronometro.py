@@ -1,19 +1,19 @@
 from  ws import db
 
+
+CronoEst = db.Table('CronoEst', db.Column('id_cronometro', db.Integer, db.ForeignKey('cronometro.id_cronometro'), primary_key=True), db.Column('id_estacion', db.Integer, db.ForeignKey('estacion.id_estacion'), primary_key=True))
+
 class Cronometro(db.Model):
     id_cronometro = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(255))
     tiempo_total = db.Column(db.Integer)
-    id_estacion = db.Column(db.Integer, db.ForeignKey('estacion.id_estacion'))
     alarmas = db.relationship('Alarma', backref='alarmas', lazy='dynamic')
 
-    def __init__(self, nombre='', tiempo_total=0, id_estacion=0):
+
+
+    def __init__(self, nombre='', tiempo_total=0):
         self.nombre = nombre
         self.tiempo_total = tiempo_total
-        self.id_estacion = id_estacion
-
-
-        #self.alarmas = alarmas
 
     def get_cronometro(self, id):
         cronometro = Cronometro.query.filter_by(id_cronometro=id).first()
@@ -32,10 +32,10 @@ class Cronometro(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def put_cronometro(self, nombre, tiempo_total, id_estacion):
+    def put_cronometro(self, nombre, tiempo_total):
         self.nombre = nombre
         self.tiempo_total = tiempo_total
-        self.id_estacion = id_estacion
+
         db.session.commit()
 
 
@@ -43,11 +43,10 @@ class Cronometro(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+
     def existe_cronometro_alarma(self, id_alarma):
         for alarma in self.alarmas:
             if(alarma.id_alarma==id_alarma):
                 return True
         return False
-
-
 
