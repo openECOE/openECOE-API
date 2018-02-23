@@ -1,14 +1,14 @@
-from ws import db
+from ws import db, datetime
 
 class Dia(db.Model):
     id_dia = db.Column(db.Integer, primary_key=True)
-    fecha = db.Column(db.Integer)
+    fecha = db.Column(db.Date)
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
     turnos = db.relationship('Turno', backref='turnos', lazy='dynamic')
 
-    def __init__(self, fecha, turnos):
+    def __init__(self, fecha='', id_ecoe=0):
         self.fecha = fecha
-        self.turnos = turnos
+        self.id_ecoe = id_ecoe
 
     def get_dia(self, id):
         dia = Dia.query.filter_by(id_dia=id).first()
@@ -26,11 +26,13 @@ class Dia(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def put_dia(self, fecha):
+    def put_dia(self, fecha, id_ecoe):
+
         self.fecha = fecha
+        self.id_ecoe = id_ecoe
+
         db.session.commit()
 
     def delete_dia(self):
         db.session.delete(self)
         db.session.commit()
-

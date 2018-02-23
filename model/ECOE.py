@@ -75,6 +75,12 @@ class ECOE(db.Model):
                 return True
         return False
 
+    def existe_ecoe_dias(self, id_dia):
+        for dia in self.dias:
+            if(dia.id_dia == id_dia):
+                return True
+        return False
+
     def put_ecoe_cronometro(self, cronometro):
         self.cronometros.append(cronometro)
         db.session.commit()

@@ -1,6 +1,7 @@
 from ws import *
 from model import Organizacion, ECOE
 
+
 #Rutas de Organizacion-ECOE
 @app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['GET'])
 def muestraEcoesOrganizacion(organizacion_id):
