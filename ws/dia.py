@@ -1,6 +1,5 @@
 from ws import *
 from model import ECOE, Dia
-import datetime
 
 # RUTAS DE DIA
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/', methods=['GET'])
@@ -65,14 +64,14 @@ def modificaDia(ecoe_id, dia_id):
 
     if (ecoe):
         if (ecoe.existe_ecoe_dias(dia_id) == False):
-            abort(400)
+            abort(404)
 
         dia = Dia().get_dia(dia_id)
 
         value = request.json
 
         if ((not request.json) or (not "fecha" in request.json) or (not "id_ecoe" in request.json)):
-            abort(403)
+            abort(400)
 
         fecha = value["fecha"]
         id_ecoe = value["id_ecoe"]

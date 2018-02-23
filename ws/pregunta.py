@@ -1,5 +1,5 @@
 from ws import *
-from model import Grupo, Area
+from model import Grupo, Area, Pregunta
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['GET'])
 def obtenPreguntas(grupo_id):

@@ -51,25 +51,23 @@ class Pregunta(db.Model):
 
     def existe_pregunta_id_ecoe(self, id_area):
         return True
-        #from Estacion import Estacion
-        #from Area import Area
 
-        #area = Area().get_area(id_area)
+        area = Area().get_area(id_area)
 
-      #  if(area):
-       #     id_ecoe_new = area.id_ecoe
+        if(area):
+            id_ecoe_new = area.id_ecoe
 
-        #    grupo = Grupo().get_grupo(self.id_grupo)
-         #   estacion = Estacion().get_estacion(grupo.id_estacion)
-          #  id_ecoe_old = estacion.id_ecoe
+            grupo = Grupo().get_grupo(self.id_grupo)
+            estacion = Estacion().get_estacion(grupo.id_estacion)
+            id_ecoe_old = estacion.id_ecoe
 
-           # if(id_ecoe_new==id_ecoe_old):
-            #    return True
-            #else:
-             #   return False
+            if(id_ecoe_new==id_ecoe_old):
+                return True
+            else:
+                return False
 
-      #  else:
-       #     return False
+        else:
+            return False
 
     def put_pregunta_area(self, id_area):
         self.id_area = id_area

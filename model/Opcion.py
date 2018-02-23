@@ -34,4 +34,3 @@ class Opcion(db.Model):
     def delete_opcion(self):
         db.session.delete(self)
         db.session.commit()
-

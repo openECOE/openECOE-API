@@ -2,13 +2,13 @@ from ws import *
 
 class Turno(db.Model):
     id_turno = db.Column(db.Integer, primary_key=True)
-    hora_inicio = db.Column(db.Integer)
+    hora_inicio = db.Column(db.TIME)
     id_dia = db.Column(db.Integer, db.ForeignKey('dia.id_dia'))
     ruedas = db.relationship('Rueda', backref='ruedas', lazy='dynamic')
 
-    def __init__(self, hora_inicio, ruedas):
+    def __init__(self, hora_inicio="00:00", id_dia=0):
         self.hora_inicio = hora_inicio
-        self.ruedas = ruedas
+        self.id_dia = id_dia
 
     def get_turno(self, id):
         turno = Turno.query.filter_by(id_turno = id).first()
@@ -26,8 +26,10 @@ class Turno(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def put_turno(self, hora_inicio):
+    def put_turno(self, hora_inicio="00:00", id_dia=0):
         self.hora_inicio = hora_inicio
+        self.id_dia = id_dia
+
         db.session.commit()
 
 

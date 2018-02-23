@@ -36,3 +36,9 @@ class Dia(db.Model):
     def delete_dia(self):
         db.session.delete(self)
         db.session.commit()
+
+    def existe_dia_turno(self, id_turno):
+        for turno in self.turnos:
+            if(turno.id_turno == id_turno):
+                return True
+        return False
