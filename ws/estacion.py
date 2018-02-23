@@ -45,7 +45,9 @@ def insertaEstacion(ecoe_id):
 
         nombre = value["nombre"]
 
-        estacionIn = Estacion(nombre, ecoe_id)
+        cronometros = ecoe.cronometros
+
+        estacionIn = Estacion(nombre, ecoe_id, cronometros)
         estacionIn.post_estacion()
 
         estacion = Estacion().get_ult_estacion()

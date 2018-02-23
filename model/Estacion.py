@@ -10,10 +10,9 @@ class Estacion(db.Model):
     grupos = db.relationship('Grupo', backref='grupos', lazy='dynamic')
     cronometros = db.relationship('Cronometro', secondary=estCrono, lazy='subquery', backref=db.backref('estCro', lazy='dynamic'))
 
-    def __init__(self, nombre='', id_ecoe='', grupos=[], cronometros=[]):
+    def __init__(self, nombre='', id_ecoe='', cronometros=[]):
         self.nombre = nombre
         self.id_ecoe = id_ecoe
-        self.grupos = grupos
         self.cronometros = cronometros
 
     def get_estacion(self, id):
