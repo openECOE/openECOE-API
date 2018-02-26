@@ -37,3 +37,8 @@ class Turno(db.Model):
         db.session.delete(self)
         db.session.commit()
 
+    def existe_turno_rueda(self, id_rueda):
+        for rueda in self.ruedas:
+            if(rueda.id_rueda == id_rueda):
+                return True
+        return False

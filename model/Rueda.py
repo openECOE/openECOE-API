@@ -5,9 +5,9 @@ class Rueda(db.Model):
     descripcion = db.Column(db.String(500))
     id_turno = db.Column(db.Integer, db.ForeignKey('turno.id_turno'))
 
-    def __init__(self, descripcion, alumnos):
+    def __init__(self, descripcion="", id_turno=0):
         self.descripcion = descripcion
-        self.alumnos = alumnos
+        self.id_turno = id_turno
 
     def get_rueda(self, id):
         rueda = Rueda.query.filter_by(id_rueda=id).first()
@@ -25,8 +25,10 @@ class Rueda(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def put_rueda(self, descripcion):
+    def put_rueda(self, descripcion, id_turno):
         self.descripcion = descripcion
+        self.id_turno = id_turno
+
         db.session.commit()
 
     def delete_rueda(self):

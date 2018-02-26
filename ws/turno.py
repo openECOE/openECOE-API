@@ -11,7 +11,7 @@ def muestraTurnos(dia_id):
 
         for turno in dia.turnos:
             turnos.append({
-                "id_dia": turno.id_turno,
+                "id_turno": turno.id_turno,
                 "hora_inicio": turno.hora_inicio.strftime("%H:%M")
             })
 
