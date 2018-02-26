@@ -11,7 +11,7 @@ def obtenPreguntas(grupo_id):
             preguntas.append({
                 "id_pregunta" : pregunta.id_pregunta,
                 "ref" : pregunta.ref,
-                "tipo_pregunta" : pregunta.tipo_pregunta
+                "tipo_opcion" : pregunta.tipo_opcion
             })
 
         return json.dumps(preguntas, indent=1, ensure_ascii=False).encode('utf8')
@@ -26,7 +26,7 @@ def obtenPregunta(grupo_id, pregunta_id):
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
             pregunta = Pregunta().get_pregunta(pregunta_id)
-            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_pregunta" : pregunta.tipo_pregunta})
+            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_opcion" : pregunta.tipo_opcion})
         else:
             abort(404)
 
@@ -41,18 +41,18 @@ def insertaPregunta(grupo_id):
     if (grupo):
         value = request.json
 
-        if ((not request.json) or (not "ref" in request.json) or (not "tipo_pregunta" in request.json)):
+        if ((not request.json) or (not "ref" in request.json) or (not "tipo_opcion" in request.json)):
             abort(400)
 
         ref = value["ref"]
-        tipo_pregunta = value["tipo_pregunta"]
+        tipo_opcion = value["tipo_opcion"]
 
-        preguntaIn = Pregunta(ref, tipo_pregunta, grupo_id)
+        preguntaIn = Pregunta(ref, tipo_opcion, grupo_id)
         preguntaIn.post_pregunta()
 
         pregunta = Pregunta().get_ult_pregunta()
 
-        return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_pregunta": pregunta.tipo_pregunta})
+        return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_opcion": pregunta.tipo_opcion})
 
     else:
         abort(404)
@@ -66,17 +66,17 @@ def modificaPregunta(grupo_id, pregunta_id):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
             value = request.json
 
-            if ((not request.json) or (not "ref" in request.json) or (not "tipo_pregunta" in request.json) or (not "id_grupo" in request.json)):
+            if ((not request.json) or (not "ref" in request.json) or (not "tipo_opcion" in request.json) or (not "id_grupo" in request.json)):
                 abort(400)
 
             ref = value["ref"]
-            tipo_pregunta = value["tipo_pregunta"]
+            tipo_opcion = value["tipo_opcion"]
             id_grupo = value["id_grupo"]
 
             pregunta = Pregunta().get_pregunta(pregunta_id)
-            pregunta.put_pregunta(ref, tipo_pregunta, id_grupo)
+            pregunta.put_pregunta(ref, tipo_opcion, id_grupo)
 
-            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_pregunta" : pregunta.tipo_pregunta})
+            return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_opcion" : pregunta.tipo_opcion})
         else:
             abort(404)
 
@@ -93,7 +93,7 @@ def eliminaPregunta(grupo_id, pregunta_id):
             pregunta = Pregunta().get_pregunta(pregunta_id)
             pregunta.delete_pregunta()
 
-            return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_pregunta": pregunta.tipo_pregunta})
+            return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_opcion": pregunta.tipo_opcion})
         else:
             abort(404)
 

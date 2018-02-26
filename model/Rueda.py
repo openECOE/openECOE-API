@@ -1,9 +1,11 @@
 from ws import db
+from model import Alumno
 
 class Rueda(db.Model):
     id_rueda = db.Column(db.Integer, primary_key=True)
     descripcion = db.Column(db.String(500))
     id_turno = db.Column(db.Integer, db.ForeignKey('turno.id_turno'))
+    alumnos = db.relationship('Alumno', backref='alumnosRueda', lazy='dynamic')
 
     def __init__(self, descripcion="", id_turno=0):
         self.descripcion = descripcion
@@ -34,5 +36,11 @@ class Rueda(db.Model):
     def delete_rueda(self):
         db.session.delete(self)
         db.session.commit()
+
+    def existe_rueda_alumno(self, id_alumno):
+        for alumno in self.alumnos:
+            if(alumno.id_alumno==id_alumno):
+                return True
+        return False
 
 

@@ -1,4 +1,5 @@
 from ws import db
+from model import Area, Opcion
 
 class Pregunta(db.Model):
     id_pregunta = db.Column(db.Integer, primary_key=True)
@@ -6,15 +7,12 @@ class Pregunta(db.Model):
     id_area = db.Column(db.Integer, db.ForeignKey('area.id_area'))
     area = db.relationship('Area', backref='area')
     ref = db.Column(db.String(255))
-    tipo_opcion = db.Column(db.Integer)
+    tipo_opcion = db.Column(db.String(500))
+    opciones = db.relationship('Opcion', backref='opciones', lazy='dynamic')
 
-
-    #area_pregunta = db.Column(db.Integer)
-    #opciones = db.Column(db.Integer)
-
-    def __init__(self, referencia='', tipo_pregunta='', id_grupo=0):
+    def __init__(self, referencia='', tipo_opcion='', id_grupo=0):
         self.ref = referencia
-        self.tipo_pregunta = tipo_pregunta
+        self.tipo_opcion = tipo_opcion
         self.id_grupo = id_grupo
 
     def get_pregunta(self, id):
@@ -68,6 +66,12 @@ class Pregunta(db.Model):
 
         else:
             return False
+
+    def existe_pregunta_opcion(self, id_opcion):
+        for opcion in self.opciones:
+            if(opcion.id_opcion==id_opcion):
+                return True
+        return False
 
     def put_pregunta_area(self, id_area):
         self.id_area = id_area

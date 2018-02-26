@@ -5,6 +5,7 @@ class Alumno(db.Model):
     nombre = db.Column(db.String(255))
     dni = db.Column(db.String(25))
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
+    id_rueda = db.Column(db.Integer, db.ForeignKey('rueda.id_rueda'))
 
     def __init__(self, nombre='', dni='', id_ecoe=0):
         self.nombre = nombre
@@ -25,9 +26,17 @@ class Alumno(db.Model):
         self.id_ecoe = id_ecoe
         db.session.commit()
 
+    def put_alumno_id_rueda(self, id_rueda):
+        self.id_rueda = id_rueda
+
+        db.session.commit()
 
     def delete_alumno(self):
         db.session.delete(self)
+        db.session.commit()
+
+    def delete_alumno_id_rueda(self):
+        self.id_rueda = None
         db.session.commit()
 
     def get_ult_alumno(self):
@@ -37,4 +46,3 @@ class Alumno(db.Model):
         alumno = alumnos[numAlumnos-1]
 
         return alumno
-

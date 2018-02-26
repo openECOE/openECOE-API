@@ -85,7 +85,6 @@ def modificaRueda(turno_id, rueda_id):
 def eliminaRueda(turno_id, rueda_id):
     turno = Turno().get_turno(turno_id)
 
-
     if(turno):
         if (turno.existe_turno_rueda(rueda_id) == False):
             abort(404)

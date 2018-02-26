@@ -2,62 +2,93 @@ from ws import *
 from model import Pregunta, Opcion
 
 #RUTAS DE OPCION
-@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>', methods=['GET'])
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/', methods=['GET'])
+def muestraOpciones(pregunta_id):
+    pregunta = Pregunta().get_pregunta(pregunta_id)
+
+    if (pregunta):
+        opciones = []
+        for opcion in pregunta.opciones:
+            opciones.append({
+                "id_opcion" : opcion.id_opcion,
+                "puntos" : opcion.puntos,
+                "descripcion" : opcion.descripcion
+            })
+
+        return json.dumps(opciones, indent=1, ensure_ascii=False).encode('utf8')
+    else:
+        abort(404)
+
+
+
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['GET'])
 def muestraOpcion(pregunta_id, opcion_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
-    opcion = Opcion().get_opcion(opcion_id)
 
     if(pregunta):
+        if(pregunta.existe_pregunta_opcion(opcion_id)==False):
+            abort(404)
+
+        opcion = Opcion().get_opcion(opcion_id)
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
 
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones', methods=['POST'])
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/', methods=['POST'])
 def insertaOpcion(pregunta_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
 
     if(pregunta):
         value = request.json
         if ((not request.json) or (not "puntos" in request.json) or (not "descripcion" in request.json)):
+            abort(400)
+        puntos = value["puntos"]
+        descripcion = value["descripcion"]
 
-            puntos = value["puntos"]
-            descripcion = value["descripcion"]
+        opcionIn = Opcion(puntos=puntos, descripcion=descripcion, id_pregunta=pregunta_id)
+        opcionIn.post_opcion()
 
-            opcionIn = Opcion(puntos=puntos, descripcion=descripcion)
-            opcionIn.post_opcion()
-
-            opcion = Opcion().get_ult_opcion()
+        opcion = Opcion().get_ult_opcion()
 
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>', methods=['PUT'])
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['PUT'])
 def modificaOpcion(pregunta_id, opcion_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
-    opcion = Opcion().get_opcion(opcion_id)
 
     if(pregunta):
         value = request.json
         if ((not request.json) or (not "puntos" in request.json) or (not "descripcion" in request.json)):
+            abort(400)
 
-            puntos = value["puntos"]
-            descripcion = value["descripcion"]
+        puntos = value["puntos"]
+        descripcion = value["descripcion"]
+        id_pregunta = value["id_pregunta"]
 
-            opcion.put_opcion(puntos, descripcion)
+        if(pregunta.existe_pregunta_opcion(opcion_id) == False):
+            abort(400)
+
+        opcion = Opcion().get_opcion(opcion_id)
+        opcion.put_opcion(puntos, descripcion, id_pregunta)
 
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estaciones/<int:estacion_id>/grupos/<int:grupo_id>/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>', methods=['DELETE'])
+@app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['DELETE'])
 def eliminaOpcion(pregunta_id, opcion_id):
     pregunta = Pregunta().get_pregunta(pregunta_id)
-    opcion = Opcion().get_opcion(opcion_id)
 
-    if(opcion):
+    if(pregunta):
+        if(pregunta.existe_pregunta_opcion(opcion_id) == False):
+            abort(404)
+
+        opcion = Opcion().get_opcion(opcion_id)
         opcion.delete_opcion()
+
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
     else:
         abort(404)

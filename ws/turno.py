@@ -24,10 +24,12 @@ def muestraTurnos(dia_id):
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['GET'])
 def muestraTurno(dia_id, turno_id):
     dia = Dia().get_dia(dia_id)
-    turno = Turno().get_turno(turno_id)
-
 
     if(dia):
+        if(dia.existe_dia_turno(turno_id) == False):
+            abort(404)
+
+        turno = Turno().get_turno(turno_id)
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
 
     else:
