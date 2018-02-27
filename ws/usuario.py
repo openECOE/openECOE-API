@@ -2,7 +2,7 @@ from ws import *
 from model import Usuario, Organizacion, Permiso
 
 #API Usuario
-@app.route('/api/v1.0/usuarios/', methods=['GET'])
+@app.route('/api/v1.0/user/', methods=['GET'])
 def muestraUsuarios():
     usuarios = []
 
@@ -15,7 +15,7 @@ def muestraUsuarios():
 
     return json.dumps(usuarios, indent=1, ensure_ascii=False).encode('utf8')
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['GET'])
+@app.route('/api/v1.0/user/<int:usuario_id>/', methods=['GET'])
 def muestraUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -24,7 +24,7 @@ def muestraUsuario(usuario_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/usuarios/', methods=['POST'])
+@app.route('/api/v1.0/user/', methods=['POST'])
 def insertaUsuario():
     value = request.json
 
@@ -41,7 +41,7 @@ def insertaUsuario():
     return jsonify({"id": usuario.id_usuario, "nombre": usuario.nombre, "apellidos" : usuario.apellidos})
 
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['PUT'])
+@app.route('/api/v1.0/user/<int:usuario_id>/', methods=['PUT'])
 def actualizaUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -63,7 +63,7 @@ def actualizaUsuario(usuario_id):
       abort(404)
 
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/user/<int:usuario_id>/', methods=['DELETE'])
 def eliminaUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -75,7 +75,7 @@ def eliminaUsuario(usuario_id):
 
 
 #Rutas de Organizacion-Usuarios
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['GET'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/user/', methods=['GET'])
 def muestraUsuariosOrg(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -94,7 +94,7 @@ def muestraUsuariosOrg(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['GET'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/user/<int:usuario_id>/', methods=['GET'])
 def muestraUsuarioOrg(organizacion_id, usuario_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -108,7 +108,7 @@ def muestraUsuarioOrg(organizacion_id, usuario_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/', methods=['POST'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/user/', methods=['POST'])
 def insertaUsuarioOrg(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -133,7 +133,7 @@ def insertaUsuarioOrg(organizacion_id):
 
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['PUT'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/user/<int:usuario_id>/', methods=['PUT'])
 def anyadeUsuarioOrg(organizacion_id, usuario_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -150,7 +150,7 @@ def anyadeUsuarioOrg(organizacion_id, usuario_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/usuarios/<int:usuario_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/user/<int:usuario_id>/', methods=['DELETE'])
 def eliminaUsuarioOrg(organizacion_id, usuario_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
     if(organizacion):
@@ -167,7 +167,7 @@ def eliminaUsuarioOrg(organizacion_id, usuario_id):
 
 
 #API Permiso-Usuario
-@app.route('/api/v1.0/permisos/<int:permiso_id>/usuarios/', methods=['GET'])
+@app.route('/api/v1.0/permission/<int:permiso_id>/user/', methods=['GET'])
 def muestraPermisosUsu(permiso_id):
 
     permiso = Permiso().get_permiso(permiso_id)

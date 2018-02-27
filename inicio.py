@@ -6,7 +6,7 @@ from ws import usuario
 from ws import permiso
 from ws import ecoe
 from ws import area
-from ws import alumno
+from ws import alarma
 from ws import estacion
 from ws import grupo
 from ws import pregunta

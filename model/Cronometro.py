@@ -1,5 +1,5 @@
 from  ws import db
-
+from model import Alarma
 
 CronoEst = db.Table('CronoEst', db.Column('id_cronometro', db.Integer, db.ForeignKey('cronometro.id_cronometro'), primary_key=True), db.Column('id_estacion', db.Integer, db.ForeignKey('estacion.id_estacion'), primary_key=True))
 

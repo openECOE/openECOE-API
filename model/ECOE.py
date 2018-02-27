@@ -51,11 +51,6 @@ class ECOE(db.Model):
         db.session.delete(self)
         db.session.commit()
 
-    def existe_ecoe_area(self, id_area):
-        for area in self.areas:
-            if(area.id_area==id_area):
-                return True
-        return False
 
     def existe_ecoe_alumno(self, id_alumno):
         for alumno in self.alumnos:

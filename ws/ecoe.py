@@ -3,7 +3,7 @@ from model import Organizacion, ECOE
 
 
 #Rutas de Organizacion-ECOE
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['GET'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/', methods=['GET'])
 def muestraEcoesOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -22,7 +22,7 @@ def muestraEcoesOrganizacion(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
 def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -36,7 +36,7 @@ def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/', methods=['POST'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/', methods=['POST'])
 def creaEcoeOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
     if(organizacion):
@@ -55,7 +55,7 @@ def creaEcoeOrganizacion(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
 def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -81,7 +81,7 @@ def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
 
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
 def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 

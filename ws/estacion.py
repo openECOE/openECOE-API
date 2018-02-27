@@ -1,8 +1,17 @@
 from ws import *
 from model import ECOE, Estacion
 
+def existEcoeAStation(station, ecoe_id):
+    if(station):
+        if(station.id_ecoe == ecoe_id):
+            return True
+        else:
+            return False
+    else:
+        return False
+
 #Relacion ECOE-Estacion
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/', methods=['GET'])
 def obtenEstaciones(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -18,7 +27,7 @@ def obtenEstaciones(ecoe_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<int:estacion_id>/', methods=['GET'])
 def obtenEstacion(ecoe_id, estacion_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -33,7 +42,7 @@ def obtenEstacion(ecoe_id, estacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/', methods=['POST'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/', methods=['POST'])
 def insertaEstacion(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -56,7 +65,7 @@ def insertaEstacion(ecoe_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['PUT'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<int:estacion_id>/', methods=['PUT'])
 def modificaEstacion(ecoe_id, estacion_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -81,7 +90,7 @@ def modificaEstacion(ecoe_id, estacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/estacion/<int:estacion_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<int:estacion_id>/', methods=['DELETE'])
 def eliminaEstacion(ecoe_id, estacion_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 

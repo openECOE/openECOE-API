@@ -1,8 +1,17 @@
 from ws import *
 from model import ECOE, Alumno, Rueda, Turno, Dia
 
+def existEcoeStudent(alumno, ecoe_id):
+    if(alumno):
+        if(alumno.id_ecoe == ecoe_id):
+            return True
+        else:
+            return False
+    else:
+        return False
+
 #Relacion ECOE-Alumno
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/', methods=['GET'])
 def obtenAlumnos(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -20,22 +29,18 @@ def obtenAlumnos(ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['GET'])
 def obtenAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+    alumno = Alumno().get_alumno(alumno_id)
 
-    if(ecoe):
-        if(ecoe.existe_ecoe_alumno(alumno_id)):
-            alumno = Alumno().get_alumno(alumno_id)
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni" : alumno.dni})
-        else:
-            abort(404)
-
-    else:
+    if(existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
 
+    return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni" : alumno.dni})
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/', methods=['POST'])
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/', methods=['POST'])
 def insertaAlumno(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -59,53 +64,40 @@ def insertaAlumno(ecoe_id):
 
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['PUT'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['PUT'])
 def modificaAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if (ecoe):
-        if (ecoe.existe_ecoe_alumno(alumno_id)):
-            value = request.json
-
-            if ((not request.json) or (not "nombre" in request.json)  or (not "dni" in request.json) or (not "id_ecoe" in request.json)):
-                abort(400)
-
-            nombre = value["nombre"]
-            dni = value["dni"]
-            id_ecoe = value["id_ecoe"]
-
-            alumno = Alumno().get_alumno(alumno_id)
-            alumno.put_alumno(nombre, dni, id_ecoe)
-
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
-        else:
-            abort(404)
-
-    else:
+    alumno = Alumno().get_alumno(alumno_id)
+    if (existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
 
+    value = request.json
+
+    if ((not request.json) or (not "nombre" in request.json)  or (not "dni" in request.json) or (not "id_ecoe" in request.json)):
+        abort(400)
+
+    nombre = value["nombre"]
+    dni = value["dni"]
+    id_ecoe = value["id_ecoe"]
+
+    alumno.put_alumno(nombre, dni, id_ecoe)
+
+    return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
 
 
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/alumno/<int:alumno_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['DELETE'])
 def eliminaAlumno(ecoe_id, alumno_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+    alumno = Alumno().get_alumno(alumno_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_alumno(alumno_id)):
-            alumno = Alumno().get_alumno(alumno_id)
-            alumno.delete_alumno()
-
-            return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
-        else:
-            abort(404)
-
-    else:
+    if (existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
+
+    alumno.delete_alumno()
+    return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
+
 
 #Rutas Rueda-Alumno
 # RUTAS DE TURNO
-@app.route('/api/v1.0/ruedas/<int:rueda_id>/alumno/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/<int:dia_id>//round/<int:rueda_id>/student/', methods=['GET'])
 def muestraAlumnosRueda(rueda_id):
     rueda = Rueda().get_rueda(rueda_id)
 
@@ -126,7 +118,7 @@ def muestraAlumnosRueda(rueda_id):
 
 
 # RUTAS DE Rueda-Alumno
-@app.route('/api/v1.0/ruedas/<int:rueda_id>/alumno/<int:alumno_id>/', methods=['GET'])
+@app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['GET'])
 def muestraAlumnoRueda(rueda_id, alumno_id):
     rueda = Rueda().get_rueda(rueda_id)
 
@@ -143,7 +135,7 @@ def muestraAlumnoRueda(rueda_id, alumno_id):
 
 
 
-@app.route('/api/v1.0/ruedas/<int:rueda_id>/alumno/<int:alumno_id>/', methods=['PUT'])
+@app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['PUT'])
 def modificaAlumnoRueda(rueda_id, alumno_id):
     rueda = Rueda().get_rueda(rueda_id)
     if (rueda==False):
@@ -164,7 +156,7 @@ def modificaAlumnoRueda(rueda_id, alumno_id):
     return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
 
 
-@app.route('/api/v1.0/ruedas/<int:rueda_id>/alumno/<int:alumno_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['DELETE'])
 def eliminaAlumnoRueda(rueda_id, alumno_id):
     rueda = Rueda().get_rueda(rueda_id)
     if (rueda == False):

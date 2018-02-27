@@ -1,7 +1,7 @@
 from ws import *
 from model import Permiso, Usuario
 
-@app.route('/api/v1.0/permisos/', methods=['GET'])
+@app.route('/api/v1.0/permission/', methods=['GET'])
 def muestraPermisos():
     permisos = []
 
@@ -16,7 +16,7 @@ def muestraPermisos():
 
     return json.dumps(permisos, indent=1, ensure_ascii=False).encode('utf8')
 
-@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['GET'])
+@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['GET'])
 def muestraPermiso(permiso_id):
     permiso = Permiso().get_permiso(permiso_id)
 
@@ -25,7 +25,7 @@ def muestraPermiso(permiso_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/permisos/', methods=['POST'])
+@app.route('/api/v1.0/permission/', methods=['POST'])
 def insertaPermiso():
     value = request.json
 
@@ -44,7 +44,7 @@ def insertaPermiso():
     return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
 
 
-@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['PUT'])
+@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['PUT'])
 def actualizaPermiso(permiso_id):
     permiso = Permiso().get_permiso(permiso_id)
 
@@ -67,7 +67,7 @@ def actualizaPermiso(permiso_id):
         abort(404)
 
 
-@app.route('/api/v1.0/permisos/<int:permiso_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['DELETE'])
 def eliminaPermiso(permiso_id):
     permiso = Permiso().get_permiso(permiso_id)
 
@@ -78,7 +78,7 @@ def eliminaPermiso(permiso_id):
         abort(404)
 
 #API Usuario-Permiso
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/permisos/', methods=['GET'])
+@app.route('/api/v1.0/user/<int:usuario_id>/permission/', methods=['GET'])
 def muestraPermisosUsuario(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -98,7 +98,7 @@ def muestraPermisosUsuario(usuario_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/permisos/<int:permiso_id>/', methods=['GET'])
+@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['GET'])
 def muestraUsuarioPerm(usuario_id, permiso_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -112,7 +112,7 @@ def muestraUsuarioPerm(usuario_id, permiso_id):
         abort(404)
 
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/permisos/', methods=['POST'])
+@app.route('/api/v1.0/user/<int:usuario_id>/permission/', methods=['POST'])
 def insertaUsuarioPerm(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -140,7 +140,7 @@ def insertaUsuarioPerm(usuario_id):
         abort(404)
 
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/permisos/<int:permiso_id>/', methods=['PUT'])
+@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['PUT'])
 def anyadeUsuarioPerm(usuario_id, permiso_id):
     usuario = Usuario().get_usuario(usuario_id)
 
@@ -158,7 +158,7 @@ def anyadeUsuarioPerm(usuario_id, permiso_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/permisos/<int:permiso_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['DELETE'])
 def eliminaUsuarioPerm(usuario_id, permiso_id):
     usuario = Usuario().get_usuario(usuario_id)
     if(usuario):

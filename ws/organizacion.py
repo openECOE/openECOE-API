@@ -2,7 +2,7 @@ from ws import *
 from model import Organizacion, Usuario
 
 #Rutas de Organizacion
-@app.route('/api/v1.0/organizacion/', methods=['GET'])
+@app.route('/api/v1.0/organization/', methods=['GET'])
 def muestraOrganizaciones():
     organizaciones = []
 
@@ -26,7 +26,7 @@ def muestraOrganizacion(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/', methods=['POST'])
+@app.route('/api/v1.0/organization/', methods=['POST'])
 def insertaOrganizacion():
     value = request.json
 
@@ -42,7 +42,7 @@ def insertaOrganizacion():
     return jsonify({"id": org.id_organizacion, "nombre": org.nombre})
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['PUT'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/', methods=['PUT'])
 def modificaOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -63,7 +63,7 @@ def modificaOrganizacion(organizacion_id):
         abort(404)
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['DELETE'])
+@app.route('/api/v1.0/organization/<int:organizacion_id>/', methods=['DELETE'])
 def eliminaOrganizacion(organizacion_id):
     organizacion = Organizacion().get_organizacion(organizacion_id)
 
@@ -76,7 +76,7 @@ def eliminaOrganizacion(organizacion_id):
 
 
 #Rutas de Usuarios-Organizacion
-@app.route('/api/v1.0/usuarios/<int:usuario_id>/organizacion/', methods=['GET'])
+@app.route('/api/v1.0/user/<int:usuario_id>/organization/', methods=['GET'])
 def muestraOrganizacionesUsu(usuario_id):
     usuario = Usuario().get_usuario(usuario_id)
     if(usuario):

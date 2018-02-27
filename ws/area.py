@@ -1,8 +1,18 @@
 from ws import *
 from model import ECOE, Area
 
-#Relacion ECOE-Area
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['GET'])
+def existEcoeArea(area, ecoe_id):
+    if(area):
+        if(area.id_ecoe == ecoe_id):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+
+#ECOE-Area
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/', methods=['GET'])
 def obtenAreas(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -19,22 +29,18 @@ def obtenAreas(ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['GET'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/<int:area_id>/', methods=['GET'])
 def obtenArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
 
-    if(ecoe):
-        if(ecoe.existe_ecoe_area(area_id)):
-            area = Area().get_area(area_id)
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-        else:
-            abort(404)
+    area = Area().get_area(area_id)
 
-    else:
+    if(existEcoeArea(area, ecoe_id)==False):
         abort(404)
 
+    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/', methods=['POST'])
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/', methods=['POST'])
 def insertaArea(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
@@ -56,44 +62,39 @@ def insertaArea(ecoe_id):
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['PUT'])
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/<int:area_id>/', methods=['PUT'])
 def modificaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_area(area_id)):
-            value = request.json
+   area = Area().get_area(area_id)
 
-            if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
-                abort(400)
+   if (existEcoeArea(area, ecoe_id) == False):
+    abort(404)
 
-            nombre = value["nombre"]
-            id_ecoe = value["id_ecoe"]
+    value = request.json
 
-            area = Area().get_area(area_id)
-            area.put_area(nombre, id_ecoe)
+    if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
+        abort(400)
 
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-        else:
-            abort(404)
+    nombre = value["nombre"]
+    id_ecoe = value["id_ecoe"]
 
-    else:
-        abort(404)
+    area = Area().get_area(area_id)
+    area.put_area(nombre, id_ecoe)
+
+    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
 
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/areas/<int:area_id>/', methods=['DELETE'])
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/<int:area_id>/', methods=['DELETE'])
 def eliminaArea(ecoe_id, area_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+    area = Area().get_area(area_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_area(area_id)):
-            area = Area().get_area(area_id)
-            area.delete_area()
-
-            return jsonify({"id_area": area.id_area, "nombre": area.nombre})
-        else:
-            abort(404)
-
-    else:
+    if (existEcoeArea(area, ecoe_id) == False):
         abort(404)
+
+    area = Area().get_area(area_id)
+    area.delete_area()
+
+    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+
