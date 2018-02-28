@@ -1,12 +1,12 @@
 from ws import *
-from model import ECOE, Estacion, Cronometro, Alarma
+from model import ECOE, Station, Chronometer, Alarma
 
 def existEcoeCrono(ecoe_id, crono_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
     if (ecoe == False):
         return False
 
-    if (ecoe.existe_ecoe_cronometro(crono_id) == False):
+    if (ecoe.exists_ecoe_chronometer(crono_id) == False):
         return False
 
     return True
@@ -18,7 +18,7 @@ def getAlarms(ecoe_id, cronometro_id):
     if (existEcoeCrono(ecoe_id, cronometro_id) == False):
         abort(404)
 
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     alarmas = []
     for alarma in cronometro.alarmas:
@@ -35,7 +35,7 @@ def getAlarm(ecoe_id, cronometro_id, alarma_id):
     if (existEcoeCrono(ecoe_id, cronometro_id) == False):
         abort(404)
 
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
     if(cronometro.existe_cronometro_alarma()):
         abort(404)
     alarma = Alarma().get_alarma(alarma_id)
@@ -69,7 +69,7 @@ def putAlarm(ecoe_id, cronometro_id, alarma_id):
     if (existEcoeCrono(ecoe_id, cronometro_id) == False):
         abort(404)
 
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro.existe_cronometro_alarma(alarma_id)):
         value = request.json
@@ -94,7 +94,7 @@ def delAlarm(ecoe_id, cronometro_id, alarma_id):
     if (existEcoeCrono(ecoe_id, cronometro_id) == False):
         abort(404)
 
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):
             alarma = Alarma().get_alarma(alarma_id)
@@ -110,7 +110,7 @@ def delAlarm(ecoe_id, cronometro_id, alarma_id):
 
 @app.route('/api/v1.0/chrono/<int:cronometro_id>/alarm/', methods=['GET'])
 def obtenAlarmas(cronometro_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
         alarmas = []
@@ -127,7 +127,7 @@ def obtenAlarmas(cronometro_id):
 
 @app.route('/api/v1.0/chrono/<int:cronometro_id>/alarm/<int:alarma_id>/', methods=['GET'])
 def obtenAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
         alarma = Alarma().get_alarma(alarma_id)
@@ -141,7 +141,7 @@ def obtenAlarma(cronometro_id, alarma_id):
 
 @app.route('/api/v1.0/chrono/<int:cronometro_id>/alarm/', methods=['POST'])
 def insertaAlarma(cronometro_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
         value = request.json
@@ -165,7 +165,7 @@ def insertaAlarma(cronometro_id):
 
 @app.route('/api/v1.0/chrono/<int:cronometro_id>/alarm/<int:alarma_id>/', methods=['PUT'])
 def modificaAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):
@@ -190,7 +190,7 @@ def modificaAlarma(cronometro_id, alarma_id):
 
 @app.route('/api/v1.0/chrono/<int:cronometro_id>/alarm/<int:alarma_id>/', methods=['DELETE'])
 def eliminaAlarma(cronometro_id, alarma_id):
-    cronometro = Cronometro().get_cronometro(cronometro_id)
+    cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):

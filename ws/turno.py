@@ -1,10 +1,10 @@
 from ws import *
-from model import Dia, Turno
+from model import Day, Turno
 
 # RUTAS DE TURNO
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['GET'])
 def muestraTurnos(dia_id):
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if (dia):
         turnos = []
@@ -23,7 +23,7 @@ def muestraTurnos(dia_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['GET'])
 def muestraTurno(dia_id, turno_id):
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if(dia):
         if(dia.existe_dia_turno(turno_id) == False):
@@ -39,7 +39,7 @@ def muestraTurno(dia_id, turno_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['POST'])
 def insertaTurno(dia_id):
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if(dia):
         value = request.json
@@ -59,7 +59,7 @@ def insertaTurno(dia_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['PUT'])
 def modificaTurno(dia_id, turno_id):
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if(dia):
         value = request.json
@@ -82,7 +82,7 @@ def modificaTurno(dia_id, turno_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['DELETE'])
 def eliminaTurno(dia_id, turno_id):
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if(dia):
         if(dia.existe_dia_turno(turno_id) == False):

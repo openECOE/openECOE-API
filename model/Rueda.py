@@ -1,5 +1,5 @@
 from ws import db
-from model import Alumno
+from model import Student
 
 class Rueda(db.Model):
     id_rueda = db.Column(db.Integer, primary_key=True)

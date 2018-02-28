@@ -1,16 +1,18 @@
 from ws import db
 
 class Area(db.Model):
+    __tablename__ = "area"
+
     id_area = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255))
+    name = db.Column(db.String(255))
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
 
     def __init__(self, nombre='', id_ecoe=0):
-        self.nombre = nombre
+        self.name = nombre
         self.id_ecoe = id_ecoe
 
     def __repr__(self):
-        return '<Area %r>' %self.nombre
+        return '<Area %r>' %self.name
 
     def post_area(self):
 
@@ -30,7 +32,7 @@ class Area(db.Model):
         return area
 
     def put_area(self, nombre, id_ecoe):
-        self.nombre = nombre
+        self.name = nombre
         self.id_ecoe = id_ecoe
         db.session.commit()
 

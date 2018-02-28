@@ -1,5 +1,5 @@
 from ws import *
-from model import ECOE, Alumno, Rueda, Turno, Dia
+from model import ECOE, Student, Rueda, Turno, Day
 
 def existEcoeStudent(alumno, ecoe_id):
     if(alumno):
@@ -31,7 +31,7 @@ def obtenAlumnos(ecoe_id):
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['GET'])
 def obtenAlumno(ecoe_id, alumno_id):
-    alumno = Alumno().get_alumno(alumno_id)
+    alumno = Student().get_alumno(alumno_id)
 
     if(existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
@@ -53,10 +53,10 @@ def insertaAlumno(ecoe_id):
         nombre = value["nombre"]
         dni = value["dni"]
 
-        alumnoIn = Alumno(nombre, dni, ecoe_id)
+        alumnoIn = Student(nombre, dni, ecoe_id)
         alumnoIn.post_alumno()
 
-        alumno = Alumno().get_ult_alumno()
+        alumno = Student().get_ult_alumno()
 
         return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
     else:
@@ -66,7 +66,7 @@ def insertaAlumno(ecoe_id):
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['PUT'])
 def modificaAlumno(ecoe_id, alumno_id):
-    alumno = Alumno().get_alumno(alumno_id)
+    alumno = Student().get_alumno(alumno_id)
     if (existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
 
@@ -86,7 +86,7 @@ def modificaAlumno(ecoe_id, alumno_id):
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/student/<int:alumno_id>/', methods=['DELETE'])
 def eliminaAlumno(ecoe_id, alumno_id):
-    alumno = Alumno().get_alumno(alumno_id)
+    alumno = Student().get_alumno(alumno_id)
 
     if (existEcoeStudent(alumno, ecoe_id) == False):
         abort(404)
@@ -126,7 +126,7 @@ def muestraAlumnoRueda(rueda_id, alumno_id):
         if(rueda.existe_rueda_alumno(alumno_id)==False):
             abort(404)
 
-        alumno = Alumno().get_alumno(alumno_id)
+        alumno = Student().get_alumno(alumno_id)
         return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})
 
     else:
@@ -141,12 +141,12 @@ def modificaAlumnoRueda(rueda_id, alumno_id):
     if (rueda==False):
         abort(404)
 
-    alumno = Alumno().get_alumno(alumno_id)
+    alumno = Student().get_alumno(alumno_id)
     if(alumno == False):
         abort(404)
 
     turno = Turno().get_turno(rueda.id_turno)
-    dia = Dia().get_dia(turno.id_dia)
+    dia = Day().get_dia(turno.id_dia)
 
     if(dia.id_ecoe != alumno.id_ecoe):
         abort(404)
@@ -165,7 +165,7 @@ def eliminaAlumnoRueda(rueda_id, alumno_id):
     if (rueda.existe_rueda_alumno(alumno_id) == False):
         abort(404)
 
-    alumno = Alumno().get_alumno(alumno_id)
+    alumno = Student().get_alumno(alumno_id)
     alumno.delete_alumno_id_rueda()
 
     return jsonify({"id_alumno": alumno.id_alumno, "nombre": alumno.nombre, "dni": alumno.dni})

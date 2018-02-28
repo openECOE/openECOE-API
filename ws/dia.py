@@ -1,5 +1,5 @@
 from ws import *
-from model import ECOE, Dia
+from model import ECOE, Day
 
 # RUTAS DE DIA
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/', methods=['GET'])
@@ -25,7 +25,7 @@ def muestraDias(ecoe_id):
 def muestraDia(ecoe_id, dia_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
-    dia = Dia().get_dia(dia_id)
+    dia = Day().get_dia(dia_id)
 
     if (ecoe):
 
@@ -48,10 +48,10 @@ def insertaDia(ecoe_id):
 
         fecha = value["fecha"]
 
-        diaIn = Dia(fecha=fecha, id_ecoe=ecoe_id)
+        diaIn = Day(fecha=fecha, id_ecoe=ecoe_id)
         diaIn.post_dia()
 
-        dia = Dia().get_ult_dia()
+        dia = Day().get_ult_dia()
 
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
     else:
@@ -66,7 +66,7 @@ def modificaDia(ecoe_id, dia_id):
         if (ecoe.existe_ecoe_dias(dia_id) == False):
             abort(404)
 
-        dia = Dia().get_dia(dia_id)
+        dia = Day().get_dia(dia_id)
 
         value = request.json
 
@@ -91,7 +91,7 @@ def eliminaDia(ecoe_id, dia_id):
         if (ecoe.existe_ecoe_dias(dia_id) == False):
             abort(400)
 
-        dia = Dia().get_dia(dia_id)
+        dia = Day().get_dia(dia_id)
         dia.delete_dia()
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
     else:

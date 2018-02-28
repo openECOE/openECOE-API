@@ -1,5 +1,5 @@
 from ws import *
-from model import ECOE, Estacion
+from model import ECOE, Station
 
 def existEcoeAStation(station, ecoe_id):
     if(station):
@@ -33,7 +33,7 @@ def obtenEstacion(ecoe_id, estacion_id):
 
     if(ecoe):
         if(ecoe.existe_ecoe_estacion(estacion_id)):
-            estacion = Estacion().get_estacion(estacion_id)
+            estacion = Station().get_estacion(estacion_id)
             return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre})
         else:
             abort(404)
@@ -56,10 +56,10 @@ def insertaEstacion(ecoe_id):
 
         cronometros = ecoe.cronometros
 
-        estacionIn = Estacion(nombre, ecoe_id, cronometros)
+        estacionIn = Station(nombre, ecoe_id, cronometros)
         estacionIn.post_estacion()
 
-        estacion = Estacion().get_ult_estacion()
+        estacion = Station().get_ult_estacion()
 
         return jsonify({"id_estacion" : estacion.id_estacion, "nombre" : estacion.nombre})
     else:
@@ -79,7 +79,7 @@ def modificaEstacion(ecoe_id, estacion_id):
             nombre = value["nombre"]
             id_ecoe = value["id_ecoe"]
 
-            estacion = Estacion().get_estacion(estacion_id)
+            estacion = Station().get_estacion(estacion_id)
             estacion.put_estacion(nombre, id_ecoe)
 
             return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre, "id_ecoe": estacion.id_ecoe})
@@ -96,7 +96,7 @@ def eliminaEstacion(ecoe_id, estacion_id):
 
     if (ecoe):
         if (ecoe.existe_ecoe_estacion(estacion_id)):
-            estacion = Estacion().get_estacion(estacion_id)
+            estacion = Station().get_estacion(estacion_id)
             estacion.delete_estacion()
 
             return jsonify({"id_estacion": estacion.id_estacion, "nombre": estacion.nombre, "id_ecoe": estacion.id_ecoe})

@@ -50,7 +50,7 @@ def creaEcoeOrganizacion(organizacion_id):
         ecoe = ECOE(nombre, organizacion_id)
         ecoe.post_ecoe()
 
-        return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
+        return jsonify({"id": ecoe.id, "nombre": ecoe.name})
     else:
         abort(404)
 

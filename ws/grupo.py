@@ -1,10 +1,10 @@
 from ws import *
-from model import Estacion, Grupo
+from model import Station, Grupo
 
 # Relacion Estacion-Grupos
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['GET'])
 def obtenGrupos(estacion_id):
-    estacion = Estacion().get_estacion(estacion_id)
+    estacion = Station().get_estacion(estacion_id)
 
     if (estacion):
         grupos = []
@@ -21,7 +21,7 @@ def obtenGrupos(estacion_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['GET'])
 def obtenGrupo(estacion_id, grupo_id):
-    estacion = Estacion().get_estacion(estacion_id)
+    estacion = Station().get_estacion(estacion_id)
 
     if (estacion):
         if (estacion.existe_estacion_grupos()):
@@ -36,7 +36,7 @@ def obtenGrupo(estacion_id, grupo_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['POST'])
 def insertaGrupo(estacion_id):
-    estacion = Estacion().get_estacion(estacion_id)
+    estacion = Station().get_estacion(estacion_id)
 
     if (estacion):
 
@@ -60,7 +60,7 @@ def insertaGrupo(estacion_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['PUT'])
 def modificaGrupo(estacion_id, grupo_id):
-    estacion = Estacion().get_estacion(estacion_id)
+    estacion = Station().get_estacion(estacion_id)
 
     if (estacion):
         if (estacion.existe_estacion_grupos(grupo_id)):
@@ -85,7 +85,7 @@ def modificaGrupo(estacion_id, grupo_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['DELETE'])
 def eliminaGrupo(estacion_id, grupo_id):
-    estacion = Estacion().get_estacion(estacion_id)
+    estacion = Station().get_estacion(estacion_id)
 
     if (estacion):
         if (estacion.existe_estacion_grupos(grupo_id)):

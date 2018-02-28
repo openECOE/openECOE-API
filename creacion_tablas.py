@@ -17,4 +17,4 @@ from ws import dia
 from ws import turno
 from ws import rueda
 
-db.create_all()
+db.update.all()
