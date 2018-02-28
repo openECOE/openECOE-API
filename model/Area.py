@@ -23,7 +23,7 @@ class Area(db.Model):
         area = Area.query.filter_by(id_area=id).first()
         return area
 
-    def get_ult_area(self):
+    def get_last_area(self):
         areas = Area.query.all()
 
         numAreas = len(areas)

@@ -4,7 +4,7 @@ from model import Day, Shift
 # RUTAS DE TURNO
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['GET'])
 def muestraTurnos(dia_id):
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if (dia):
         turnos = []
@@ -23,10 +23,10 @@ def muestraTurnos(dia_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['GET'])
 def muestraTurno(dia_id, turno_id):
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if(dia):
-        if(dia.existe_dia_turno(turno_id) == False):
+        if(dia.exist_day_shift(turno_id) == False):
             abort(404)
 
         turno = Shift().get_turno(turno_id)
@@ -39,7 +39,7 @@ def muestraTurno(dia_id, turno_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['POST'])
 def insertaTurno(dia_id):
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if(dia):
         value = request.json
@@ -59,7 +59,7 @@ def insertaTurno(dia_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['PUT'])
 def modificaTurno(dia_id, turno_id):
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if(dia):
         value = request.json
@@ -70,7 +70,7 @@ def modificaTurno(dia_id, turno_id):
         hora_inicio = value["hora_inicio"]
         id_dia = value["id_dia"]
 
-        if(dia.existe_dia_turno(turno_id)==False):
+        if(dia.exist_day_shift(turno_id)==False):
             abort(404)
 
         turno = Shift().get_turno(turno_id)
@@ -82,10 +82,10 @@ def modificaTurno(dia_id, turno_id):
 
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['DELETE'])
 def eliminaTurno(dia_id, turno_id):
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if(dia):
-        if(dia.existe_dia_turno(turno_id) == False):
+        if(dia.exist_day_shift(turno_id) == False):
             abort(404)
         turno = Shift().get_turno(turno_id)
         turno.delete_turno()

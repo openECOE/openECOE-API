@@ -25,7 +25,7 @@ def muestraDias(ecoe_id):
 def muestraDia(ecoe_id, dia_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
-    dia = Day().get_dia(dia_id)
+    dia = Day().get_day(dia_id)
 
     if (ecoe):
 
@@ -48,10 +48,10 @@ def insertaDia(ecoe_id):
 
         fecha = value["fecha"]
 
-        diaIn = Day(fecha=fecha, id_ecoe=ecoe_id)
-        diaIn.post_dia()
+        diaIn = Day(date=fecha, id_ecoe=ecoe_id)
+        diaIn.post_day()
 
-        dia = Day().get_ult_dia()
+        dia = Day().get_last_day()
 
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
     else:
@@ -66,7 +66,7 @@ def modificaDia(ecoe_id, dia_id):
         if (ecoe.existe_ecoe_dias(dia_id) == False):
             abort(404)
 
-        dia = Day().get_dia(dia_id)
+        dia = Day().get_day(dia_id)
 
         value = request.json
 
@@ -76,7 +76,7 @@ def modificaDia(ecoe_id, dia_id):
         fecha = value["fecha"]
         id_ecoe = value["id_ecoe"]
 
-        dia.put_dia(fecha, id_ecoe)
+        dia.put_day(fecha, id_ecoe)
 
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
     else:
@@ -91,8 +91,8 @@ def eliminaDia(ecoe_id, dia_id):
         if (ecoe.existe_ecoe_dias(dia_id) == False):
             abort(400)
 
-        dia = Day().get_dia(dia_id)
-        dia.delete_dia()
+        dia = Day().get_day(dia_id)
+        dia.delete_day()
         return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
     else:
         abort(404)

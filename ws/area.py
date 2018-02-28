@@ -13,7 +13,7 @@ def existEcoeArea(area, ecoe_id):
 
 #ECOE-Area
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/', methods=['GET'])
-def obtenAreas(ecoe_id):
+def getAreas(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if(ecoe):
@@ -21,7 +21,7 @@ def obtenAreas(ecoe_id):
         for area in ecoe.areas:
             areas.append({
                 "id_area" : area.id_area,
-                "nombre" : area.nombre,
+                "name" : area.name
         })
 
         return json.dumps(areas, indent=1, ensure_ascii=False).encode('utf8')
@@ -37,33 +37,33 @@ def obtenArea(ecoe_id, area_id):
     if(existEcoeArea(area, ecoe_id)==False):
         abort(404)
 
-    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+    return jsonify({"id_area": area.id_area, "name": area.name})
 
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/', methods=['POST'])
-def insertaArea(ecoe_id):
+def postArea(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if(ecoe):
         value = request.json
 
-        if not request.json or not "nombre" in request.json:
+        if not request.json or not "name" in request.json:
             abort(400)
 
-        nombre = value["nombre"]
+        name = value["name"]
 
-        areaIn = Area(nombre=nombre, id_ecoe=ecoe_id)
+        areaIn = Area(name=name, id_ecoe=ecoe_id)
         areaIn.post_area()
 
-        area = Area().get_ult_area()
+        area = Area().get_last_area()
 
-        return jsonify({"id_area" : area.id_area, "nombre" : area.nombre})
+        return jsonify({"id_area" : area.id_area, "name" : area.name})
     else:
         abort(404)
 
 
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/area/<int:area_id>/', methods=['PUT'])
-def modificaArea(ecoe_id, area_id):
+def putArea(ecoe_id, area_id):
 
    area = Area().get_area(area_id)
 
@@ -72,16 +72,16 @@ def modificaArea(ecoe_id, area_id):
 
     value = request.json
 
-    if ((not request.json) or (not "nombre" in request.json) or (not "id_ecoe" in request.json)):
+    if ((not request.json) or (not "name" in request.json) or (not "id_ecoe" in request.json)):
         abort(400)
 
-    nombre = value["nombre"]
+    name = value["name"]
     id_ecoe = value["id_ecoe"]
 
     area = Area().get_area(area_id)
-    area.put_area(nombre, id_ecoe)
+    area.put_area(name, id_ecoe)
 
-    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+    return jsonify({"id_area": area.id_area, "name": area.name})
 
 
 
@@ -96,5 +96,5 @@ def eliminaArea(ecoe_id, area_id):
     area = Area().get_area(area_id)
     area.delete_area()
 
-    return jsonify({"id_area": area.id_area, "nombre": area.nombre})
+    return jsonify({"id_area": area.id_area, "nombre": area.name})
 

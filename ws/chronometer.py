@@ -173,7 +173,7 @@ def eliminaCronometroEcoe(ecoe_id, cronometro_id):
 #Relacion Estacion-Cronometro
 @app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/', methods=['GET'])
 def obtenCronometrosEstacion(estacion_id):
-    estacion = Station().get_estacion(estacion_id)
+    estacion = Station().get_station(estacion_id)
 
     if (estacion):
         cronometros = []
@@ -190,10 +190,10 @@ def obtenCronometrosEstacion(estacion_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['GET'])
 def obtenCronometroEstacion(estacion_id, cronometro_id):
-    estacion = Station().get_estacion(estacion_id)
+    estacion = Station().get_station(estacion_id)
 
     if (estacion):
-        if (estacion.existe_estacion_cronometro(cronometro_id)):
+        if (estacion.exists_station_chronometer(cronometro_id)):
             cronometro = Chronometer().get_cronometro(cronometro_id)
             return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total" : cronometro.tiempo_total})
         else:
@@ -204,7 +204,7 @@ def obtenCronometroEstacion(estacion_id, cronometro_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/', methods=['POST'])
 def insertaCronometroEstacion(estacion_id):
-    estacion = Station().get_estacion(estacion_id)
+    estacion = Station().get_station(estacion_id)
 
     if (estacion):
         value = request.json
@@ -219,7 +219,7 @@ def insertaCronometroEstacion(estacion_id):
         cronometroIn.post_cronometro()
 
         cronometro = Chronometer().get_ult_cronometro()
-        estacion.put_estacion_cronometro(cronometro)
+        estacion.put_station_chronometer(cronometro)
 
         return jsonify({"id_cronometro": cronometro.id_cronometro, "nombre": cronometro.nombre, "tiempo_total": cronometro.tiempo_total})
     else:
@@ -227,10 +227,10 @@ def insertaCronometroEstacion(estacion_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['PUT'])
 def modificaCronometroEstacion(estacion_id, cronometro_id):
-    estacion = Station().get_estacion(estacion_id)
+    estacion = Station().get_station(estacion_id)
 
     if (estacion):
-        if (estacion.existe_estacion_cronometro(cronometro_id)):
+        if (estacion.exists_station_chronometer(cronometro_id)):
             cronometro = Chronometer().get_cronometro(cronometro_id)
 
             value = request.json
@@ -249,10 +249,10 @@ def modificaCronometroEstacion(estacion_id, cronometro_id):
 
 @app.route('/api/v1.0/estacion/<int:estacion_id>/cronometros/<int:cronometro_id>/', methods=['DELETE'])
 def eliminaCronometroEstacion(estacion_id, cronometro_id):
-    estacion = Station().get_estacion(estacion_id)
+    estacion = Station().get_station(estacion_id)
 
     if (estacion):
-        if (estacion.existe_estacion_cronometro(cronometro_id)):
+        if (estacion.exists_station_chronometer(cronometro_id)):
             cronometro = Chronometer().get_cronometro(cronometro_id)
             cronometro.delete_cronometro()
 

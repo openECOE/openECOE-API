@@ -58,7 +58,7 @@ class Question(db.Model):
             id_ecoe_new = area.id_ecoe
 
             grupo = Grupo().get_grupo(self.id_grupo)
-            estacion = Estacion().get_estacion(grupo.id_estacion)
+            estacion = Estacion().get_station(grupo.id_estacion)
             id_ecoe_old = estacion.id_ecoe
 
             if(id_ecoe_new==id_ecoe_old):
