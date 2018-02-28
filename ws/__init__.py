@@ -10,7 +10,7 @@ from werkzeug.exceptions import abort, Response
 
 app = Flask(__name__)
 #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/angelsegura/PycharmProjects/openECOE-API/ecoe.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/ecoe'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/openECOE'
 
 db = SQLAlchemy(app)
 

@@ -1,5 +1,5 @@
 from ws import *
-from model import Station, Grupo
+from model import Station, Group
 
 # Relacion Estacion-Grupos
 @app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['GET'])
@@ -25,7 +25,7 @@ def obtenGrupo(estacion_id, grupo_id):
 
     if (estacion):
         if (estacion.existe_estacion_grupos()):
-            grupo = Grupo().get_grupo(grupo_id)
+            grupo = Group().get_grupo(grupo_id)
             return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
         else:
             abort(404)
@@ -47,10 +47,10 @@ def insertaGrupo(estacion_id):
 
         nombre = value["nombre"]
 
-        grupoIn = Grupo(nombre=nombre, id_estacion=estacion_id)
+        grupoIn = Group(nombre=nombre, id_estacion=estacion_id)
         grupoIn.post_grupo()
 
-        grupo = Grupo().get_ult_grupo()
+        grupo = Group().get_ult_grupo()
 
         return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
 
@@ -72,7 +72,7 @@ def modificaGrupo(estacion_id, grupo_id):
             nombre = value["nombre"]
             id_estacion = value["id_estacion"]
 
-            grupo = Grupo().get_grupo(grupo_id)
+            grupo = Group().get_grupo(grupo_id)
             grupo.put_grupo(nombre, id_estacion)
 
             return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
@@ -89,7 +89,7 @@ def eliminaGrupo(estacion_id, grupo_id):
 
     if (estacion):
         if (estacion.existe_estacion_grupos(grupo_id)):
-            grupo = Grupo().get_grupo(grupo_id)
+            grupo = Group().get_grupo(grupo_id)
             grupo.delete_grupo()
 
             return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})

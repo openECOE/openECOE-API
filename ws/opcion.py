@@ -1,10 +1,10 @@
 from ws import *
-from model import Pregunta, Opcion
+from model import Question, Option
 
 #RUTAS DE OPCION
 @app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/', methods=['GET'])
 def muestraOpciones(pregunta_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if (pregunta):
         opciones = []
@@ -23,13 +23,13 @@ def muestraOpciones(pregunta_id):
 
 @app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['GET'])
 def muestraOpcion(pregunta_id, opcion_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if(pregunta):
         if(pregunta.existe_pregunta_opcion(opcion_id)==False):
             abort(404)
 
-        opcion = Opcion().get_opcion(opcion_id)
+        opcion = Option().get_opcion(opcion_id)
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
 
     else:
@@ -37,7 +37,7 @@ def muestraOpcion(pregunta_id, opcion_id):
 
 @app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/', methods=['POST'])
 def insertaOpcion(pregunta_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if(pregunta):
         value = request.json
@@ -46,10 +46,10 @@ def insertaOpcion(pregunta_id):
         puntos = value["puntos"]
         descripcion = value["descripcion"]
 
-        opcionIn = Opcion(puntos=puntos, descripcion=descripcion, id_pregunta=pregunta_id)
+        opcionIn = Option(puntos=puntos, descripcion=descripcion, id_pregunta=pregunta_id)
         opcionIn.post_opcion()
 
-        opcion = Opcion().get_ult_opcion()
+        opcion = Option().get_ult_opcion()
 
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
     else:
@@ -57,7 +57,7 @@ def insertaOpcion(pregunta_id):
 
 @app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['PUT'])
 def modificaOpcion(pregunta_id, opcion_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if(pregunta):
         value = request.json
@@ -71,7 +71,7 @@ def modificaOpcion(pregunta_id, opcion_id):
         if(pregunta.existe_pregunta_opcion(opcion_id) == False):
             abort(400)
 
-        opcion = Opcion().get_opcion(opcion_id)
+        opcion = Option().get_opcion(opcion_id)
         opcion.put_opcion(puntos, descripcion, id_pregunta)
 
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})
@@ -80,13 +80,13 @@ def modificaOpcion(pregunta_id, opcion_id):
 
 @app.route('/api/v1.0/preguntas/<int:pregunta_id>/opciones/<int:opcion_id>/', methods=['DELETE'])
 def eliminaOpcion(pregunta_id, opcion_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if(pregunta):
         if(pregunta.existe_pregunta_opcion(opcion_id) == False):
             abort(404)
 
-        opcion = Opcion().get_opcion(opcion_id)
+        opcion = Option().get_opcion(opcion_id)
         opcion.delete_opcion()
 
         return jsonify({"id_opcion": opcion.id_opcion, "puntos": opcion.puntos, "descipcion": opcion.descripcion})

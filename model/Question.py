@@ -1,26 +1,28 @@
 from ws import db
-from model import Area, Opcion
+from model import Area, Option
 
-class Pregunta(db.Model):
-    id_pregunta = db.Column(db.Integer, primary_key=True)
-    id_grupo = db.Column(db.Integer, db.ForeignKey('grupo.id_grupo'))
+class Question(db.Model):
+    __tablename__ = "ques"
+
+    id_question = db.Column(db.Integer, primary_key=True)
+    id_group = db.Column(db.Integer, db.ForeignKey('group.id_group'))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id_area'))
     area = db.relationship('Area', backref='area')
     ref = db.Column(db.String(255))
-    tipo_opcion = db.Column(db.String(500))
-    opciones = db.relationship('Opcion', backref='opciones', lazy='dynamic')
+    option_type = db.Column(db.String(500))
+    options = db.relationship('Opcion', backref='opciones', lazy='dynamic')
 
     def __init__(self, referencia='', tipo_opcion='', id_grupo=0):
         self.ref = referencia
-        self.tipo_opcion = tipo_opcion
-        self.id_grupo = id_grupo
+        self.option_type = tipo_opcion
+        self.id_group = id_grupo
 
     def get_pregunta(self, id):
-        pregunta = Pregunta.query.filter_by(id_pregunta=id).first()
+        pregunta = Question.query.filter_by(id_pregunta=id).first()
         return pregunta
 
     def get_ult_pregunta(self):
-        preguntas = Pregunta.query.all()
+        preguntas = Question.query.all()
 
         numpreguntas = len(preguntas)
         pregunta = preguntas[numpreguntas-1]
@@ -39,7 +41,7 @@ class Pregunta(db.Model):
     def put_pregunta(self, ref, tipo_pregunta, id_grupo):
         self.ref = ref
         self.tipo_pregunta = tipo_pregunta
-        self.id_grupo = id_grupo
+        self.id_group = id_grupo
         
         db.session.commit()
 
@@ -68,7 +70,7 @@ class Pregunta(db.Model):
             return False
 
     def existe_pregunta_opcion(self, id_opcion):
-        for opcion in self.opciones:
+        for opcion in self.options:
             if(opcion.id_opcion==id_opcion):
                 return True
         return False

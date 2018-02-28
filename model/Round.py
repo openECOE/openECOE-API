@@ -1,22 +1,24 @@
 from ws import db
 from model import Student
 
-class Rueda(db.Model):
-    id_rueda = db.Column(db.Integer, primary_key=True)
-    descripcion = db.Column(db.String(500))
-    id_turno = db.Column(db.Integer, db.ForeignKey('turno.id_turno'))
-    alumnos = db.relationship('Alumno', backref='alumnosRueda', lazy='dynamic')
+class Round(db.Model):
+    __tablename__="round"
+
+    id_round = db.Column(db.Integer, primary_key=True)
+    description = db.Column(db.String(500))
+    id_shift = db.Column(db.Integer, db.ForeignKey('shi.id_shift'))
+    students = db.relationship('Student', backref='studentsRound', lazy='dynamic')
 
     def __init__(self, descripcion="", id_turno=0):
-        self.descripcion = descripcion
-        self.id_turno = id_turno
+        self.description = descripcion
+        self.id_shift = id_turno
 
     def get_rueda(self, id):
-        rueda = Rueda.query.filter_by(id_rueda=id).first()
+        rueda = Round.query.filter_by(id_rueda=id).first()
         return rueda
 
     def get_ult_rueda(self):
-        ruedas = Rueda.query.all()
+        ruedas = Round.query.all()
 
         numruedas = len(ruedas)
         rueda = ruedas[numruedas-1]
@@ -28,8 +30,8 @@ class Rueda(db.Model):
         db.session.commit()
 
     def put_rueda(self, descripcion, id_turno):
-        self.descripcion = descripcion
-        self.id_turno = id_turno
+        self.description = descripcion
+        self.id_shift = id_turno
 
         db.session.commit()
 
@@ -38,7 +40,7 @@ class Rueda(db.Model):
         db.session.commit()
 
     def existe_rueda_alumno(self, id_alumno):
-        for alumno in self.alumnos:
+        for alumno in self.students:
             if(alumno.id_alumno==id_alumno):
                 return True
         return False

@@ -1,5 +1,5 @@
 from ws import *
-from model import Day, Turno
+from model import Day, Shift
 
 # RUTAS DE TURNO
 @app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['GET'])
@@ -29,7 +29,7 @@ def muestraTurno(dia_id, turno_id):
         if(dia.existe_dia_turno(turno_id) == False):
             abort(404)
 
-        turno = Turno().get_turno(turno_id)
+        turno = Shift().get_turno(turno_id)
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
 
     else:
@@ -48,10 +48,10 @@ def insertaTurno(dia_id):
 
         hora_inicio = value["hora_inicio"]
 
-        turnoIn = Turno(hora_inicio=hora_inicio, id_dia=dia_id)
+        turnoIn = Shift(hora_inicio=hora_inicio, id_dia=dia_id)
         turnoIn.post_turno()
 
-        turno = Turno().get_ult_turno()
+        turno = Shift().get_ult_turno()
 
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
     else:
@@ -73,7 +73,7 @@ def modificaTurno(dia_id, turno_id):
         if(dia.existe_dia_turno(turno_id)==False):
             abort(404)
 
-        turno = Turno().get_turno(turno_id)
+        turno = Shift().get_turno(turno_id)
         turno.put_turno(hora_inicio, id_dia)
 
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
@@ -87,7 +87,7 @@ def eliminaTurno(dia_id, turno_id):
     if(dia):
         if(dia.existe_dia_turno(turno_id) == False):
             abort(404)
-        turno = Turno().get_turno(turno_id)
+        turno = Shift().get_turno(turno_id)
         turno.delete_turno()
         return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
     else:

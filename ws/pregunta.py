@@ -1,9 +1,9 @@
 from ws import *
-from model import Grupo, Area, Pregunta
+from model import Group, Area, Question
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['GET'])
 def obtenPreguntas(grupo_id):
-    grupo = Grupo().get_grupo(grupo_id)
+    grupo = Group().get_grupo(grupo_id)
 
     if (grupo):
         preguntas = []
@@ -21,11 +21,11 @@ def obtenPreguntas(grupo_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['GET'])
 def obtenPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+    grupo = Group().get_grupo(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
-            pregunta = Pregunta().get_pregunta(pregunta_id)
+            pregunta = Question().get_pregunta(pregunta_id)
             return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_opcion" : pregunta.tipo_opcion})
         else:
             abort(404)
@@ -36,7 +36,7 @@ def obtenPregunta(grupo_id, pregunta_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['POST'])
 def insertaPregunta(grupo_id):
-    grupo = Grupo().get_grupo(grupo_id)
+    grupo = Group().get_grupo(grupo_id)
 
     if (grupo):
         value = request.json
@@ -47,10 +47,10 @@ def insertaPregunta(grupo_id):
         ref = value["ref"]
         tipo_opcion = value["tipo_opcion"]
 
-        preguntaIn = Pregunta(ref, tipo_opcion, grupo_id)
+        preguntaIn = Question(ref, tipo_opcion, grupo_id)
         preguntaIn.post_pregunta()
 
-        pregunta = Pregunta().get_ult_pregunta()
+        pregunta = Question().get_ult_pregunta()
 
         return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_opcion": pregunta.tipo_opcion})
 
@@ -60,7 +60,7 @@ def insertaPregunta(grupo_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['PUT'])
 def modificaPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+    grupo = Group().get_grupo(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
@@ -73,7 +73,7 @@ def modificaPregunta(grupo_id, pregunta_id):
             tipo_opcion = value["tipo_opcion"]
             id_grupo = value["id_grupo"]
 
-            pregunta = Pregunta().get_pregunta(pregunta_id)
+            pregunta = Question().get_pregunta(pregunta_id)
             pregunta.put_pregunta(ref, tipo_opcion, id_grupo)
 
             return jsonify({"id_pregunta" : pregunta.id_pregunta, "ref" : pregunta.ref, "tipo_opcion" : pregunta.tipo_opcion})
@@ -86,11 +86,11 @@ def modificaPregunta(grupo_id, pregunta_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['DELETE'])
 def eliminaPregunta(grupo_id, pregunta_id):
-    grupo = Grupo().get_grupo(grupo_id)
+    grupo = Group().get_grupo(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
-            pregunta = Pregunta().get_pregunta(pregunta_id)
+            pregunta = Question().get_pregunta(pregunta_id)
             pregunta.delete_pregunta()
 
             return jsonify({"id_pregunta": pregunta.id_pregunta, "ref": pregunta.ref, "tipo_opcion": pregunta.tipo_opcion})
@@ -104,7 +104,7 @@ def eliminaPregunta(grupo_id, pregunta_id):
 # Relacion Pregunta-Area
 @app.route('/api/v1.0/pregunta/<int:pregunta_id>/area/', methods=['GET'])
 def obtenAreaPregunta(pregunta_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if (pregunta):
         area = pregunta.area
@@ -119,7 +119,7 @@ def obtenAreaPregunta(pregunta_id):
 
 @app.route('/api/v1.0/pregunta/<int:pregunta_id>/area/', methods=['PUT'])
 def insertaAreaPregunta(pregunta_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if (pregunta):
         value = request.json
@@ -143,7 +143,7 @@ def insertaAreaPregunta(pregunta_id):
 
 @app.route('/api/v1.0/pregunta/<int:pregunta_id>/area/', methods=['DELETE'])
 def eliminaAreaPregunta(pregunta_id):
-    pregunta = Pregunta().get_pregunta(pregunta_id)
+    pregunta = Question().get_pregunta(pregunta_id)
 
     if(pregunta):
         area = pregunta.area

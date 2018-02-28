@@ -1,7 +1,7 @@
 from ws import db
 from model import Area, Student, Station, Day, Chronometer
 
-ecoechro = db.Table('ecoechro', db.Column('id_ecoe', db.Integer, db.ForeignKey('ecoe.id'), primary_key=True), db.Column('id_cronometro', db.Integer, db.ForeignKey('cronometro.id_cronometro'), primary_key=True))
+ecoechro = db.Table('ecoechro', db.Column('id_ecoe', db.Integer, db.ForeignKey('ecoe.id'), primary_key=True), db.Column('id_chronometer', db.Integer, db.ForeignKey('chro.id_chronometer'), primary_key=True))
 
 class ECOE(db.Model):
     __tablename__ = "ecoe"

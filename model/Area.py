@@ -5,7 +5,7 @@ class Area(db.Model):
 
     id_area = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    id_ecoe = db.Column(db.Integer, db.ForeignKey('ECOE.id'))
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'))
 
     def __init__(self, nombre='', id_ecoe=0):
         self.name = nombre

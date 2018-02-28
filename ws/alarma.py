@@ -1,5 +1,5 @@
 from ws import *
-from model import ECOE, Station, Chronometer, Alarma
+from model import ECOE, Station, Chronometer, Alarm
 
 def existEcoeCrono(ecoe_id, crono_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
@@ -38,7 +38,7 @@ def getAlarm(ecoe_id, cronometro_id, alarma_id):
     cronometro = Chronometer().get_cronometro(cronometro_id)
     if(cronometro.existe_cronometro_alarma()):
         abort(404)
-    alarma = Alarma().get_alarma(alarma_id)
+    alarma = Alarm().get_alarma(alarma_id)
 
     return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
 
@@ -56,10 +56,10 @@ def postAlarm(ecoe_id, cronometro_id):
     tiempo = value["tiempo"]
     sonido = value["sonido"]
 
-    alarmaIn = Alarma(tiempo, sonido, cronometro_id)
+    alarmaIn = Alarm(tiempo, sonido, cronometro_id)
     alarmaIn.post_alarma()
 
-    alarma = Alarma().get_ult_alarma()
+    alarma = Alarm().get_ult_alarma()
 
     return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
 
@@ -81,7 +81,7 @@ def putAlarm(ecoe_id, cronometro_id, alarma_id):
         sonido = value["sonido"]
         id_cronometro = value["id_cronometro"]
 
-        alarma = Alarma().get_alarma(alarma_id)
+        alarma = Alarm().get_alarma(alarma_id)
         alarma.put_alarma(tiempo, sonido, id_cronometro)
 
         return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
@@ -97,7 +97,7 @@ def delAlarm(ecoe_id, cronometro_id, alarma_id):
     cronometro = Chronometer().get_cronometro(cronometro_id)
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):
-            alarma = Alarma().get_alarma(alarma_id)
+            alarma = Alarm().get_alarma(alarma_id)
             alarma.delete_alarma()
 
             return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
@@ -130,7 +130,7 @@ def obtenAlarma(cronometro_id, alarma_id):
     cronometro = Chronometer().get_cronometro(cronometro_id)
 
     if (cronometro):
-        alarma = Alarma().get_alarma(alarma_id)
+        alarma = Alarm().get_alarma(alarma_id)
         if (cronometro.existe_cronometro_alarma(alarma_id)):
             return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
         else:
@@ -154,10 +154,10 @@ def insertaAlarma(cronometro_id):
 
 
 
-        alarmaIn = Alarma(tiempo, sonido, cronometro_id)
+        alarmaIn = Alarm(tiempo, sonido, cronometro_id)
         alarmaIn.post_alarma()
 
-        alarma = Alarma().get_ult_alarma()
+        alarma = Alarm().get_ult_alarma()
 
         return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
     else:
@@ -178,7 +178,7 @@ def modificaAlarma(cronometro_id, alarma_id):
             sonido = value["sonido"]
             id_cronometro = value["id_cronometro"]
 
-            alarma = Alarma().get_alarma(alarma_id)
+            alarma = Alarm().get_alarma(alarma_id)
             alarma.put_alarma(tiempo, sonido, id_cronometro)
 
             return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})
@@ -194,7 +194,7 @@ def eliminaAlarma(cronometro_id, alarma_id):
 
     if (cronometro):
         if (cronometro.existe_cronometro_alarma(alarma_id)):
-            alarma = Alarma().get_alarma(alarma_id)
+            alarma = Alarm().get_alarma(alarma_id)
             alarma.delete_alarma()
 
             return jsonify({"id_alarma": alarma.id_alarma, "tiempo": alarma.tiempo, "sonido": alarma.sonido})

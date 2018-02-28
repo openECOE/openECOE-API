@@ -1,5 +1,5 @@
 from ws import *
-from model import ECOE, Student, Rueda, Turno, Day
+from model import ECOE, Student, Round, Shift, Day
 
 def existEcoeStudent(alumno, ecoe_id):
     if(alumno):
@@ -99,7 +99,7 @@ def eliminaAlumno(ecoe_id, alumno_id):
 # RUTAS DE TURNO
 @app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/<int:dia_id>//round/<int:rueda_id>/student/', methods=['GET'])
 def muestraAlumnosRueda(rueda_id):
-    rueda = Rueda().get_rueda(rueda_id)
+    rueda = Round().get_rueda(rueda_id)
 
     if (rueda):
         alumnos = []
@@ -120,7 +120,7 @@ def muestraAlumnosRueda(rueda_id):
 # RUTAS DE Rueda-Alumno
 @app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['GET'])
 def muestraAlumnoRueda(rueda_id, alumno_id):
-    rueda = Rueda().get_rueda(rueda_id)
+    rueda = Round().get_rueda(rueda_id)
 
     if (rueda):
         if(rueda.existe_rueda_alumno(alumno_id)==False):
@@ -137,7 +137,7 @@ def muestraAlumnoRueda(rueda_id, alumno_id):
 
 @app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['PUT'])
 def modificaAlumnoRueda(rueda_id, alumno_id):
-    rueda = Rueda().get_rueda(rueda_id)
+    rueda = Round().get_rueda(rueda_id)
     if (rueda==False):
         abort(404)
 
@@ -145,7 +145,7 @@ def modificaAlumnoRueda(rueda_id, alumno_id):
     if(alumno == False):
         abort(404)
 
-    turno = Turno().get_turno(rueda.id_turno)
+    turno = Shift().get_turno(rueda.id_turno)
     dia = Day().get_dia(turno.id_dia)
 
     if(dia.id_ecoe != alumno.id_ecoe):
@@ -158,7 +158,7 @@ def modificaAlumnoRueda(rueda_id, alumno_id):
 
 @app.route('/api/v1.0/wheel/<int:rueda_id>/student/<int:alumno_id>/', methods=['DELETE'])
 def eliminaAlumnoRueda(rueda_id, alumno_id):
-    rueda = Rueda().get_rueda(rueda_id)
+    rueda = Round().get_rueda(rueda_id)
     if (rueda == False):
         abort(404)
 
