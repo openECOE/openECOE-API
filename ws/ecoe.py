@@ -1,11 +1,11 @@
 from ws import *
-from model import Organizacion, ECOE
+from model import Organization, ECOE
 
 
 #Rutas de Organizacion-ECOE
 @app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/', methods=['GET'])
 def muestraEcoesOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+    organizacion = Organization().get_organization(organizacion_id)
 
     ecoes=[]
 
@@ -24,10 +24,10 @@ def muestraEcoesOrganizacion(organizacion_id):
 
 @app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['GET'])
 def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+    organizacion = Organization().get_organization(organizacion_id)
 
     if(organizacion):
-        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
+        if(organizacion.exist_organization_ecoe(ecoe_id)):
             ecoe = ECOE().get_ECOE(ecoe_id)
             return jsonify({"id": ecoe.id, "nombre": ecoe.nombre})
         else:
@@ -38,7 +38,7 @@ def muestraEcoeOrganizacion(organizacion_id, ecoe_id):
 
 @app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/', methods=['POST'])
 def creaEcoeOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+    organizacion = Organization().get_organization(organizacion_id)
     if(organizacion):
         value = request.json
 
@@ -57,10 +57,10 @@ def creaEcoeOrganizacion(organizacion_id):
 
 @app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['PUT'])
 def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+    organizacion = Organization().get_organization(organizacion_id)
 
     if(organizacion):
-        if(organizacion.existe_organizacion_ecoe(ecoe_id)):
+        if(organizacion.exist_organization_ecoe(ecoe_id)):
             value = request.json
 
             if ((not request.json) or (not "nombre" in request.json) or (not "id_organizacion" in request.json)):
@@ -83,10 +83,10 @@ def modificaEcoeOrganizacion(organizacion_id, ecoe_id):
 
 @app.route('/api/v1.0/organization/<int:organizacion_id>/ECOE/<int:ecoe_id>/', methods=['DELETE'])
 def eliminaEcoeOrganizacion(organizacion_id, ecoe_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+    organizacion = Organization().get_organization(organizacion_id)
 
     if (organizacion):
-        if (organizacion.existe_organizacion_ecoe(ecoe_id)):
+        if (organizacion.exist_organization_ecoe(ecoe_id)):
 
             ecoe = ECOE().get_ECOE(ecoe_id)
             ecoe.delete_ecoe()

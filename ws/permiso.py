@@ -1,155 +1,156 @@
 from ws import *
-from model import Permiso, Usuario
+from model import Permission, User
 
 @app.route('/api/v1.0/permission/', methods=['GET'])
-def muestraPermisos():
-    permisos = []
+def getPermissions():
+    permissions = []
 
-    for permiso in Permiso.query.all():
-        permisos.append({
-            "id_permiso": permiso.id_permiso,
-            "id_tipoPermiso": permiso.id_tipoPermiso,
-            "id_organizacion": permiso.id_organizacion,
-            "id_ecoe": permiso.id_ecoe,
-            "id_estacion": permiso.id_estacion
+    for permission in Permission.query.all():
+        permissions.append({
+            "id_permission": permission.id_permission,
+            "id_typePermission": permission.id_typePermission,
+            "id_organization": permission.id_organization,
+            "id_ecoe": permission.id_ecoe,
+            "id_station": permission.id_station
         })
 
-    return json.dumps(permisos, indent=1, ensure_ascii=False).encode('utf8')
+    return json.dumps(permissions, indent=1, ensure_ascii=False).encode('utf8')
 
-@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['GET'])
-def muestraPermiso(permiso_id):
-    permiso = Permiso().get_permiso(permiso_id)
+@app.route('/api/v1.0/permission/<permission_id>/', methods=['GET'])
+def getPermission(permission_id):
+    permission = Permission().get_permission(permission_id)
 
-    if(permiso):
-        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    if(permission):
+        return jsonify({"id_permiso": permission.id_permission, "id_tipoPermiso": permission.id_typePermission, "id_organizacion": permission.id_organizacion, "id_ecoe": permission.id_ecoe, "id_estacion": permission.id_station})
     else:
         abort(404)
 
 @app.route('/api/v1.0/permission/', methods=['POST'])
-def insertaPermiso():
+def postPermission():
     value = request.json
 
-    if ((not request.json) or (not "id_tipoPermiso" in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+    if ((not request.json) or (not "id_typePermission" in request.json) or (not "id_organization" in request.json) or (not "id_ecoe" in request.json) or (not "id_station" in request.json)):
         abort(400)
 
-    id_tipoPermiso = value["id_tipoPermiso"]
-    id_organizacion = value["id_organizacion"]
+    id_typePermission = value["id_tipoPermiso"]
+    id_organization = value["id_organization"]
     id_ecoe = value["id_ecoe"]
-    id_estacion = value["id_estacion"]
+    id_station = value["id_station"]
 
-    permisoIn = Permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
-    permisoIn.post_permiso()
+    permissionIn = Permission(id_typePermission, id_organization, id_ecoe, id_station)
+    permissionIn.post_permission()
 
-    permiso = Permiso().get_ult_permiso()
-    return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    permission = Permission().get_last_permission()
+    return jsonify({"id_permiso": permission.id_permission, "id_tipoPermiso": permission.id_typePermission, "id_organization": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
 
 
-@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['PUT'])
-def actualizaPermiso(permiso_id):
-    permiso = Permiso().get_permiso(permiso_id)
+@app.route('/api/v1.0/permission/<permission_id>/', methods=['PUT'])
+def actualizaPermiso(permission_id):
+    permission = Permission().get_permission(permission_id)
 
-    if(permiso):
+    if(permission):
         value = request.json
 
-        if ((not request.json) or (not "id_tipoPermiso"  in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+        if ((not request.json) or (not "id_typePermission"  in request.json) or (not "id_organization" in request.json) or (not "id_ecoe" in request.json) or (not "id_station" in request.json)):
             abort(400)
 
-        id_tipoPermiso = value["id_tipoPermiso"]
-        id_organizacion = value["id_organizacion"]
+        id_typePermission = value["id_typePermission"]
+        id_organization = value["id_organization"]
         id_ecoe = value["id_ecoe"]
-        id_estacion = value["id_estacion"]
+        id_station = value["id_station"]
 
-        permiso = Permiso().get_permiso(permiso_id)
-        permiso.put_permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
+        permission = Permission().get_permission(permission_id)
+        permission.put_permission(id_typePermission, id_organization, id_ecoe, id_station)
 
-        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+        return jsonify({"id_permission": permission.id_permission, "id_typePermission": permission.id_typePermission, "id_organization": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/permission/<int:permiso_id>/', methods=['DELETE'])
-def eliminaPermiso(permiso_id):
-    permiso = Permiso().get_permiso(permiso_id)
+@app.route('/api/v1.0/permission/<permission_id>/', methods=['DELETE'])
+def delPermission(permission_id):
+    permission = Permission().get_permission(permission_id)
 
-    if (permiso):
-        permiso.delete_permiso()
-        return jsonify({"id_permiso": permiso.id_permiso, "id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    if (permission):
+        permission.delete_permission()
+        return jsonify({"id_permission": permission.id_permission, "id_typePermission": permission.id_typePermission, "id_organization": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
     else:
         abort(404)
 
 #API Usuario-Permiso
-@app.route('/api/v1.0/user/<int:usuario_id>/permission/', methods=['GET'])
-def muestraPermisosUsuario(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
+@app.route('/api/v1.0/user/<user_id>/permission/', methods=['GET'])
+def getPermUsers(user_id):
+    user = User().get_user(user_id)
 
-    if(usuario):
-        permisos = []
+    if(user):
+        permissions = []
 
-        for permiso in usuario.permisos:
-            permisos.append({
-                "id_permiso": permiso.id_permiso,
-                "id_tipoPermiso": permiso.id_tipoPermiso,
-                "id_organizacion": permiso.id_organizacion,
-                "id_ecoe": permiso.id_ecoe,
-                "id_estacion": permiso.id_estacion
+        for permission in user.permissions:
+            permissions.append({
+                "id_permission": permission.id_permission,
+                "id_typePermission": permission.id_typePermission,
+                "id_organization": permission.id_organization,
+                "id_ecoe": permission.id_ecoe,
+                "id_station": permission.id_station
             })
 
-        return json.dumps(permisos, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(permissions, indent=1, ensure_ascii=False).encode('utf8')
     else:
         abort(404)
 
-@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['GET'])
-def muestraUsuarioPerm(usuario_id, permiso_id):
-    usuario = Usuario().get_usuario(usuario_id)
+@app.route('/api/v1.0/user/<user_id>/permission/<permission_id>/', methods=['GET'])
+def getPermUser(user_id, permission_id):
+    user = User().get_user(user_id)
 
-    if (usuario):
-        if(usuario.existe_usuario_permiso(permiso_id)):
-            permiso = Permiso().get_permiso(permiso_id)
-            return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion" : permiso.id_estacion})
+    if (user):
+        if(user.exist_user_permission(permission_id)):
+            permission = Permission().get_permission(permission_id)
+            return jsonify(
+                {"id_permission": permission.id_permission, "id_typePermission": permission.id_typePermission, "id_organization": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
         else:
             abort(404)
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/user/<int:usuario_id>/permission/', methods=['POST'])
-def insertaUsuarioPerm(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
+@app.route('/api/v1.0/user/<user_id>/permission/', methods=['POST'])
+def postPermUser(user_id):
+    user = User().get_user(user_id)
 
-    if(usuario):
+    if(user):
         value = request.json
 
-        if ((not request.json) or (not "id_tipoPermiso"  in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_estacion" in request.json)):
+        if ((not request.json) or (not "id_typePermission"  in request.json) or (not "id_organizacion" in request.json) or (not "id_ecoe" in request.json) or (not "id_station" in request.json)):
             abort(400)
 
-        id_tipoPermiso = value["id_tipoPermiso"]
+        id_typePermission = value["id_typePermission"]
         id_organizacion = value["id_organizacion"]
         id_ecoe = value["id_ecoe"]
-        id_estacion = value["id_estacion"]
+        id_station = value["id_station"]
 
 
-        permisoIn = Permiso(id_tipoPermiso, id_organizacion, id_ecoe, id_estacion)
-        permisoIn.post_permiso()
+        permissionIn = Permission(id_typePermission, id_organizacion, id_ecoe, id_station)
+        permissionIn.post_permission()
 
-        permiso = Permiso().get_ult_permiso()
-        usuario.put_usuario_permisos(permiso)
+        permission = Permission().get_last_permission()
+        user.put_user_permission(permission)
 
-        return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+        return jsonify({"id_permission": permission.id_permission, "id_typePermission": permission.id_typePermission, "id_organizacion": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
 
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['PUT'])
-def anyadeUsuarioPerm(usuario_id, permiso_id):
-    usuario = Usuario().get_usuario(usuario_id)
+@app.route('/api/v1.0/user/<user_id>/permission/<permission_id>/', methods=['PUT'])
+def putPermUser(user_id, permission_id):
+    user = User().get_user(user_id)
 
-    if(usuario):
-        permiso = Permiso().get_permiso(permiso_id)
-        if(permiso):
-            if(usuario.existe_usuario_permiso(permiso_id)==False):
-                usuario.put_usuario_permisos(permiso)
-                return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+    if(user):
+        permission = Permission().get_permission(permission_id)
+        if(permission):
+            if(user.exist_user_permission(permission_id)==False):
+                user.put_user_permission(permission)
+                return jsonify({"id_permission": permission.id_permission , "id_typePermission": permission.id_typePermission, "id_organization": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_station": permission.id_station})
             else:
                 abort(405)
 
@@ -158,15 +159,15 @@ def anyadeUsuarioPerm(usuario_id, permiso_id):
     else:
         abort(404)
 
-@app.route('/api/v1.0/user/<int:usuario_id>/permission/<int:permiso_id>/', methods=['DELETE'])
-def eliminaUsuarioPerm(usuario_id, permiso_id):
-    usuario = Usuario().get_usuario(usuario_id)
-    if(usuario):
-        if(usuario.existe_usuario_permiso(permiso_id)):
-            permiso = Permiso().get_permiso(permiso_id)
-            usuario.delete_usuario_permiso(permiso)
+@app.route('/api/v1.0/user/<user_id>/permission/<permission_id>/', methods=['DELETE'])
+def eliminaUsuarioPerm(user_id, permission_id):
+    user = User().get_user(user_id)
+    if(user):
+        if(user.exist_user_permission(permission_id)):
+            permission = Permission().get_permission(permission_id)
+            user.delete_user_permission(permission)
 
-            return jsonify({"id_tipoPermiso": permiso.id_tipoPermiso, "id_organizacion": permiso.id_organizacion, "id_ecoe": permiso.id_ecoe, "id_estacion": permiso.id_estacion})
+            return jsonify({"id_permission": permission.id_permission,"id_tipoPermiso": permission.id_typePermission, "id_organizacion": permission.id_organization, "id_ecoe": permission.id_ecoe, "id_estacion": permission.id_station})
         else:
             abort(404)
     else:

@@ -1,95 +1,93 @@
 from ws import *
-from model import Organizacion, Usuario
+from model import Organization, User
 
 #Rutas de Organizacion
 @app.route('/api/v1.0/organization/', methods=['GET'])
-def muestraOrganizaciones():
-    organizaciones = []
+def getOrganizations():
+    organizations = []
 
-    for organizacion in Organizacion.query.all():
-        organizaciones.append({
-            "id_organizacion": organizacion.id_organizacion,
-            "nombre": organizacion.nombre,
+    for organization in Organization.query.all():
+        organizations.append({
+            "id_organizacion": organization.id_organizacion,
+            "name": organization.name,
         })
 
-    return json.dumps(organizaciones, indent=1, ensure_ascii=False).encode('utf8')
+    return json.dumps(organizations, indent=1, ensure_ascii=False).encode('utf8')
 
 
-@app.route('/api/v1.0/organizacion/<int:organizacion_id>/', methods=['GET'])
-def muestraOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+@app.route('/api/v1.0/organization/<int:organization_id>/', methods=['GET'])
+def getOrganization(organization_id):
+    organization = Organization().get_organization(organization_id)
 
-    if (organizacion):
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+    if (organization):
+        return jsonify({"id_organization": organization.id_organization, "name": organization.name})
 
     else:
         abort(404)
 
 
 @app.route('/api/v1.0/organization/', methods=['POST'])
-def insertaOrganizacion():
+def postOrganization():
     value = request.json
 
-    if not request.json or not "nombre" in request.json:
+    if not request.json or not "name" in request.json:
         abort(400)
 
-    nombre = value["nombre"]
+    name = value["name"]
 
-    orgIn = Organizacion(nombre)
-    orgIn.post_organizacion()
+    orgIn = Organization(name)
+    orgIn.post_organization()
 
-    org = Organizacion().get_ult_organizacion()
-    return jsonify({"id": org.id_organizacion, "nombre": org.nombre})
+    organization = Organization().get_last_organization()
+    return jsonify({"id": organization.id_organization, "name": organization.name})
 
 
-@app.route('/api/v1.0/organization/<int:organizacion_id>/', methods=['PUT'])
-def modificaOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+@app.route('/api/v1.0/organization/<organization_id>/', methods=['PUT'])
+def putOrganization(organization_id):
+    organization = Organization().get_organization(organization_id)
 
-    if (organizacion):
+    if (organization):
         value = request.json
 
-        if not request.json or not "nombre" in request.json:
+        if not request.json or not "name" in request.json:
             abort(400)
 
-        nombre = value["nombre"]
+        name = value["name"]
 
+        organization.put_organization(name)
 
-
-        organizacion.put_organizacion(nombre)
-
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+        return jsonify({"id_organizacion": organization.id_organization, "name": organization.name})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/organization/<int:organizacion_id>/', methods=['DELETE'])
-def eliminaOrganizacion(organizacion_id):
-    organizacion = Organizacion().get_organizacion(organizacion_id)
+@app.route('/api/v1.0/organization/<organization_id>/', methods=['DELETE'])
+def delOrganization(organization_id):
+    organization = Organization().get_organization(organization_id)
 
-    if (organizacion):
-        organizacion.delete_organizacion()
-        return jsonify({"id_organizacion": organizacion.id_organizacion, "nombre": organizacion.nombre})
+    if (organization):
+        organization.delete_organization()
+        return jsonify({"id_organizacion": organization.id_organizacion, "nombre": organization.nombre})
     else:
         abort(404)
 
 
 
 #Rutas de Usuarios-Organizacion
-@app.route('/api/v1.0/user/<int:usuario_id>/organization/', methods=['GET'])
-def muestraOrganizacionesUsu(usuario_id):
-    usuario = Usuario().get_usuario(usuario_id)
-    if(usuario):
-        organizaciones = Organizacion().get_usuario_organizaciones(usuario_id)
-        estructura = []
+@app.route('/api/v1.0/user/<user_id>/organization/', methods=['GET'])
+def getOrgUsu(user_id):
+    user = User().get_user(user_id)
+    if(user):
+        organizations = Organization().get_user_organization(user_id)
+        jsonOut = []
 
-        for organizacion in organizaciones:
-            estructura.append({
-                "id_organizacion": organizacion.id_organizacion,
-                "nombre": organizacion.nombre,
+        for organization in organizations:
+            jsonOut.append({
+                "id_organization": organization.id_organization,
+                "name": organization.name,
             })
 
-        return json.dumps(estructura, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(jsonOut, indent=1, ensure_ascii=False).encode('utf8')
 
     else:
         abort(404)

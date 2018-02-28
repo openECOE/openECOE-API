@@ -11,7 +11,7 @@ class ECOE(db.Model):
     cronometros = db.relationship('Cronometro', secondary=ecoeCrono, lazy='subquery', backref=db.backref('ecoesCro', lazy='dynamic'))
     estaciones = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
     dias = db.relationship('Dia', backref='dias', lazy='dynamic')
-    id_organizacion = db.Column(db.Integer, db.ForeignKey('organizacion.id_organizacion'))
+    id_organizacion = db.Column(db.Integer, db.ForeignKey('org.id_organization'))
 
     def __init__(self, nombre='', id_organizacion=0):
         self.nombre = nombre
