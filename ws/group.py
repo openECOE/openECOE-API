@@ -1,100 +1,114 @@
 from ws import *
 from model import Station, Group
 
-# Relacion Estacion-Grupos
-@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['GET'])
-def obtenGrupos(estacion_id):
-    estacion = Station().get_station(estacion_id)
+def existGroupStation(group, station_id, ecoe_id):
+    if(group):
+        if(group.id_station == station_id):
+            station = Station().get_station(station_id)
 
-    if (estacion):
-        grupos = []
-        for grupo in estacion.grupos:
-            grupos.append({
-                "id_grupo": grupo.id_grupo,
-                "nombre": grupo.nombre
+            if(existStationEcoe(station, ecoe_id)):
+                return True
+            else:
+                return False
+
+        else:
+            return False
+    else:
+        return False
+
+def existStationEcoe(station, ecoe_id):
+    if (station):
+        if (station.id_ecoe == ecoe_id):
+            return True
+        else:
+            return False
+    else:
+        return False
+
+# Relacion Estacion-Grupos
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/groups/', methods=['GET'])
+def getGroups(ecoe_id, station_id):
+    station = Station().get_station(station_id)
+
+    if (existStationEcoe(station, ecoe_id)):
+        groups = []
+        for group in station.groups:
+            groups.append({
+                "id_group": group.id_group,
+                "name": group.name
             })
 
-        return json.dumps(grupos, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(groups, indent=1, ensure_ascii=False).encode('utf8')
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['GET'])
-def obtenGrupo(estacion_id, grupo_id):
-    estacion = Station().get_station(estacion_id)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/groups/<int:group_id>/', methods=['GET'])
+def getGroup(ecoe_id, station_id, group_id):
+    group = Group().get_group(group_id)
 
-    if (estacion):
-        if (estacion.exist_station_groups()):
-            grupo = Group().get_grupo(grupo_id)
-            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
-        else:
-            abort(404)
-
+    if (existGroupStation(group, station_id, ecoe_id)):
+        return jsonify({"id_grupo": group.id_group, "nombre": group.name})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/', methods=['POST'])
-def insertaGrupo(estacion_id):
-    estacion = Station().get_station(estacion_id)
 
-    if (estacion):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/groups/', methods=['POST'])
+def postGroup(ecoe_id, station_id):
+    station = Station().get_station(station_id)
+
+    if (existStationEcoe(station, ecoe_id)):
 
         value = request.json
 
-        if ((not request.json) or (not "nombre" in request.json)):
+        if ((not request.json) or (not "name" in request.json)):
             abort(400)
 
-        nombre = value["nombre"]
+        name = value["name"]
 
-        grupoIn = Group(nombre=nombre, id_estacion=estacion_id)
-        grupoIn.post_grupo()
+        groupIn = Group(name=name, id_station=station_id)
+        groupIn.post_group()
 
-        grupo = Group().get_ult_grupo()
+        group = Group().get_last_group()
 
-        return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['PUT'])
-def modificaGrupo(estacion_id, grupo_id):
-    estacion = Station().get_station(estacion_id)
-
-    if (estacion):
-        if (estacion.exist_station_groups(grupo_id)):
-            value = request.json
-
-            if ((not request.json) or (not "nombre" in request.json) or (not "id_estacion" in request.json)):
-                abort(400)
-
-            nombre = value["nombre"]
-            id_estacion = value["id_estacion"]
-
-            grupo = Group().get_grupo(grupo_id)
-            grupo.put_grupo(nombre, id_estacion)
-
-            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
-        else:
-            abort(404)
+        return jsonify({"id_grupo": group.id_group, "name": group.name})
 
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/estacion/<int:estacion_id>/grupos/<int:grupo_id>/', methods=['DELETE'])
-def eliminaGrupo(estacion_id, grupo_id):
-    estacion = Station().get_station(estacion_id)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/groups/<group_id>/', methods=['PUT'])
+def putGroup(ecoe_id, station_id, group_id):
+    group = Group().get_group(group_id)
 
-    if (estacion):
-        if (estacion.exist_station_groups(grupo_id)):
-            grupo = Group().get_grupo(grupo_id)
-            grupo.delete_grupo()
+    if(existGroupStation(group, station_id, ecoe_id)):
+        value = request.json
 
-            return jsonify({"id_grupo": grupo.id_grupo, "nombre": grupo.nombre})
-        else:
-            abort(404)
+        if ((not request.json) or (not "name" in request.json) or (not "id_station" in request.json)):
+            abort(400)
+
+        name = value["name"]
+        id_station = value["id_station"]
+
+        group = Group().get_group(group_id)
+        group.put_group(name, id_station)
+
+        return jsonify({"id_grupo": group.id_group, "name": group.name})
+
+
+    else:
+        abort(404)
+
+
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/groups/<int:grupo_id>/', methods=['DELETE'])
+def delGroup(ecoe_id, station_id, group_id):
+    group = Group().get_group(group_id)
+
+    if (existGroupStation(group, station_id, ecoe_id)):
+        group.delete_grupo()
+
+        return jsonify({"id_grupo": group.id_group, "nombre": group.name})
 
     else:
         abort(404)

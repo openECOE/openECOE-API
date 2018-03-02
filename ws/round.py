@@ -38,7 +38,7 @@ def muestraRueda(turno_id, rueda_id):
 
 
 
-@app.route('/api/v1.0/turnos/<int:turno_id>/ruedas/', methods=['POST'])
+@app.route('/api/v1.0/ECOE/<int:ecoe:id>/dia/<int:dia>/turnos/<int:turno_id>/ruedas/', methods=['POST'])
 def insertaRueda(turno_id):
     turno = Shift().get_turno(turno_id)
 

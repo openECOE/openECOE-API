@@ -17,4 +17,11 @@ from ws import day
 from ws import shift
 from ws import round
 
+class OrganizationResource(ModelResource):
+    class Meta:
+        model = Organization
+
+api = Api(app)
+api.add_resource(OrganizationResource)
+
 app.run(port=5000, debug=True)

@@ -2,98 +2,94 @@ from ws import *
 from model import ECOE, Day
 
 # RUTAS DE DIA
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/', methods=['GET'])
-def muestraDias(ecoe_id):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/', methods=['GET'])
+def getDays(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if(ecoe):
-        dias = []
+        days = []
 
-        for dia in ecoe.dias:
-            dias.append({
-                "id_dia" : dia.id_dia,
-                "fecha" : dia.fecha.strftime("%Y-%m-%d")
+        for day in ecoe.days:
+            days.append({
+                "id_day" : day.id_day,
+                "date" : day.date.strftime("%Y-%m-%d")
             })
 
-        return json.dumps(dias, indent=1, ensure_ascii=False).encode('utf8')
+        return json.dumps(days, indent=1, ensure_ascii=False).encode('utf8')
 
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/', methods=['GET'])
-def muestraDia(ecoe_id, dia_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/<day_id>/', methods=['GET'])
+def getDay(ecoe_id, day_id):
+   day = Day().get_day(day_id)
 
-    dia = Day().get_day(dia_id)
+   if(day==False):
+       abort(404)
 
-    if (ecoe):
-
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
-
-    else:
+   if (ecoe_id==day.id_ecoe):
+       return jsonify({"id_day": day.id_day, "date": day.date.strftime("%Y-%m-%d")})
+   else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/', methods=['POST'])
-def insertaDia(ecoe_id):
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/', methods=['POST'])
+def postDay(ecoe_id):
     ecoe = ECOE().get_ECOE(ecoe_id)
 
     if (ecoe):
         value = request.json
 
         # comprobar json
-        if ((not request.json) or (not "fecha" in request.json)):
+        if ((not request.json) or (not "date" in request.json)):
             abort(400)
 
-        fecha = value["fecha"]
+        date = value["date"]
 
-        diaIn = Day(date=fecha, id_ecoe=ecoe_id)
-        diaIn.post_day()
+        dayIn = Day(date=date, id_ecoe=ecoe_id)
+        dayIn.post_day()
 
-        dia = Day().get_last_day()
+        day = Day().get_last_day()
 
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
+        return jsonify({"id_dia": day.id_day, "date": day.date.strftime("%Y-%m-%d")})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/', methods=['PUT'])
-def modificaDia(ecoe_id, dia_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/<day_id>/', methods=['PUT'])
+def putDay(ecoe_id, day_id):
+    day = Day().get_day(day_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_dias(dia_id) == False):
+    if (day):
+        if (ecoe_id != day.id_ecoe):
             abort(404)
-
-        dia = Day().get_day(dia_id)
 
         value = request.json
 
-        if ((not request.json) or (not "fecha" in request.json) or (not "id_ecoe" in request.json)):
+        if ((not request.json) or (not "date" in request.json) or (not "id_ecoe" in request.json)):
             abort(400)
 
-        fecha = value["fecha"]
+        date = value["date"]
         id_ecoe = value["id_ecoe"]
 
-        dia.put_day(fecha, id_ecoe)
+        day.put_day(date, id_ecoe)
 
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
+        return jsonify({"id_dia": day.id_day, "date": day.date.strftime("%Y-%m-%d")})
     else:
         abort(404)
 
 
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/dias/<int:dia_id>/', methods=['DELETE'])
-def eliminaDia(ecoe_id, dia_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
+@app.route('/api/v1.0/ECOE/<int:ecoe_id>/day/<day_id>/', methods=['DELETE'])
+def delDay(ecoe_id, day_id):
+    day = Day().get_day(day_id)
 
-    if (ecoe):
-        if (ecoe.existe_ecoe_dias(dia_id) == False):
+    if (day):
+        if (day.id_ecoe!=ecoe_id):
             abort(400)
 
-        dia = Day().get_day(dia_id)
-        dia.delete_day()
-        return jsonify({"id_dia": dia.id_dia, "fecha": dia.fecha.strftime("%Y-%m-%d")})
+        day.delete_day()
+        return jsonify({"id_dia": day.id_day, "fecha": day.date.strftime("%Y-%m-%d")})
     else:
         abort(404)
 

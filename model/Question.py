@@ -10,7 +10,7 @@ class Question(db.Model):
     area = db.relationship('Area', backref='area')
     ref = db.Column(db.String(255))
     option_type = db.Column(db.String(500))
-    options = db.relationship('Opcion', backref='opciones', lazy='dynamic')
+    options = db.relationship('Option', backref='opciones', lazy='dynamic')
 
     def __init__(self, referencia='', tipo_opcion='', id_grupo=0):
         self.ref = referencia
@@ -57,7 +57,7 @@ class Question(db.Model):
         if(area):
             id_ecoe_new = area.id_ecoe
 
-            grupo = Grupo().get_grupo(self.id_grupo)
+            grupo = Grupo().get_group(self.id_grupo)
             estacion = Estacion().get_station(grupo.id_estacion)
             id_ecoe_old = estacion.id_ecoe
 

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_potion import Api, ModelResource
 
 from flask import jsonify, request
 

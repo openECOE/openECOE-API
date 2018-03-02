@@ -3,7 +3,7 @@ from model import Group, Area, Question
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['GET'])
 def obtenPreguntas(grupo_id):
-    grupo = Group().get_grupo(grupo_id)
+    grupo = Group().get_group(grupo_id)
 
     if (grupo):
         preguntas = []
@@ -21,7 +21,7 @@ def obtenPreguntas(grupo_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['GET'])
 def obtenPregunta(grupo_id, pregunta_id):
-    grupo = Group().get_grupo(grupo_id)
+    grupo = Group().get_group(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
@@ -36,7 +36,7 @@ def obtenPregunta(grupo_id, pregunta_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['POST'])
 def insertaPregunta(grupo_id):
-    grupo = Group().get_grupo(grupo_id)
+    grupo = Group().get_group(grupo_id)
 
     if (grupo):
         value = request.json
@@ -60,7 +60,7 @@ def insertaPregunta(grupo_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['PUT'])
 def modificaPregunta(grupo_id, pregunta_id):
-    grupo = Group().get_grupo(grupo_id)
+    grupo = Group().get_group(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):
@@ -86,7 +86,7 @@ def modificaPregunta(grupo_id, pregunta_id):
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/<int:pregunta_id>/', methods=['DELETE'])
 def eliminaPregunta(grupo_id, pregunta_id):
-    grupo = Group().get_grupo(grupo_id)
+    grupo = Group().get_group(grupo_id)
 
     if (grupo):
         if (grupo.existe_grupo_pregunta(pregunta_id)):

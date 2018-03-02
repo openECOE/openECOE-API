@@ -9,10 +9,10 @@ class ECOE(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     areas = db.relationship('Area', backref='areas', lazy='dynamic')
-    students = db.relationship('Alumno', backref='alumnos', lazy='dynamic')
-    chronometers = db.relationship('Cronometro', secondary=ecoechro, lazy='subquery', backref=db.backref('ecoesCro', lazy='dynamic'))
-    stations = db.relationship('Estacion', backref='estaciones', lazy='dynamic')
-    days = db.relationship('Dia', backref='dias', lazy='dynamic')
+    students = db.relationship('Student', backref='alumnos', lazy='dynamic')
+    chronometers = db.relationship('Chronometer', secondary=ecoechro, lazy='subquery', backref=db.backref('ecoesChro', lazy='dynamic'))
+    stations = db.relationship('Station', backref='estaciones', lazy='dynamic')
+    days = db.relationship('Day', backref='dias', lazy='dynamic')
     id_organization = db.Column(db.Integer, db.ForeignKey('org.id_organization'))
 
     def __init__(self, name='', id_organization=0):

@@ -8,7 +8,7 @@ def getOrganizations():
 
     for organization in Organization.query.all():
         organizations.append({
-            "id_organizacion": organization.id_organizacion,
+            "id_organization": organization.id_organization,
             "name": organization.name,
         })
 
@@ -56,7 +56,7 @@ def putOrganization(organization_id):
 
         organization.put_organization(name)
 
-        return jsonify({"id_organizacion": organization.id_organization, "name": organization.name})
+        return jsonify({"id_organization": organization.id_organization, "name": organization.name})
     else:
         abort(404)
 
@@ -67,7 +67,7 @@ def delOrganization(organization_id):
 
     if (organization):
         organization.delete_organization()
-        return jsonify({"id_organizacion": organization.id_organizacion, "nombre": organization.nombre})
+        return jsonify({"id_organization": organization.id_organization, "name": organization.name})
     else:
         abort(404)
 
