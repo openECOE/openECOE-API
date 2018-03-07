@@ -3,3 +3,4 @@ PyMySQL
 Flask-Rest
 flask-potion
 flask-migrate
+flask_script
