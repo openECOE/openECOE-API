@@ -2,3 +2,4 @@ Flask-SQLAlchemy
 PyMySQL
 Flask-Rest
 flask-potion
+flask-migrate
