@@ -1,7 +1,7 @@
 from model import *
 from ws import app
 
-#These imports are necesary, if you don´t do the imports, it won't recognize the URIs
+#These imports are necesary, if you don't do the imports, it won't recognize the URIs
 from ws import organization
 from ws import user
 from ws import permission
