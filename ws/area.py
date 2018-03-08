@@ -1,4 +1,9 @@
-from ws import *
+from ws import app
+
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort
+
 from model import ECOE, Area
 
 def existEcoeArea(area, ecoe_id):

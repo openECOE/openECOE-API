@@ -1,5 +1,4 @@
 from ws import db
-from model import User, ECOE
 
 orguser = db.Table('orguser', db.Column('id_organization', db.Integer, db.ForeignKey('org.id_organization'), primary_key=True), db.Column('id_user', db.Integer, db.ForeignKey('user.id_user'), primary_key=True))
 

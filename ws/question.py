@@ -1,5 +1,10 @@
-from ws import *
-from model import Group, Area, Question
+from ws import app
+
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort
+
+from model import Group, Question
 
 @app.route('/api/v1.0/grupos/<int:grupo_id>/pregunta/', methods=['GET'])
 def obtenPreguntas(grupo_id):

@@ -1,5 +1,10 @@
-from ws import *
-from model import Organization, User
+from ws import app
+
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort
+
+from model import Organization
 
 #Rutas de Organizacion
 @app.route('/api/v1.0/organization/', methods=['GET'])

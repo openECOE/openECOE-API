@@ -1,4 +1,3 @@
-from model import *
 from ws import app
 
 #These imports are necesary, if you don't do the imports, it won't recognize the URIs
@@ -17,7 +16,6 @@ from ws import student
 from ws import day
 from ws import shift
 from ws import round
-
 
 app.run(port=5000, debug=True)
 

@@ -1,7 +1,8 @@
 from ws import db
 from model import Permission
 
-from Organization import *
+from model import Organization
+from .Organization import orguser
 
 userperm = db.Table('userperm', db.Column('id_user', db.Integer, db.ForeignKey('user.id_user'), primary_key=True), db.Column('id_permission', db.Integer, db.ForeignKey('perm.id_permission'), primary_key=True))
 

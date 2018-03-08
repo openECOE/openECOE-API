@@ -1,4 +1,5 @@
-from ws import db, datetime
+from ws import db
+
 from model import Shift
 
 class Day(db.Model):

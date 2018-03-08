@@ -1,4 +1,9 @@
-from ws import *
+from ws import app
+
+from flask import jsonify, request
+import json
+from werkzeug.exceptions import abort
+
 from model import Shift, Round
 
 # RUTAS DE TURNO
