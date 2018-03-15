@@ -1,7 +1,9 @@
-from ws import app
+from model import app
+
 from model.Organization import Organization
 from model.ECOE import ECOE
-from flask_potion import Api, ModelResource, fields
+
+from flask_potion import Api
 from flask_potion.routes import Relation
 
 # #These imports are necesary, if you don't do the imports, it won't recognize the URIs
@@ -23,22 +25,13 @@ from flask_potion.routes import Relation
 
 api = Api(app)
 
-class EcoeResource(ModelResource):
-    class Meta:
-        model = ECOE
 
-    class Schema:
-        organization = fields.ToOne('org')
 
-api.add_resource(EcoeResource)
+# api.add_resource(EcoeResource)
+#
+#
+#
+# api.add_resource(OrganizationResource)
 
-class OrganizationResource(ModelResource):
-    ecoes = Relation('ecoe')
-
-    class Meta:
-        model = Organization
-
-api.add_resource(OrganizationResource)
-
-app.run(port=5000, debug=True)
+# app.run(port=5000, debug=True)
 

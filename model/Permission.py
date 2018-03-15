@@ -1,4 +1,4 @@
-from ws import db
+from model import db
 
 class Permission(db.Model):
     __tablename__ = "perm"

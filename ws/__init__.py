@@ -1,9 +1,4 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
+from flask_potion import Api, ModelResource, fields
+from flask_potion.routes import Relation
 
-app = Flask(__name__)
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////Users/angelsegura/PycharmProjects/openECOE-API/ecoe.db'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root@localhost/openECOE'
-
-db = SQLAlchemy(app)
-
+api = Api(app)
