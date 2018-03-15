@@ -7,5 +7,5 @@ class Area(db.Model):
 
     id_area = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    id_ecoe = db.Column(db.Integer, db.ForeignKey("ecoe.id"), nullable=False)
-    ecoe = db.relationship("ECOE", backref=backref('areas', lazy='dynamic'))
+    id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
+    ecoe = db.relationship(ECOE, backref=backref('ecoes', lazy='dynamic'))
