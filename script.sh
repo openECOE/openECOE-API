@@ -13,7 +13,7 @@ apt-get install -y mariadb-server-5.5
 systemctl start mariadb.service
 systemctl enable mariadb.service
 
-git clone http://atlas.umh.es/openECOE/openECOE-API.git
+git clone http://amoreno:3F**F\&SRjYsG@atlas.umh.es/openECOE/openECOE-API.git
 
 #Falta por eliminar la iteración con el usuario
 # Usuario: Segura
