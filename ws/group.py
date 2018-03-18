@@ -1,8 +1,11 @@
 from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 
 from model.Group import Group
 
 class GroupResource(ModelResource):
+    questions = Relation('ques')
+
     class Meta:
         model = Group
 
