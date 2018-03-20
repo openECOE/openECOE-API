@@ -1,0 +1,19 @@
+venv_path: "/home/vagrant/venv"
+requirements_path: "/vagrant/requirements.txt"
+database_name: "openECOE-API"
+
+mysql_packages:
+  - mariadb-client
+  - mariadb-server
+  - python-mysqldb
+
+mysql_root_password: 1234567890
+mysql_databases:
+  - name: "{{database_name}}"
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: openecoe
+    host: "%"
+    password: 1234567890
+    priv: "{{database_name}}.*:ALL"

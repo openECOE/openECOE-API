@@ -68,3 +68,4 @@ modules.xml
 migrations/
 .vagrant/
 venv/
+setup.retry
