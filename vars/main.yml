@@ -7,7 +7,7 @@ mysql_packages:
   - mariadb-server
   - python-mysqldb
 
-mysql_root_password: 1234567890
+mysql_root_password: "J6Xc3H03lKnzol$CMdx!"
 mysql_databases:
   - name: "{{database_name}}"
     encoding: latin1
@@ -15,5 +15,5 @@ mysql_databases:
 mysql_users:
   - name: openecoe
     host: "%"
-    password: 1234567890
+    password: "r1HelaXAqnwidN^gm#27"
     priv: "{{database_name}}.*:ALL"
