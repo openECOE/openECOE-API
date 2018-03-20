@@ -1,7 +1,7 @@
-from ws import db
+from model import db
 from sqlalchemy.orm import backref
 
-from model import Round, ECOE
+from model.ECOE import ECOE
 
 class Student(db.Model):
     __tablename__="stu"
@@ -10,7 +10,7 @@ class Student(db.Model):
     name = db.Column(db.String(255))
     dni = db.Column(db.String(25))
     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
-    ecoe = db.relationship("ECOE", backref=backref('studentsecoe', lazy='dynamic'))
-    id_round = db.Column(db.Integer, db.ForeignKey(Round.id_round))
-    round = db.relationship("Round", backref=backref('studentsround', lazy='dynamic'))
+    ecoe = db.relationship(ECOE, backref=backref('students', lazy='dynamic'))
+   # id_round = db.Column(db.Integer, db.ForeignKey(Round.id_round))
+   # round = db.relationship("Round", backref=backref('studentsround', lazy='dynamic'))
 

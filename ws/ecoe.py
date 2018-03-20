@@ -1,8 +1,13 @@
 from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 
-from model import ECOE
+from model.ECOE import ECOE
 
 class EcoeResource(ModelResource):
+    areas = Relation('area')
+    students = Relation('stu')
+    stations = Relation('sta')
+
     class Meta:
         model = ECOE
 
