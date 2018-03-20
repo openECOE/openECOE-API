@@ -65,3 +65,7 @@ modules.xml
 
 
 # End of https://www.gitignore.io/api/pycharm+iml
+migrations/
+.vagrant/
+venv/
+setup.retry
