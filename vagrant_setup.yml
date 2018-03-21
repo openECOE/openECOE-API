@@ -7,3 +7,4 @@
   roles:
     - {role: python}
     - {role: geerlingguy.mysql}
+    - {role: franklinkim.environment}
