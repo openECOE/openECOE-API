@@ -11,11 +11,11 @@ class Question(db.Model):
     group = db.relationship(Group, backref=backref('questions', lazy='dynamic'))
     id_area = db.Column(db.Integer, db.ForeignKey(Area.id_area), nullable=False)
     area = db.relationship(Area, backref='area') #Esta relación no debe de ser inversa
-    ref = db.Column(db.String(255))
-    option_type = db.Column(db.String(500))
+    wording = db.Column(db.String(500))
+    option_type = db.Column(db.String(255))
 
-    def __init__(self, ref='', option_type='', id_group=0, id_area=0):
-        self.ref = ref
+    def __init__(self, wording='', option_type='', id_group=0, id_area=0):
+        self.wording = wording
         self.option_type = option_type
         self.id_group = id_group
         self.id_area = id_area
@@ -36,8 +36,10 @@ class Question(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def path_question(self, ref, option_type, id_group, id_area):
-        self.ref = ref
-        self.option_type = option_type
-        self.id_group = id_group
-        self.id_area = id_area
+    def path_question(self, newQuestion):
+        self.wording = newQuestion.wording
+        self.option_type = newQuestion.option_type
+        self.id_group = newQuestion.id_group
+        self.id_area = newQuestion.id_area
+
+        db.session.commit()

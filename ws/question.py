@@ -21,37 +21,69 @@ class QuestionResource(ModelResource):
         group = fields.ToOne('group')
         area = fields.ToOne('area')
 
-@app.route('/ques', methods=['POST'])
-def postQuestion():
+def ifQuestion(area, group):
+    areaAux = Area().get_area(area)
+    if (areaAux):
+        groupAux = Group().get_group(group)
+        if (groupAux):
+            stationAux = Station().get_station(groupAux.id_station)
+            if (stationAux):
+                if (areaAux.id_ecoe == stationAux.id_ecoe):
+                    return True
+    return False
+
+def inJsonQuestion():
     value = request.json
 
-    if ((not request.json) or (not "ref" in request.json) or (not "option_type" in request.json) or (not "area" in request.json) or (not "group" in request.json)):
+    if ((not request.json) or (not "wording" in request.json) or (not "option_type" in request.json) or (
+    not "area" in request.json) or (not "group" in request.json)):
         abort(400)
 
-    ref = value["ref"]
+    wording = value["wording"]
     option_type = value["option_type"]
     area = value["area"]
     group = value["group"]
 
-    areaAux = Area().get_area(area)
-    groupAux = Group().get_group(group)
-    stationAux = Station().get_station(groupAux.id_station)
-
-    if((areaAux == False) or (groupAux==False) or (stationAux==False)):
+    if (ifQuestion(area, group) == False):
         abort(404)
 
-    if(areaAux.id_ecoe != stationAux.id_ecoe):
+    question = Question(wording, option_type, group, area)
+
+    return question
+
+def outJsonQuestion(question):
+    myjson = jsonify({
+        "$uri": "/ques/" + str(question.id_question),
+        "wording": question.wording,
+        "option_type": question.option_type,
+        "area": {
+            "$ref": "/area/" + str(question.id_area)
+        },
+        "group": {
+            "$ref": "/group/" + str(question.id_group)
+        }
+    })
+
+    return myjson
+
+
+
+@app.route('/ques', methods=['POST'])
+def postQuestion():
+    inJsonQuestion().post_question()
+    question = Question().get_last_ques()
+
+    return outJsonQuestion(question)
+
+@app.route('/ques/<int:id>', methods=['PATCH'])
+def pathQuestion(id):
+    questionOld = Question().get_question(id)
+
+    if(questionOld):
+        questionOld.path_question(inJsonQuestion())
+        return outJsonQuestion(questionOld)
+    else:
         abort(404)
 
-    question = Question(ref, option_type, area, group)
-    question.post_question()
 
-    return "AAAAAA"
-
- #   return jsonify({
-  #      "$ref": question,
-   #     "$option_type": option_type,
-    #    "$area": area,
-     #   "$group": group
-   # })
 
