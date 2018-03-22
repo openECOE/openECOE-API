@@ -8,7 +8,7 @@ Vagrant.configure("2") do |config|
   config.vm.network "forwarded_port", guest: 5000, host: 5000
 
   config.vm.provision "ansible_local" do |ansible|
-    ansible.verbose = "v"
+    #ansible.verbose = "v"
     ansible.galaxy_role_file= "vagrant_requeriments.yml"
     ansible.playbook = "vagrant_setup.yml"
   end
