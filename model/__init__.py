@@ -5,5 +5,3 @@ from start import app
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-from .Organization import Organization
