@@ -11,6 +11,14 @@ class Station(db.Model):
 
 #    stachro = db.relationship("Stachro")
 
+    def __init__(self, name='', id_ecoe='', chronometers=[]):
+        self.name = name
+        self.id_ecoe = id_ecoe
+        self.chronometers = chronometers
+
+    def get_station(self, id):
+        station = Station.query.filter_by(id_station=id).first()
+        return station
 
 #class Stachro(db.Model):
 #    __tablename__ = "stachro"

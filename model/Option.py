@@ -11,3 +11,4 @@ class Option(db.Model):
     description = db.Column(db.String(255))
     id_question = db.Column(db.Integer, db.ForeignKey(Question.id_question), nullable=False)
     question = db.relationship(Question, backref=backref('options', lazy='dynamic'))
+
