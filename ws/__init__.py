@@ -9,9 +9,11 @@ from ws.station import StationResource
 from ws.group import GroupResource
 from ws.question import QuestionResource
 from ws.option import OptionResource
+from ws.day import DayResource
 
 api = Api(app)
 
+api.add_resource(DayResource)
 api.add_resource(OptionResource)
 api.add_resource(QuestionResource)
 api.add_resource(GroupResource)
