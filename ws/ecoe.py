@@ -7,6 +7,7 @@ class EcoeResource(ModelResource):
     areas = Relation('area')
     students = Relation('stu')
     stations = Relation('sta')
+    days = Relation('day')
 
     class Meta:
         model = ECOE
