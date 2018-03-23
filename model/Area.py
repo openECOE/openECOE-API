@@ -10,8 +10,6 @@ class Area(db.Model):
     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
     ecoe = db.relationship(ECOE, backref=backref('areas', lazy='dynamic'))
 
-    
-
     def get_area(self, id):
         area = Area.query.filter_by(id_area=id).first()
         return area

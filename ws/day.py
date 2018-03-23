@@ -11,4 +11,4 @@ class DayResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        date = fields.DateTimeString() # YYYY-MM-DDThh:mm:ssTZD (eg 1997-07-16T19:20:30+01:00)
+        date = fields.DateString() # YYYY-MM-DD (eg 1997-07-16)
