@@ -1,99 +1,12 @@
-from ws import *
+from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 
-from flask import jsonify, request
-import json
-from werkzeug.exceptions import abort
+from model.Shift import Shift
 
-from model import Day, Shift
+class ShiftResource(ModelResource):
 
-# RUTAS DE TURNO
-@app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['GET'])
-def muestraTurnos(dia_id):
-    dia = Day().get_day(dia_id)
+    class Meta:
+        model = Shift
 
-    if (dia):
-        turnos = []
-
-        for turno in dia.turnos:
-            turnos.append({
-                "id_turno": turno.id_turno,
-                "hora_inicio": turno.hora_inicio.strftime("%H:%M")
-            })
-
-        return json.dumps(turnos, indent=1, ensure_ascii=False).encode('utf8')
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['GET'])
-def muestraTurno(dia_id, turno_id):
-    dia = Day().get_day(dia_id)
-
-    if(dia):
-        if(dia.exist_day_shift(turno_id) == False):
-            abort(404)
-
-        turno = Shift().get_turno(turno_id)
-        return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
-
-    else:
-        abort(404)
-
-
-
-@app.route('/api/v1.0/dias/<int:dia_id>/turnos/', methods=['POST'])
-def insertaTurno(dia_id):
-    dia = Day().get_day(dia_id)
-
-    if(dia):
-        value = request.json
-        if ((not request.json) or (not "hora_inicio" in request.json)):
-            abort(400)
-
-        hora_inicio = value["hora_inicio"]
-
-        turnoIn = Shift(hora_inicio=hora_inicio, id_dia=dia_id)
-        turnoIn.post_turno()
-
-        turno = Shift().get_ult_turno()
-
-        return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['PUT'])
-def modificaTurno(dia_id, turno_id):
-    dia = Day().get_day(dia_id)
-
-    if(dia):
-        value = request.json
-
-        if ((not request.json) or (not "hora_inicio" in request.json) or (not "id_dia" in request.json)):
-            abort(400)
-
-        hora_inicio = value["hora_inicio"]
-        id_dia = value["id_dia"]
-
-        if(dia.exist_day_shift(turno_id)==False):
-            abort(404)
-
-        turno = Shift().get_turno(turno_id)
-        turno.put_turno(hora_inicio, id_dia)
-
-        return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/dias/<int:dia_id>/turnos/<int:turno_id>/', methods=['DELETE'])
-def eliminaTurno(dia_id, turno_id):
-    dia = Day().get_day(dia_id)
-
-    if(dia):
-        if(dia.exist_day_shift(turno_id) == False):
-            abort(404)
-        turno = Shift().get_turno(turno_id)
-        turno.delete_turno()
-        return jsonify({"id_turno": turno.id_turno, "hora_inicio": turno.hora_inicio.strftime("%H:%M")})
-    else:
-        abort(404)
+    class Schema:
+        day = fields.ToOne('day')
