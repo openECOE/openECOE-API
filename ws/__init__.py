@@ -16,6 +16,7 @@ from ws.alarm import AlarmResource
 
 api = Api(app)
 
+
 api.add_resource(AlarmResource)
 api.add_resource(ChronometerResource)
 #api.add_resource(ShiftResource)

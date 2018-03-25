@@ -6,5 +6,6 @@ from model.Chronometer import Chronometer
 class ChronometerResource(ModelResource):
     alarms = Relation('ala')
 
+
     class Meta:
         model = Chronometer
