@@ -11,3 +11,4 @@ class StationResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
+        chronometers = fields.ToMany('chro')

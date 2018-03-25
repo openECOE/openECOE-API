@@ -14,5 +14,5 @@ class EcoeResource(ModelResource):
 
     class Schema:
         organization = fields.ToOne('org')
-        chronometer = fields.ToMany('chro')
+        chronometers = fields.ToMany('chro')
 
