@@ -22,6 +22,12 @@ class Station(db.Model):
         station = Station.query.filter_by(id_station=id).first()
         return station
 
+    def get_stations(self):
+        stations = Station.query.all()
+
+        return stations
+
+
 class Stachro(db.Model):
     __tablename__ = "stachro"
 
