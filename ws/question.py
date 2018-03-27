@@ -1,5 +1,5 @@
-from flask_potion import ModelResource, fields, manager
-from flask_potion.routes import Relation, Route, FieldSet
+from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 
 from flask import jsonify, request
 from werkzeug.exceptions import abort

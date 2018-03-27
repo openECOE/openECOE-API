@@ -10,15 +10,15 @@ from ws.group import GroupResource
 from ws.question import QuestionResource
 from ws.option import OptionResource
 from ws.day import DayResource
-#from ws.shift import ShiftResource
+from ws.shift import ShiftResource
 from ws.chronometer import ChronometerResource
 from ws.alarm import AlarmResource
+from ws.round import RoundResource
 
 api = Api(app)
 
-api.add_resource(AlarmResource)
-api.add_resource(ChronometerResource)
-#api.add_resource(ShiftResource)
+api.add_resource(RoundResource)
+api.add_resource(ShiftResource)
 api.add_resource(DayResource)
 api.add_resource(OptionResource)
 api.add_resource(QuestionResource)
@@ -27,4 +27,6 @@ api.add_resource(StationResource)
 api.add_resource(StudentResource)
 api.add_resource(AreaResource)
 api.add_resource(EcoeResource)
+api.add_resource(AlarmResource)
+api.add_resource(ChronometerResource)
 api.add_resource(OrganizationResource)
