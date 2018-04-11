@@ -1,5 +1,9 @@
+from flask_login import login_required
 from flask_potion import Api
 from start import app
+import login
+
+api = Api(app, decorators=[login_required])
 
 from ws.organization import OrganizationResource
 from ws.ecoe import EcoeResource
@@ -14,8 +18,8 @@ from ws.shift import ShiftResource
 from ws.chronometer import ChronometerResource
 from ws.alarm import AlarmResource
 from ws.round import RoundResource
+from ws import user
 
-api = Api(app)
 
 api.add_resource(RoundResource)
 api.add_resource(ShiftResource)

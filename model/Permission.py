@@ -1,7 +1,7 @@
 from model import db
 
 class Permission(db.Model):
-    __tablename__ = "perm"
+    __tablename__ = 'permission'
     id_permission = db.Column(db.Integer, primary_key=True)
     id_typePermission = db.Column(db.Integer)
     id_organization = db.Column(db.Integer)

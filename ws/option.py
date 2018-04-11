@@ -7,4 +7,4 @@ class OptionResource(ModelResource):
         model = Option
 
     class Schema:
-        question = fields.ToOne('ques')
+        question = fields.ToOne('question')

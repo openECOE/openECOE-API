@@ -4,7 +4,7 @@ from model.Group import Group
 from model.Area import Area
 
 class Question(db.Model):
-    __tablename__ = "ques"
+    __tablename__ = 'question'
 
     id_question = db.Column(db.Integer, primary_key=True)
     id_group = db.Column(db.Integer, db.ForeignKey(Group.id_group), nullable=False)

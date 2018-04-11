@@ -4,6 +4,7 @@ from flask_potion.routes import Relation
 from flask import jsonify
 from werkzeug.exceptions import abort
 
+
 import json
 
 from model import app
@@ -19,7 +20,7 @@ class StationResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        chronometers = fields.ToMany('chro')
+        chronometers = fields.ToMany('chronometer')
 
 #@app.route('/sta/<int:id>/chronometers', methods=['GET']):
 #def getStations(id):
@@ -35,7 +36,7 @@ def outJsonStation(station, cod):
 
 
     myjson = {
-        "$uri": "/sta/" + str(station.id_station),
+        "$uri": "/station/" + str(station.id_station),
         "name": station.name,
         "chronometers": outJsonChronometers(classIn),
         "ecoe": {
@@ -50,7 +51,7 @@ def outJson(out):
     return myjson
 
 def outJsonChronometer(chronometer):
-    return {"$ref": "/chro/" + str(chronometer.id_chronometer)}
+    return {"$ref": "/chronometer/" + str(chronometer.id_chronometer)}
 
 def outJsonChronometers(classIn):
 
@@ -61,7 +62,7 @@ def outJsonChronometers(classIn):
 
     return classArr
 
-@app.route('/sta', methods=['GET'])
+@app.route('/station', methods=['GET'])
 def getStations():
     arrSta = []
 
@@ -81,7 +82,7 @@ def getStations():
     return json.dumps(arrSta, indent=1, ensure_ascii=False).encode('utf8')
 
 
-@app.route('/sta/<int:id>', methods=['GET'])
+@app.route('/station/<int:id>', methods=['GET'])
 def getStation(id):
     station = Station().get_station(id)
 

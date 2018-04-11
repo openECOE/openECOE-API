@@ -6,3 +6,5 @@ flask-potion
 flask-migrate
 flask_script
 flask-restful
+flask-login
+flask-principal

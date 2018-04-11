@@ -4,7 +4,7 @@ from model.Question import Question
 from sqlalchemy.orm import backref
 
 class Option(db.Model):
-    __tablename__ = "opt"
+    __tablename__ = 'option'
 
     id_option = db.Column(db.Integer, primary_key=True)
     points = db.Column(db.Integer)

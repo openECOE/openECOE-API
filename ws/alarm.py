@@ -8,4 +8,4 @@ class AlarmResource(ModelResource):
         model = Alarm
 
     class Schema:
-        chronometer = fields.ToOne('chro')
+        chronometer = fields.ToOne('chronometer')

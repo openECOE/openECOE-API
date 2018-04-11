@@ -4,7 +4,7 @@ from sqlalchemy.orm import backref
 from model.Day import Day
 
 class Shift(db.Model):
-    __tablename__="shi"
+    __tablename__ = 'shift'
 
     id_shift = db.Column(db.Integer, primary_key=True)
     start_time = db.Column(db.DATETIME)

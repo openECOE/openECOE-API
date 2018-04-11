@@ -4,7 +4,7 @@ from model import db
 from model.ECOE import ECOE
 
 class Day(db.Model):
-    __tablename__ = "day"
+    __tablename__ = 'day'
 
     id_day = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.Date, nullable=False)

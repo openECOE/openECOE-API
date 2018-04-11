@@ -4,7 +4,7 @@ from flask_potion.routes import Relation
 from model.Day import Day
 
 class DayResource(ModelResource):
-    shifts = Relation('shi')
+    shifts = Relation('shift')
 
     class Meta:
         model = Day

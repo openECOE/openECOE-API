@@ -3,7 +3,7 @@ from model import db
 from model.ECOE import ECOE
 
 class Area(db.Model):
-    __tablename__ = "area"
+    __tablename__ = 'area'
 
     id_area = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(257))

@@ -11,6 +11,6 @@ class EcoeResource(ModelResource):
         model = ECOE
 
     class Schema:
-        organization = fields.ToOne('org')
-        chronometers = fields.ToMany('chro')
-        students = fields.ToMany('stu')
+        organization = fields.ToOne('organization')
+        chronometers = fields.ToMany('chronometer')
+        students = fields.ToMany('student')

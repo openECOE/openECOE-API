@@ -4,7 +4,7 @@ from sqlalchemy.orm import backref
 
 
 class Student(db.Model):
-    __tablename__="stu"
+    __tablename__ = 'student'
 
     id_student = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))

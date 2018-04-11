@@ -5,7 +5,7 @@ from model.Chronometer import Chronometer
 
 
 class Alarm(db.Model):
-    __tablename__= "ala"
+    __tablename__ = 'alarm'
 
     id_alarm = db.Column(db.Integer, primary_key=True)
     time = db.Column(db.Integer, nullable=False)

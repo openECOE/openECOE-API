@@ -7,6 +7,5 @@ class RoundResource(ModelResource):
         model = Round
 
     class Schema:
-        shift = fields.ToOne('shi')
-        students = fields.ToMany('stu')
-        
+        shift = fields.ToOne('shift')
+        students = fields.ToMany('student')

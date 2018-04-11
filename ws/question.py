@@ -12,7 +12,7 @@ from model.Station import Station
 from model import app
 
 class QuestionResource(ModelResource):
-    options = Relation('opt')
+    options = Relation('option')
 
     class Meta:
         model = Question
@@ -53,7 +53,7 @@ def inJsonQuestion():
 
 def outJsonQuestion(question):
     myjson = jsonify({
-        "$uri": "/ques/" + str(question.id_question),
+        "$uri": "/question/" + str(question.id_question),
         "wording": question.wording,
         "option_type": question.option_type,
         "area": {
@@ -68,14 +68,14 @@ def outJsonQuestion(question):
 
 
 
-@app.route('/ques', methods=['POST'])
+@app.route('/question', methods=['POST'])
 def postQuestion():
     inJsonQuestion().post_question()
     question = Question().get_last_ques()
 
     return outJsonQuestion(question)
 
-@app.route('/ques/<int:id>', methods=['PATCH'])
+@app.route('/question/<int:id>', methods=['PATCH'])
 def pathQuestion(id):
     questionOld = Question().get_question(id)
 

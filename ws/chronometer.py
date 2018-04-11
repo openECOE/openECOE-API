@@ -5,8 +5,8 @@ from model.Chronometer import Chronometer
 
 class ChronometerResource(ModelResource):
     ecoes = Relation('ecoe')
-    alarms = Relation('ala')
-    stations = Relation('sta')
+    alarms = Relation('alarm')
+    stations = Relation('station')
 
     class Meta:
         model = Chronometer
