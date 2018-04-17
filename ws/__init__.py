@@ -1,9 +1,7 @@
-from flask_login import login_required
 from flask_potion import Api
 from start import app
-import login
 
-api = Api(app, decorators=[login_required])
+api = Api(app)
 
 from ws.organization import OrganizationResource
 from ws.ecoe import EcoeResource
