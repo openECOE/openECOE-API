@@ -1,21 +1,12 @@
-from ws import app
+from flask import Flask
+from config import Config
+# from model import db
+# from model.User import User
 
-#These imports are necesary, if you don't do the imports, it won't recognize the URIs
-from ws import organization
-from ws import user
-from ws import permission
-from ws import ecoe
-from ws import area
-from ws import alarm
-from ws import station
-from ws import group
-from ws import question
-from ws import option
-from ws import chronometer
-from ws import student
-from ws import day
-from ws import shift
-from ws import round
+app = Flask(__name__)
+app.config.from_object(Config)
 
-app.run(port=5000, debug=True)
+from ws import *
 
+# db.session.add(User(name='admin', surname='admin', is_superadmin=True))
+# db.session.commit()

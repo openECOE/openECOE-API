@@ -1,110 +1,98 @@
-from ws import app
+from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 
-from flask import jsonify, request
-import json
+from flask import jsonify
 from werkzeug.exceptions import abort
 
-from model import ECOE, Station
 
-def existEcoeAStation(station, ecoe_id):
+import json
+
+from model import app
+
+from model.Station import Station
+from model.ECOE import ECOE
+
+class StationResource(ModelResource):
+    groups = Relation('group')
+
+    class Meta:
+        model = Station
+
+    class Schema:
+        ecoe = fields.ToOne('ecoe')
+        chronometers = fields.ToMany('chronometer')
+
+#@app.route('/sta/<int:id>/chronometers', methods=['GET']):
+#def getStations(id):
+#    return True
+
+def outJsonStation(station, cod):
+
+    if(cod==0):
+        ecoe = ECOE().get_ECOE(station.id_ecoe)
+        classIn = ecoe
+    else:
+        classIn = station
+
+
+    myjson = {
+        "$uri": "/station/" + str(station.id_station),
+        "name": station.name,
+        "chronometers": outJsonChronometers(classIn),
+        "ecoe": {
+            "$ref": "/ecoe/" + str(station.id_ecoe)
+        }
+    }
+
+    return myjson
+
+def outJson(out):
+    myjson = jsonify(out)
+    return myjson
+
+def outJsonChronometer(chronometer):
+    return {"$ref": "/chronometer/" + str(chronometer.id_chronometer)}
+
+def outJsonChronometers(classIn):
+
+    classArr =[]
+
+    for chronometer in classIn.chronometers:
+        classArr.append(outJsonChronometer(chronometer))
+
+    return classArr
+
+@app.route('/station', methods=['GET'])
+def getStations():
+    arrSta = []
+
+    stations = Station().get_stations()
+
+    for station in stations:
+
+        if (len(station.chronometers) == 0):
+            cod =0
+        else:
+            cod = 1
+
+        arrSta.append(
+            outJsonStation(station, cod)
+        )
+
+    return json.dumps(arrSta, indent=1, ensure_ascii=False).encode('utf8')
+
+
+@app.route('/station/<int:id>', methods=['GET'])
+def getStation(id):
+    station = Station().get_station(id)
+
     if(station):
-        if(station.id_ecoe == ecoe_id):
-            return True
+        chronometers = station.chronometers
+
+        if(len(chronometers)==0):
+            return outJson(outJsonStation(station, 0))
         else:
-            return False
-    else:
-        return False
-
-#Relacion ECOE-Estacion
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/', methods=['GET'])
-def getStations(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        stations = []
-        for station in ecoe.stations:
-            stations.append({
-                "id_station" : station.id_station,
-                "name" : station.name
-        })
-
-        return json.dumps(stations, indent=1, ensure_ascii=False).encode('utf8')
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/', methods=['GET'])
-def getStation(ecoe_id, station_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        if(ecoe.existe_ecoe_estacion(station_id)):
-            station = Station().get_station(station_id)
-            return jsonify({"id_station": station.id_station, "name": station.name})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/', methods=['POST'])
-def postStation(ecoe_id):
-    ecoe = ECOE().get_ECOE(ecoe_id)
-
-    if(ecoe):
-        value = request.json
-
-        if ((not request.json) or (not "name" in request.json)):
-            abort(400)
-
-        name = value["name"]
-
-        chronometers = ecoe.chronometers
-
-        stationIn = Station(name, ecoe_id, chronometers)
-        stationIn.post_station()
-
-        station = Station().get_last_station()
-
-        return jsonify({"id_station" : station.id_station, "name" : station.name})
-    else:
-        abort(404)
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<station_id>/', methods=['PUT'])
-def putStation(ecoe_id, station_id):
-    station = Station().get_station(station_id)
-
-    if (station):
-        if (ecoe_id == station.id_ecoe):
-            value = request.json
-
-            if ((not request.json) or (not "name" in request.json) or (not "id_ecoe" in request.json)):
-                abort(400)
-
-            name = value["name"]
-            id_ecoe = value["id_ecoe"]
-
-            station.put_station(name, id_ecoe)
-
-            return jsonify({"id_station": station.id_station, "name": station.name, "id_ecoe": station.id_ecoe})
-        else:
-            abort(404)
-
-    else:
-        abort(404)
-
-
-@app.route('/api/v1.0/ECOE/<int:ecoe_id>/station/<int:estacion_id>/', methods=['DELETE'])
-def delStation(ecoe_id, estacion_id):
-    station = Station().get_station(estacion_id)
-
-    if (station):
-        if (ecoe_id == station.id_ecoe):
-            station.delete_station()
-
-            return jsonify({"id_station": station.id_station, "name": station.name, "id_ecoe": station.id_ecoe})
-        else:
-            abort(404)
+            return outJson(outJsonStation(station, 1))
 
     else:
         abort(404)

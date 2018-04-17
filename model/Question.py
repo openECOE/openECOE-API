@@ -1,89 +1,45 @@
-from ws import db
-from model import Area, Option
+from model import db
+from sqlalchemy.orm import backref
+from model.Group import Group
+from model.Area import Area
 
 class Question(db.Model):
-    __tablename__ = "ques"
+    __tablename__ = 'question'
 
     id_question = db.Column(db.Integer, primary_key=True)
-    id_group = db.Column(db.Integer, db.ForeignKey('group.id_group'))
-    id_area = db.Column(db.Integer, db.ForeignKey('area.id_area'))
-    area = db.relationship('Area', backref='area')
-    ref = db.Column(db.String(255))
-    option_type = db.Column(db.String(500))
-    options = db.relationship('Option', backref='opciones', lazy='dynamic')
+    id_group = db.Column(db.Integer, db.ForeignKey(Group.id_group), nullable=False)
+    group = db.relationship(Group, backref=backref('questions', lazy='dynamic'))
+    id_area = db.Column(db.Integer, db.ForeignKey(Area.id_area), nullable=False)
+    area = db.relationship(Area, backref='area') #Esta relación no debe de ser inversa
+    wording = db.Column(db.String(500))
+    option_type = db.Column(db.String(255))
 
-    def __init__(self, referencia='', tipo_opcion='', id_grupo=0):
-        self.ref = referencia
-        self.option_type = tipo_opcion
-        self.id_group = id_grupo
+    def __init__(self, wording='', option_type='', id_group=0, id_area=0):
+        self.wording = wording
+        self.option_type = option_type
+        self.id_group = id_group
+        self.id_area = id_area
 
-    def get_pregunta(self, id):
-        pregunta = Question.query.filter_by(id_pregunta=id).first()
-        return pregunta
+    def get_last_ques(self):
+        questions = Question.query.all()
 
-    def get_ult_pregunta(self):
-        preguntas = Question.query.all()
+        numquestions = len(questions)
+        question = questions[numquestions-1]
 
-        numpreguntas = len(preguntas)
-        pregunta = preguntas[numpreguntas-1]
+        return question
 
-        return pregunta
+    def get_question(self, id):
+        question = Question.query.filter_by(id_question=id).first()
+        return question
 
-    def post_pregunta(self):
+    def post_question(self):
         db.session.add(self)
         db.session.commit()
 
-    def post_pregunta_area(self, area):
-        self.area = area
+    def path_question(self, newQuestion):
+        self.wording = newQuestion.wording
+        self.option_type = newQuestion.option_type
+        self.id_group = newQuestion.id_group
+        self.id_area = newQuestion.id_area
+
         db.session.commit()
-
-    #Edita la ref de preguntas
-    def put_pregunta(self, ref, tipo_pregunta, id_grupo):
-        self.ref = ref
-        self.tipo_pregunta = tipo_pregunta
-        self.id_group = id_grupo
-        
-        db.session.commit()
-
-    def delete_pregunta(self):
-        db.session.delete(self)
-        db.session.commit()
-
-    def existe_pregunta_id_ecoe(self, id_area):
-        return True
-
-        area = Area().get_area(id_area)
-
-        if(area):
-            id_ecoe_new = area.id_ecoe
-
-            grupo = Grupo().get_group(self.id_grupo)
-            estacion = Estacion().get_station(grupo.id_estacion)
-            id_ecoe_old = estacion.id_ecoe
-
-            if(id_ecoe_new==id_ecoe_old):
-                return True
-            else:
-                return False
-
-        else:
-            return False
-
-    def existe_pregunta_opcion(self, id_opcion):
-        for opcion in self.options:
-            if(opcion.id_opcion==id_opcion):
-                return True
-        return False
-
-    def put_pregunta_area(self, id_area):
-        self.id_area = id_area
-        db.session.commit()
-
-    def delete_pregunta_area(self):
-        self.id_area = None
-        db.session.commit()
-
-
-
-
-

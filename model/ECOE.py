@@ -1,66 +1,37 @@
-from ws import db
-from model import Area, Student, Station, Day, Chronometer
+from sqlalchemy.orm import backref
 
-ecoechro = db.Table('ecoechro', db.Column('id_ecoe', db.Integer, db.ForeignKey('ecoe.id'), primary_key=True), db.Column('id_chronometer', db.Integer, db.ForeignKey('chro.id_chronometer'), primary_key=True))
+from model import db
+from model.Organization import Organization
+from model.Chronometer import Chronometer
+from model.Student import Student
 
 class ECOE(db.Model):
-    __tablename__ = "ecoe"
+    __tablename__ = 'ecoe'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
-    areas = db.relationship('Area', backref='areas', lazy='dynamic')
-    students = db.relationship('Student', backref='alumnos', lazy='dynamic')
-    chronometers = db.relationship('Chronometer', secondary=ecoechro, lazy='subquery', backref=db.backref('ecoesChro', lazy='dynamic'))
-    stations = db.relationship('Station', backref='estaciones', lazy='dynamic')
-    days = db.relationship('Day', backref='dias', lazy='dynamic')
-    id_organization = db.Column(db.Integer, db.ForeignKey('org.id_organization'))
-
-    def __init__(self, name='', id_organization=0):
-        self.name = name
-        self.id_organization = id_organization
+    id_organization = db.Column(db.Integer, db.ForeignKey(Organization.id_organization), nullable=False)
+    organization = db.relationship(Organization, backref=backref('ecoes', lazy='dynamic'))
+    chronometers = db.relationship(Chronometer, secondary='ecoe_chrono', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
+    students = db.relationship(Student, secondary='ecoe_student', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
 
     def get_ECOE(self, id):
         ecoe = ECOE.query.filter_by(id=id).first()
         return ecoe;
 
-    def get_ult_ecoe(self):
-        ecoes = ECOE.query.all()
+class ECOEChro(db.Model):
+     __tablename__ = 'ecoe_chrono'
 
-        numEcoes = len(ecoes)
-        ecoe = ecoes[numEcoes-1]
-
-        return ecoe
-
-
-    def post_ecoe(self):
-        db.session.add(self)
-        db.session.commit()
-
-    def put_ecoe(self, name, id_organization):
-        self.name = name
-        self.id_organization = id_organization
-        db.session.commit()
+     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), primary_key=True)
+     ecoe = db.relationship(ECOE, backref=backref('ecoe_chrono', lazy='dynamic'))
+     id_chronometer = db.Column(db.Integer, db.ForeignKey(Chronometer.id_chronometer), primary_key=True)
+     chronometer = db.relationship(Chronometer, backref=backref('ecoe_chrono', lazy='dynamic'))
 
 
-    def delete_ecoe(self):
-        db.session.delete(self)
-        db.session.commit()
+class ECOEStudent(db.Model):
+    __tablename__ = 'ecoe_student'
 
-
-    def exists_ecoe_chronometer(self, id_chronometer):
-        for chronometer in self.chronometers:
-            if(chronometer.id_chronometer==id_chronometer):
-                return True
-        return False
-
-
-    def put_ecoe_chronometer(self, cronometro):
-        self.chronometers.append(cronometro)
-        db.session.commit()
-
-    def delete_ecoe_chronometer(self, cronometro):
-        self.chronometers.remove(cronometro)
-        db.session.commit()
-
-
-
+    id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), primary_key=True)
+    ecoe = db.relationship(ECOE, backref=backref('ecoe_student', lazy='dynamic'))
+    id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), primary_key=True)
+    student = db.relationship(Student, backref=backref('ecoe_student', lazy='dynamic'))
