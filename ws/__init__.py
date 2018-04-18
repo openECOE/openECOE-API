@@ -16,7 +16,6 @@ from ws.shift import ShiftResource
 from ws.chronometer import ChronometerResource
 from ws.alarm import AlarmResource
 from ws.round import RoundResource
-from ws import user
 
 
 api.add_resource(RoundResource)

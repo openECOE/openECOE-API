@@ -6,3 +6,4 @@ flask-potion
 flask-migrate
 flask_script
 flask-restful
+pip==9.0.2
