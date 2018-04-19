@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 01942fd243cf
+Revision ID: 4753349d9328
 Revises: 
-Create Date: 2018-04-11 08:02:42.323973
+Create Date: 2018-04-18 08:07:00.116521
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '01942fd243cf'
+revision = '4753349d9328'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -64,14 +64,14 @@ def upgrade():
     sa.ForeignKeyConstraint(['id_ecoe'], ['ecoe.id'], ),
     sa.PrimaryKeyConstraint('id_day')
     )
-    op.create_table('ecoechro',
+    op.create_table('ecoe_chrono',
     sa.Column('id_ecoe', sa.Integer(), nullable=False),
     sa.Column('id_chronometer', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_chronometer'], ['chronometer.id_chronometer'], ),
     sa.ForeignKeyConstraint(['id_ecoe'], ['ecoe.id'], ),
     sa.PrimaryKeyConstraint('id_ecoe', 'id_chronometer')
     )
-    op.create_table('ecoestu',
+    op.create_table('ecoe_student',
     sa.Column('id_ecoe', sa.Integer(), nullable=False),
     sa.Column('id_student', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_ecoe'], ['ecoe.id'], ),
@@ -99,7 +99,7 @@ def upgrade():
     sa.ForeignKeyConstraint(['id_day'], ['day.id_day'], ),
     sa.PrimaryKeyConstraint('id_shift')
     )
-    op.create_table('station_chronometer',
+    op.create_table('station_chrono',
     sa.Column('id_station', sa.Integer(), nullable=False),
     sa.Column('id_chronometer', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_chronometer'], ['chronometer.id_chronometer'], ),
@@ -147,12 +147,12 @@ def downgrade():
     op.drop_table('option')
     op.drop_table('round')
     op.drop_table('question')
-    op.drop_table('station_chronometer')
+    op.drop_table('station_chrono')
     op.drop_table('shift')
     op.drop_table('group')
     op.drop_table('station')
-    op.drop_table('ecoestu')
-    op.drop_table('ecoechro')
+    op.drop_table('ecoe_student')
+    op.drop_table('ecoe_chrono')
     op.drop_table('day')
     op.drop_table('area')
     op.drop_table('ecoe')

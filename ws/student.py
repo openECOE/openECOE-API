@@ -1,12 +1,11 @@
-from flask_potion import ModelResource
-from flask_potion.routes import Relation
-
+from flask_potion import ModelResource, fields
 from model.Student import Student
 
-class StudentResource(ModelResource):
-    ecoes = Relation('ecoe')
-    rounds = Relation('round')
 
+class StudentResource(ModelResource):
     class Meta:
         model = Student
 
+    class Schema:
+        ecoe = fields.ToOne('ecoe')
+        round = fields.ToOne('round')

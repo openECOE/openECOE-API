@@ -62,6 +62,7 @@ def outJsonChronometers(classIn):
 
     return classArr
 
+
 @app.route('/station', methods=['GET'])
 def getStations():
     arrSta = []

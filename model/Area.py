@@ -2,6 +2,7 @@ from sqlalchemy.orm import backref
 from model import db
 from model.ECOE import ECOE
 
+
 class Area(db.Model):
     __tablename__ = 'area'
 
