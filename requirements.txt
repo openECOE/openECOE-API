@@ -6,4 +6,7 @@ flask-potion
 flask-migrate
 flask_script
 flask-restful
+flask-login
+flask-principal
 pip==9.0.2
+flask-httpauth

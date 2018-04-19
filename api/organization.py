@@ -1,10 +1,10 @@
-from flask_potion import ModelResource
+from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
 from flask_potion.contrib.alchemy import SQLAlchemyManager
 from flask_potion.contrib.principals import principals
 from . import api
 
-from model.Organization import Organization, Orguser
+from model.Organization import Organization
 
 class ManagerResource(ModelResource):
     class Meta:
@@ -21,12 +21,15 @@ class OrganizationResource(ManagerResource):
 
     class Meta:
         model = Organization
+        id_attribute = 'name'
+        id_field_class = fields.String
+        # include_id = True
 
 
-class OrganizationUserResource(ManagerResource):
-    class Meta:
-        model = Orguser
+# class OrganizationUserResource(ManagerResource):
+#     class Meta:
+#         model = Orguser
 
 
 api.add_resource(OrganizationResource)
-api.add_resource(OrganizationUserResource)
+# api.add_resource(OrganizationUserResource)
