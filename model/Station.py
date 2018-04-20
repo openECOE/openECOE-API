@@ -3,15 +3,14 @@ from sqlalchemy.orm import backref
 from model.ECOE import ECOE
 from model.Chronometer import Chronometer
 
+
 class Station(db.Model):
     __tablename__ = 'station'
     id_station = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
     ecoe = db.relationship(ECOE, backref=backref('stations', lazy='dynamic'))
-
     chronometers = db.relationship(Chronometer, secondary='station_chrono', lazy='subquery', backref=backref('stations', lazy='dynamic'))
-
 
     def __init__(self, name='', id_ecoe='', chronometers=[]):
         self.name = name

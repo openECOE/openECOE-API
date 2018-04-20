@@ -12,6 +12,7 @@ from model import app
 from model.Station import Station
 from model.ECOE import ECOE
 
+
 class StationResource(ModelResource):
     groups = Relation('group')
 
@@ -22,9 +23,10 @@ class StationResource(ModelResource):
         ecoe = fields.ToOne('ecoe')
         chronometers = fields.ToMany('chronometer')
 
-#@app.route('/sta/<int:id>/chronometers', methods=['GET']):
-#def getStations(id):
+# @app.route('/sta/<int:id>/chronometers', methods=['GET']):
+# def getStations(id):
 #    return True
+
 
 def outJsonStation(station, cod):
 
@@ -33,7 +35,6 @@ def outJsonStation(station, cod):
         classIn = ecoe
     else:
         classIn = station
-
 
     myjson = {
         "$uri": "/station/" + str(station.id_station),
@@ -46,12 +47,15 @@ def outJsonStation(station, cod):
 
     return myjson
 
+
 def outJson(out):
     myjson = jsonify(out)
     return myjson
 
+
 def outJsonChronometer(chronometer):
     return {"$ref": "/chronometer/" + str(chronometer.id_chronometer)}
+
 
 def outJsonChronometers(classIn):
 

@@ -11,6 +11,7 @@ from model.Station import Station
 
 from model import app
 
+
 class QuestionResource(ModelResource):
     options = Relation('option')
 
@@ -20,6 +21,7 @@ class QuestionResource(ModelResource):
     class Schema:
         group = fields.ToOne('group')
         area = fields.ToOne('area')
+
 
 def ifQuestion(area, group):
     areaAux = Area().get_area(area)
@@ -31,6 +33,7 @@ def ifQuestion(area, group):
                 if (areaAux.id_ecoe == stationAux.id_ecoe):
                     return True
     return False
+
 
 def inJsonQuestion():
     value = request.json
@@ -51,6 +54,7 @@ def inJsonQuestion():
 
     return question
 
+
 def outJsonQuestion(question):
     myjson = jsonify({
         "$uri": "/question/" + str(question.id_question),
@@ -67,13 +71,13 @@ def outJsonQuestion(question):
     return myjson
 
 
-
 @app.route('/question', methods=['POST'])
 def postQuestion():
     inJsonQuestion().post_question()
     question = Question().get_last_ques()
 
     return outJsonQuestion(question)
+
 
 @app.route('/question/<int:id>', methods=['PATCH'])
 def pathQuestion(id):

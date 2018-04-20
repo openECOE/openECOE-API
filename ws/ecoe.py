@@ -1,6 +1,5 @@
 from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
-
 from model.ECOE import ECOE
 
 

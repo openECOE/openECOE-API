@@ -1,5 +1,6 @@
 from model import db
 
+
 class Chronometer(db.Model):
     __tablename__ = 'chronometer'
 

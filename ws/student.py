@@ -8,4 +8,4 @@ class StudentResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        round = fields.ToOne('round')
+        # round = fields.ToOne('round')  # TODO: hacer relación student - round
