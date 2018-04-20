@@ -12,9 +12,8 @@ def load_user_from_request(request):
         email, password = request.authorization.username, request.authorization.password
 
         user = User.query.filter_by(email=email).first()
-        if user is not None:
-            if user.check_password(password):
-                return user
+        if user and user.check_password(password):
+            return user
     return None
 
 
@@ -35,3 +34,4 @@ def on_identity_loaded(sender, identity):
 
         if current_user.is_superadmin:
             identity.provides.add(RoleNeed('superadmin'))
+

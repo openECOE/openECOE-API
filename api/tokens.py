@@ -3,7 +3,7 @@ from flask_potion.contrib.alchemy import SQLAlchemyManager
 from flask_potion.contrib.principals import principals
 from flask_potion.routes import Route
 from api import api
-from auth import current_user
+from .auth import current_user
 
 api.add_resource(Resource)
 
@@ -21,12 +21,14 @@ class TokenResource(PrincipalResource):
         token = fields.String()
 
     @Route.POST(rel='create')
-    def create(self, value: fields.Number()) -> fields.Inline('self'):
-        return {"name": "foo", "token": value}
+    def create_token(self) -> fields.Inline('self'):
+        auth_token = current_user.encode_auth_token()
+        return {"token": auth_token}
 
     @Route.GET(rel='get')
     def get_token(self) -> fields.Inline('self'):
-        token = current_user.get_token()
-        return {"token": token}
+        auth_token = current_user.token
+        return {"token": auth_token}
+
 
 api.add_resource(TokenResource)

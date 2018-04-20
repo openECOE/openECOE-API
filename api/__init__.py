@@ -1,6 +1,6 @@
 from flask_potion import Api
 from start import app
-from auth import login_required
+from .auth import login_required
 
 api = Api(app, decorators=[login_required])
 

@@ -1,7 +1,17 @@
+import os
+
 from flask import Flask
-from config import Config
+from flask_bcrypt import Bcrypt
 
 app = Flask(__name__)
-app.config.from_object(Config)
+
+app_settings = os.getenv(
+    'APP_SETTINGS',
+    'config.DevelopmentConfig'
+)
+
+app.config.from_object(app_settings)
+
+bcrypt = Bcrypt(app)
 
 import api
