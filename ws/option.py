@@ -1,5 +1,4 @@
 from flask_potion import ModelResource, fields
-
 from model.Option import Option
 
 
