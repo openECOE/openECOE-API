@@ -8,6 +8,7 @@ class StudentResource(ModelResource):
 
     class Meta:
         model = Student
+        natural_key = ('dni')
 
     class Schema:
         ecoe = fields.ToOne('ecoe')

@@ -8,8 +8,9 @@ from model.Question import Question
 from model.Area import Area
 from model.Group import Group
 from model.Station import Station
-
+from model.Option import Option
 from model import app
+from model.Answer import Answer
 
 
 class QuestionResource(ModelResource):
@@ -83,11 +84,25 @@ def postQuestion():
 def pathQuestion(id):
     questionOld = Question().get_question(id)
 
-    if(questionOld):
+    if (questionOld):
         questionOld.path_question(inJsonQuestion())
         return outJsonQuestion(questionOld)
     else:
         abort(404)
 
 
+class OptionResource(ModelResource):
+    class Meta:
+        model = Option
 
+    class Schema:
+        question = fields.ToOne('question')
+
+
+class AnswerResource(ModelResource):
+    class Meta:
+        model = Answer
+
+    class Schema:
+        student = fields.ToOne('student')
+        option = fields.ToOne('option')

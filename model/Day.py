@@ -3,6 +3,7 @@ from model import db
 
 from model.ECOE import ECOE
 
+
 class Day(db.Model):
     __tablename__ = 'day'
 

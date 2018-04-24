@@ -14,3 +14,5 @@ class Student(db.Model):
     ecoe = db.relationship(ECOE, backref=backref('students', lazy='dynamic'))
     id_round = db.Column(db.Integer, db.ForeignKey(Round.id_round))
     round = db.relationship(Round, backref=backref('students', lazy='dynamic'))
+
+    __table_args__ = (db.UniqueConstraint('dni'),)

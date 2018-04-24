@@ -1,6 +1,7 @@
-from flask_potion import ModelResource
+from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
 from model.Chronometer import Chronometer
+from model.Alarm import Alarm
 
 
 class ChronometerResource(ModelResource):
@@ -10,3 +11,12 @@ class ChronometerResource(ModelResource):
 
     class Meta:
         model = Chronometer
+
+
+class AlarmResource(ModelResource):
+
+    class Meta:
+        model = Alarm
+
+    class Schema:
+        chronometer = fields.ToOne('chronometer')
