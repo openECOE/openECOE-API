@@ -7,6 +7,7 @@ from app.model.ECOE import ECOE
 class EcoeResource(ModelResource):
     areas = Relation('area')
     days = Relation('day')
+    students = Relation('student')
 
     class Meta:
         model = ECOE
@@ -14,4 +15,3 @@ class EcoeResource(ModelResource):
     class Schema:
         organization = fields.ToOne('organization')
         chronometers = fields.ToMany('chronometer')
-        students = fields.ToMany('student')
