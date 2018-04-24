@@ -11,7 +11,7 @@ class ManagerResource(ModelResource):
     class Meta:
         manager = principals(SQLAlchemyManager)
         permissions = {
-            'create': 'superadmin',
+            'create': 'yes',
             'update': 'create',
             'delete': 'update'
         }
@@ -24,7 +24,7 @@ class OrganizationResource(ManagerResource):
         model = Organization
         # id_attribute = 'name'
         # id_field_class = fields.String
-        # include_id = True
+        #include_id = True
 
 
 # class OrganizationUserResource(ManagerResource):

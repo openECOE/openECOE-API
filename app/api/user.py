@@ -24,7 +24,7 @@ class UserResource(PrincipalResource):
 
 @signals.before_create.connect_via(UserResource)
 def on_before_create_user(sender, item):
-    item.password = item.encode_password(item.password)
+    item.encode_password(item.password)
     item.registered_on = datetime.now()
 
 

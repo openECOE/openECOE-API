@@ -3,6 +3,7 @@ from flask_potion.routes import Relation
 
 from app.model.ECOE import ECOE
 
+
 class EcoeResource(ModelResource):
     areas = Relation('area')
     days = Relation('day')

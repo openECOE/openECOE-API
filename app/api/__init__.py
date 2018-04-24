@@ -4,8 +4,9 @@ bp = Blueprint('api', __name__)
 
 from flask_potion import Api
 from app.auth.auth import token_auth
+from flask_login import login_required
 
-api = Api(bp, decorators=[token_auth.login_required])
+api = Api(bp)
 
 from app.api.ecoe import EcoeResource
 from app.api.area import AreaResource

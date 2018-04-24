@@ -12,6 +12,14 @@ token_auth = HTTPTokenAuth()
 
 @login_manager.request_loader
 def load_user_from_request(request):
+    auth_token = request.headers.get('Authorization')
+
+    if auth_token:
+        auth_token = auth_token.replace('Bearer ', '', 1)
+        user = User.check_token(auth_token)
+        if user:
+            return user
+
     if request.authorization:
         username, password = request.authorization.username, request.authorization.password
 

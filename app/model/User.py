@@ -1,7 +1,7 @@
 import os
 
-from app import db
-from app import bcrypt
+from flask import current_app
+from app import db, bcrypt
 from flask_login import UserMixin
 
 import base64
@@ -22,7 +22,8 @@ class User(UserMixin, db.Model):
 
     def encode_password(self, password):
         self.password = bcrypt.generate_password_hash(
-            password).decode()
+            password, current_app.config['BCRYPT_LOG_ROUNDS']
+        ).decode()
 
     def check_password(self, candidate):
         return bcrypt.check_password_hash(
@@ -48,5 +49,7 @@ class User(UserMixin, db.Model):
         return user
 
 # db.session.add(User(name='admin', surname='orga', is_superadmin=True))
-# db.session.add(User(name='user', surname='orga'))
+#
+# db.session.add(User(email='amoreno@goumh.umh.es', password='1234567890'))
+#
 # db.session.commit()

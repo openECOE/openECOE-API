@@ -9,7 +9,7 @@ class ECOE(db.Model):
     __tablename__ = 'ecoe'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255))
+    name = db.Column(db.String(255), unique=True)
     id_organization = db.Column(db.Integer, db.ForeignKey(Organization.id_organization), nullable=False)
     organization = db.relationship(Organization, backref=backref('ecoes', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='ecoe_chrono', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
