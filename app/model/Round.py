@@ -1,6 +1,5 @@
 from app import db
 from .Shift import Shift
-from .Student import Student
 
 from sqlalchemy.orm import backref
 

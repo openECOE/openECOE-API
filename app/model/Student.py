@@ -1,7 +1,7 @@
 from app import db
 from sqlalchemy.orm import backref
-from model.ECOE import ECOE
-from model.Round import Round
+from app.model.ECOE import ECOE
+from app.model.Round import Round
 
 
 class Student(db.Model):

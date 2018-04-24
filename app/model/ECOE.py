@@ -3,7 +3,7 @@ from sqlalchemy.orm import backref
 from app import db
 from .Organization import Organization
 from .Chronometer import Chronometer
-from .Student import Student
+
 
 class ECOE(db.Model):
     __tablename__ = 'ecoe'
@@ -13,6 +13,7 @@ class ECOE(db.Model):
     id_organization = db.Column(db.Integer, db.ForeignKey(Organization.id_organization), nullable=False)
     organization = db.relationship(Organization, backref=backref('ecoes', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='ecoe_chrono', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
+
 
 class ECOEChro(db.Model):
      __tablename__ = 'ecoe_chrono'

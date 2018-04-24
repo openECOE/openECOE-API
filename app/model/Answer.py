@@ -1,7 +1,7 @@
-from model import db
-from model.Question import Question
-from model.Student import Student
-from model.Option import Option
+from app import db
+from app.model.Question import Question
+from app.model.Student import Student
+from app.model.Option import Option
 
 from sqlalchemy.orm import backref
 

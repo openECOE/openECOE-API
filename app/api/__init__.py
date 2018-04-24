@@ -20,7 +20,10 @@ from app.api.shift import ShiftResource
 from app.api.chronometer import ChronometerResource
 from app.api.alarm import AlarmResource
 from app.api.round import RoundResource
+from app.api.answer import AnswerResource
 
+api.add_resource(AnswerResource)
+api.add_resource(StudentResource)
 api.add_resource(RoundResource)
 api.add_resource(ShiftResource)
 api.add_resource(DayResource)
@@ -30,7 +33,6 @@ api.add_resource(GroupResource)
 api.add_resource(StationResource)
 api.add_resource(AreaResource)
 api.add_resource(EcoeResource)
-api.add_resource(StudentResource)
 api.add_resource(AlarmResource)
 api.add_resource(ChronometerResource)
 
