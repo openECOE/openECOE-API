@@ -14,6 +14,8 @@ class ECOE(db.Model):
     organization = db.relationship(Organization, backref=backref('ecoes', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='ecoe_chrono', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
 
+    __table_args__ = (db.UniqueConstraint('name'),)
+
     def get_ECOE(self, id):
         ecoe = ECOE.query.filter_by(id=id).first()
         return ecoe

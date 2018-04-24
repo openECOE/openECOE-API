@@ -6,6 +6,8 @@ class Organization(db.Model):
     id_organization = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255))
 
+    __table_args__ = (db.UniqueConstraint('name'),)
+
 
     # orguser = db.relationship('Orguser')
 

@@ -10,6 +10,7 @@ class EcoeResource(ModelResource):
 
     class Meta:
         model = ECOE
+        natural_key = ('name')
 
     class Schema:
         organization = fields.ToOne('organization')

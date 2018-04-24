@@ -12,6 +12,8 @@ class Station(db.Model):
     ecoe = db.relationship(ECOE, backref=backref('stations', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='station_chrono', lazy='subquery', backref=backref('stations', lazy='dynamic'))
 
+    __table_args__ = (db.UniqueConstraint('name'),)
+
     def __init__(self, name='', id_ecoe='', chronometers=[]):
         self.name = name
         self.id_ecoe = id_ecoe

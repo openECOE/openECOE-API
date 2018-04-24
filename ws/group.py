@@ -8,6 +8,7 @@ class GroupResource(ModelResource):
 
     class Meta:
         model = Group
+        natural_key = ('name')
 
     class Schema:
         station = fields.ToOne('station')

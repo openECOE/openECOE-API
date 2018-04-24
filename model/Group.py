@@ -11,6 +11,8 @@ class Group(db.Model):
     id_station = db.Column(db.Integer, db.ForeignKey(Station.id_station), nullable=False)
     station = db.relationship(Station, backref=backref('groups', lazy='dynamic'))
 
+    __table_args__ = (db.UniqueConstraint('name'),)
+
     def __init__(self, name='', id_station=0):
         self.name = name
         self.id_station = id_station

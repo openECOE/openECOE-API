@@ -11,6 +11,7 @@ class ChronometerResource(ModelResource):
 
     class Meta:
         model = Chronometer
+        natural_key = ('name')
 
 
 class AlarmResource(ModelResource):
