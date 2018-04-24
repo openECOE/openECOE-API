@@ -3,7 +3,7 @@ from sqlalchemy.orm import backref
 from app import db
 from .Organization import Organization
 from .Chronometer import Chronometer
-from .Student import Student
+
 
 class ECOE(db.Model):
     __tablename__ = 'ecoe'
@@ -13,7 +13,7 @@ class ECOE(db.Model):
     id_organization = db.Column(db.Integer, db.ForeignKey(Organization.id_organization), nullable=False)
     organization = db.relationship(Organization, backref=backref('ecoes', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='ecoe_chrono', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
-    students = db.relationship(Student, secondary='ecoe_student', lazy='subquery', backref=backref('ecoes', lazy='dynamic'))
+
 
 class ECOEChro(db.Model):
      __tablename__ = 'ecoe_chrono'
@@ -24,10 +24,10 @@ class ECOEChro(db.Model):
      chronometer = db.relationship(Chronometer, backref=backref('ecoe_chrono', lazy='dynamic'))
 
 
-class ECOEStudent(db.Model):
-    __tablename__ = 'ecoe_student'
-
-    id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), primary_key=True)
-    ecoe = db.relationship(ECOE, backref=backref('ecoe_student', lazy='dynamic'))
-    id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), primary_key=True)
-    student = db.relationship(Student, backref=backref('ecoe_student', lazy='dynamic'))
+# class ECOEStudent(db.Model):
+#     __tablename__ = 'ecoe_student'
+#
+#     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), primary_key=True)
+#     ecoe = db.relationship(ECOE, backref=backref('ecoe_student', lazy='dynamic'))
+#     id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), primary_key=True)
+#     student = db.relationship(Student, backref=backref('ecoe_student', lazy='dynamic'))
