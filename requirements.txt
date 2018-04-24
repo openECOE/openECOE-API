@@ -6,4 +6,11 @@ flask-potion
 flask-migrate
 flask_script
 flask-restful
+flask-login
+flask-principal
 pip==9.0.2
+flask-httpauth
+flask-bcrypt
+pyjwt==1.4.2
+flask_jwt
+werkzeug
