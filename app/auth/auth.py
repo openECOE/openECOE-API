@@ -1,11 +1,16 @@
-from app.model.User import User
-from flask_principal import Principal, Identity, UserNeed, AnonymousIdentity, identity_loaded, RoleNeed
-from app.auth import bp
+from flask import g
 from flask_login import current_user
-from app import login, principals
+from flask_principal import Identity, UserNeed, AnonymousIdentity, identity_loaded, RoleNeed
+from flask_httpauth import HTTPTokenAuth
+from werkzeug.exceptions import abort
+
+from app import login_manager, principals
+from app.model.User import User
+
+token_auth = HTTPTokenAuth()
 
 
-@login.request_loader
+@login_manager.request_loader
 def load_user_from_request(request):
     if request.authorization:
         username, password = request.authorization.username, request.authorization.password
@@ -30,3 +35,14 @@ def on_identity_loaded(sender, identity):
 
         if current_user.is_superadmin:
             identity.provides.add(RoleNeed('superadmin'))
+
+
+@token_auth.verify_token
+def verify_token(token):
+    g.current_user = User.check_token(token) if token else None
+    return g.current_user is not None
+
+
+@token_auth.error_handler
+def token_auth_error():
+    return abort(401)

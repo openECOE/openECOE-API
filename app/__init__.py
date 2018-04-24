@@ -5,10 +5,11 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_principal import Principal
+from flask_potion import Api
 
 db = SQLAlchemy()
 migrate = Migrate()
-login = LoginManager()
+login_manager = LoginManager()
 bcrypt = Bcrypt()
 principals = Principal()
 
@@ -23,8 +24,8 @@ def create_app():
     app.config.from_object(app_settings)
 
     db.init_app(app)
-    migrate.init_app(app)
-    login.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.init_app(app)
     bcrypt.init_app(app)
     principals.init_app(app)
 

@@ -2,4 +2,5 @@ from flask import Blueprint
 
 bp = Blueprint('auth', __name__)
 
-from app.auth import login
+from app.auth import auth
+from app.auth import tokens

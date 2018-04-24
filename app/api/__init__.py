@@ -3,9 +3,9 @@ from flask import Blueprint
 bp = Blueprint('api', __name__)
 
 from flask_potion import Api
-from flask_login import login_required
+from app.auth.auth import token_auth
 
-api = Api(bp, decorators=[login_required])
+api = Api(bp, decorators=[token_auth.login_required])
 
 from app.api.ecoe import EcoeResource
 from app.api.area import AreaResource
@@ -34,4 +34,3 @@ api.add_resource(AlarmResource)
 api.add_resource(ChronometerResource)
 
 from app.api import user, organization
-from app.api import tokens
