@@ -1,5 +1,5 @@
 from app import db
-from .Chronometer import Chronometer
+from app.model.Chronometer import Chronometer
 
 from sqlalchemy.orm import backref
 
