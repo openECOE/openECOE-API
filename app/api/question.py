@@ -37,11 +37,11 @@ def ifQuestion(area, group):
 def inJsonQuestion():
     value = request.json
 
-    if ((not request.json) or (not "wording" in request.json) or (not "option_type" in request.json) or (
+    if ((not request.json) or (not "statement" in request.json) or (not "option_type" in request.json) or (
     not "area" in request.json) or (not "group" in request.json)):
         abort(400)
 
-    wording = value["wording"]
+    statement = value["statement"]
     option_type = value["option_type"]
     area = value["area"]
     group = value["group"]
@@ -49,14 +49,14 @@ def inJsonQuestion():
     if (ifQuestion(area, group) == False):
         abort(404)
 
-    question = Question(wording, option_type, group, area)
+    question = Question(statement, option_type, group, area)
 
     return question
 
 def outJsonQuestion(question):
     myjson = jsonify({
         "$uri": "/question/" + str(question.id_question),
-        "wording": question.wording,
+        "statement": question.statement,
         "option_type": question.option_type,
         "area": {
             "$ref": "/area/" + str(question.id_area)
