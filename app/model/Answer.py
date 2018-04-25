@@ -1,16 +1,17 @@
 from app import db
-from app.model.Question import Question
 from app.model.Student import Student
 from app.model.Option import Option
-
-from sqlalchemy.orm import backref
 
 
 class Answer(db.Model):
     __tablename__ = 'answer'
 
-    id_answer = db.Column(db.Integer, primary_key=True)
-    id_option = db.Column(db.Integer, db.ForeignKey(Option.id_option), primary_key=True)
-    option = db.relationship(Option, backref='option')
+    id = db.Column(db.Integer, primary_key=True)
+    id_option = db.Column(db.Integer, db.ForeignKey(Option.id_option), nullable=False)
+    option = db.relationship(Option, backref='answers')
     id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), nullable=False)
-    student = db.relationship(Student, backref=backref('answers', lazy='dynamic'))
+    student = db.relationship(Student, backref='answers')
+
+    __table_args__ = (
+        db.UniqueConstraint(id_option, id_student, name='_option_student_uc'),
+    )
