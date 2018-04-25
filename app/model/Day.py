@@ -4,6 +4,7 @@ from .ECOE import ECOE
 from sqlalchemy.orm import backref
 
 
+
 class Day(db.Model):
     __tablename__ = 'day'
 

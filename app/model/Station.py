@@ -12,6 +12,8 @@ class Station(db.Model):
     ecoe = db.relationship(ECOE, backref=backref('stations', lazy='dynamic'))
     chronometers = db.relationship(Chronometer, secondary='station_chrono', lazy='subquery', backref=backref('stations', lazy='dynamic'))
 
+    __table_args__ = (db.UniqueConstraint('name'),)
+
     def __init__(self, name='', id_ecoe='', chronometers=[]):
         self.name = name
         self.id_ecoe = id_ecoe
@@ -31,6 +33,6 @@ class Stachro(db.Model):
     __tablename__ = 'station_chrono'
 
     id_station = db.Column(db.Integer, db.ForeignKey(Station.id_station), primary_key=True)
-    id_chronometer = db.Column(db.Integer, db.ForeignKey(Chronometer.id_chronometer), primary_key=True)
     station = db.relationship(Station, backref=backref('station_chrono', lazy='dynamic'))
+    id_chronometer = db.Column(db.Integer, db.ForeignKey(Chronometer.id_chronometer), primary_key=True)
     chronometer = db.relationship(Chronometer, backref=backref('station_chrono', lazy='dynamic'))
