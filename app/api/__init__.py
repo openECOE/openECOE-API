@@ -6,21 +6,17 @@ from flask_potion import Api
 from app.auth.auth import token_auth
 from flask_login import login_required
 
-api = Api(bp)
-
+from app.api.organization import OrganizationResource
 from app.api.ecoe import EcoeResource
 from app.api.area import AreaResource
 from app.api.student import StudentResource
 from app.api.station import StationResource
 from app.api.group import GroupResource
-from app.api.question import QuestionResource
-from app.api.option import OptionResource
-from app.api.day import DayResource
-from app.api.shift import ShiftResource
-from app.api.chronometer import ChronometerResource
-from app.api.alarm import AlarmResource
-from app.api.round import RoundResource
-from app.api.answer import AnswerResource
+from app.api.question import QuestionResource, OptionResource, AnswerResource
+from app.api.day import DayResource, ShiftResource, RoundResource
+from app.api.chronometer import ChronometerResource, AlarmResource
+
+api = Api(bp)
 
 api.add_resource(AnswerResource)
 api.add_resource(StudentResource)
@@ -35,5 +31,6 @@ api.add_resource(AreaResource)
 api.add_resource(EcoeResource)
 api.add_resource(AlarmResource)
 api.add_resource(ChronometerResource)
+api.add_resource(OrganizationResource)
 
 from app.api import user, organization
