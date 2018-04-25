@@ -1,8 +1,8 @@
 from sqlalchemy.orm import backref
 
 from app import db
-from .Organization import Organization
-from .Chronometer import Chronometer
+from app.model.Organization import Organization
+from app.model.Chronometer import Chronometer
 
 
 class ECOE(db.Model):

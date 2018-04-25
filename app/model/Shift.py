@@ -3,6 +3,7 @@ from sqlalchemy.orm import backref
 
 from .Day import Day
 
+
 class Shift(db.Model):
     __tablename__ = 'shift'
 
