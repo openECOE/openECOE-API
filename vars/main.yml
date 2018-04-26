@@ -6,9 +6,9 @@ database_user: "openecoe"
 database_password: "8luz80d6OAqboKCasW2X"
 
 environment_config:
-  FLASK_APP: start.py
-  FLASK_DEBUG: 1
-  DATABASE_URL: mysql+pymysql://{{database_user}}:{{database_password}}@localhost/{{database_name}}
+  FLASK_APP: openECOE-API.py
+  DATABASE_URL: mysql+pymysql://{{database_user}}:{{database_password}}@localhost/
+  DATABASE_NAME: "{{database_name}}"
 
 mysql_packages:
   - mariadb-client

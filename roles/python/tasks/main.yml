@@ -10,22 +10,6 @@
     state: present
     update_cache: yes
 
-- name: Install MySQL
-  apt:
-    name: mariadb-server
-    state: present
-    update_cache: yes
-
-  apt:
-  name: mariadb-client
-  state: present
-  update_cache: yes
-
-  apt:
-  name: python-mysqldb
-  state: present
-  update_cache: yes
-
 - name: Install pip3
   apt:
     name: python3-pip
