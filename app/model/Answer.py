@@ -7,9 +7,9 @@ class Answer(db.Model):
     __tablename__ = 'answer'
 
     id = db.Column(db.Integer, primary_key=True)
-    id_option = db.Column(db.Integer, db.ForeignKey(Option.id_option), nullable=False)
+    id_option = db.Column(db.Integer, db.ForeignKey(Option.id), nullable=False)
     option = db.relationship(Option, backref='answers')
-    id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), nullable=False)
+    id_student = db.Column(db.Integer, db.ForeignKey(Student.id), nullable=False)
     student = db.relationship(Student, backref='answers')
 
     __table_args__ = (
