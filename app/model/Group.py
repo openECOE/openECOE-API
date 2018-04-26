@@ -3,6 +3,7 @@ from .Station import Station
 
 from sqlalchemy.orm import backref
 
+
 class Group(db.Model):
     __tablename__ = 'group'
     id_group = db.Column(db.Integer, primary_key=True)
