@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 5b5ae008d04c
+Revision ID: a1d03ae92635
 Revises: 
-Create Date: 2018-04-25 10:44:30.683598
+Create Date: 2018-04-27 11:27:50.548828
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '5b5ae008d04c'
+revision = 'a1d03ae92635'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -46,12 +46,12 @@ def upgrade():
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
     op.create_index(op.f('ix_user_token'), 'user', ['token'], unique=True)
     op.create_table('alarm',
-    sa.Column('id_alarm', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('time', sa.Integer(), nullable=False),
     sa.Column('sound', sa.String(length=550), nullable=False),
     sa.Column('id_chronometer', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_chronometer'], ['chronometer.id_chronometer'], ),
-    sa.PrimaryKeyConstraint('id_alarm')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('ecoe',
     sa.Column('id', sa.Integer(), nullable=False),
@@ -70,11 +70,11 @@ def upgrade():
     sa.UniqueConstraint('name')
     )
     op.create_table('day',
-    sa.Column('id_day', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('date', sa.Date(), nullable=False),
     sa.Column('id_ecoe', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_ecoe'], ['ecoe.id'], ),
-    sa.PrimaryKeyConstraint('id_day')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('ecoe_chrono',
     sa.Column('id_ecoe', sa.Integer(), nullable=False),
@@ -100,11 +100,11 @@ def upgrade():
     sa.UniqueConstraint('name')
     )
     op.create_table('shift',
-    sa.Column('id_shift', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('start_time', sa.DATETIME(), nullable=True),
     sa.Column('id_day', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['id_day'], ['day.id_day'], ),
-    sa.PrimaryKeyConstraint('id_shift')
+    sa.ForeignKeyConstraint(['id_day'], ['day.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('station_chrono',
     sa.Column('id_station', sa.Integer(), nullable=False),
@@ -117,46 +117,46 @@ def upgrade():
     sa.Column('id_question', sa.Integer(), nullable=False),
     sa.Column('id_group', sa.Integer(), nullable=False),
     sa.Column('id_area', sa.Integer(), nullable=False),
-    sa.Column('wording', sa.String(length=500), nullable=True),
+    sa.Column('statement', sa.String(length=500), nullable=True),
     sa.Column('option_type', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['id_area'], ['area.id_area'], ),
     sa.ForeignKeyConstraint(['id_group'], ['group.id_group'], ),
     sa.PrimaryKeyConstraint('id_question')
     )
     op.create_table('round',
-    sa.Column('id_round', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('description', sa.String(length=500), nullable=True),
     sa.Column('id_shift', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['id_shift'], ['shift.id_shift'], ),
-    sa.PrimaryKeyConstraint('id_round')
+    sa.ForeignKeyConstraint(['id_shift'], ['shift.id'], ),
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('option',
-    sa.Column('id_option', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('points', sa.Integer(), nullable=True),
     sa.Column('description', sa.String(length=255), nullable=True),
     sa.Column('id_question', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['id_question'], ['question.id_question'], ),
-    sa.PrimaryKeyConstraint('id_option')
+    sa.PrimaryKeyConstraint('id')
     )
     op.create_table('student',
-    sa.Column('id_student', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('dni', sa.String(length=25), nullable=False),
     sa.Column('id_ecoe', sa.Integer(), nullable=False),
     sa.Column('id_round', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['id_ecoe'], ['ecoe.id'], ),
-    sa.ForeignKeyConstraint(['id_round'], ['round.id_round'], ),
-    sa.PrimaryKeyConstraint('id_student'),
+    sa.ForeignKeyConstraint(['id_round'], ['round.id'], ),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('dni'),
     sa.UniqueConstraint('dni')
     )
     op.create_table('answer',
-    sa.Column('id_answer', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('id_option', sa.Integer(), nullable=False),
     sa.Column('id_student', sa.Integer(), nullable=False),
-    sa.ForeignKeyConstraint(['id_option'], ['option.id_option'], ),
-    sa.ForeignKeyConstraint(['id_student'], ['student.id_student'], ),
-    sa.PrimaryKeyConstraint('id_answer'),
+    sa.ForeignKeyConstraint(['id_option'], ['option.id'], ),
+    sa.ForeignKeyConstraint(['id_student'], ['student.id'], ),
+    sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('id_option', 'id_student', name='_option_student_uc')
     )
     # ### end Alembic commands ###
