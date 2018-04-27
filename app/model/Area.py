@@ -3,7 +3,6 @@ from app import db
 from .ECOE import ECOE
 
 
-
 class Area(db.Model):
     __tablename__ = 'area'
 

@@ -33,4 +33,4 @@ api.add_resource(AlarmResource)
 api.add_resource(ChronometerResource)
 api.add_resource(OrganizationResource)
 
-from app.api import user, organization
+from app.api import user

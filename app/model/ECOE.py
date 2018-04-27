@@ -29,5 +29,5 @@ class ECOEChro(db.Model):
 #
 #     id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), primary_key=True)
 #     ecoe = db.relationship(ECOE, backref=backref('ecoe_student', lazy='dynamic'))
-#     id_student = db.Column(db.Integer, db.ForeignKey(Student.id_student), primary_key=True)
+#     id_student = db.Column(db.Integer, db.ForeignKey(Student.id), primary_key=True)
 #     student = db.relationship(Student, backref=backref('ecoe_student', lazy='dynamic'))

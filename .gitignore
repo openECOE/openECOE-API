@@ -82,6 +82,7 @@ pip-selfcheck.json
 ### Vagrant template
 # General
 .vagrant/
+.galaxy_install_info
 
 # Log files (if you are creating logs in debug mode, uncomment this)
 # *.logs
@@ -191,4 +192,5 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
 
