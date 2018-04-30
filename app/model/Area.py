@@ -1,5 +1,4 @@
 from app import db
-from .ECOE import ECOE
 
 
 class Area(db.Model):
@@ -7,7 +6,7 @@ class Area(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
-    id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'), nullable=False)
 
     questions = db.relationship('Question', backref='area')
 

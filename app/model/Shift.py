@@ -1,14 +1,23 @@
 from app import db
-from sqlalchemy.orm import backref
+import enum
 
-from .Day import Day
+
+class ShiftType(enum.Enum):
+    MORNING = "M"
+    AFTERNOON = "T"
 
 
 class Shift(db.Model):
     __tablename__ = 'shift'
 
     id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DATETIME)
-    id_day = db.Column(db.Integer, db.ForeignKey(Day.id), nullable=False)
-    day = db.relationship(Day, backref=backref('shifts', lazy='dynamic'))
+    code = db.Column(db.Enum(ShiftType), nullable=False)
+    id_day = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False)
+    time_start = db.Column(db.String(5))  # HH:MM
+
+    wheels = db.relationship('Wheel', backref='shift')
+
+    __table_args__ = (
+        db.UniqueConstraint(code, id_day, name='shift_day_uk'),
+    )
 

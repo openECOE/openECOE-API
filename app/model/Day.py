@@ -9,4 +9,4 @@ class Day(db.Model):
     date = db.Column(db.Date, nullable=False, unique=True)
 
     ecoes = db.relationship('ECOE', secondary=ecoes_days, lazy=True, back_populates='days')
-    turns = db.relationship('Turn', backref='day')
+    shifts = db.relationship('Shift', backref='day')

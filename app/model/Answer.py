@@ -1,17 +1,16 @@
 from app import db
-from app.model.Student import Student
-from app.model.Option import Option
+from .many_to_many_tables import answers_options
 
 
 class Answer(db.Model):
     __tablename__ = 'answer'
 
     id = db.Column(db.Integer, primary_key=True)
-    id_option = db.Column(db.Integer, db.ForeignKey(Option.id), nullable=False)
-    option = db.relationship(Option, backref='answers')
-    id_student = db.Column(db.Integer, db.ForeignKey(Student.id), nullable=False)
-    student = db.relationship(Student, backref='answers')
+    id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    id_student = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+
+    options = db.relationship('Option', secondary=answers_options, lazy=True, back_populates='answers')
 
     __table_args__ = (
-        db.UniqueConstraint(id_option, id_student, name='_option_student_uc'),
+        db.UniqueConstraint(id_question, id_student, name='question_student_uk'),
     )
