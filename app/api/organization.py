@@ -1,6 +1,7 @@
-from flask_potion import ModelResource, fields
+from flask_potion import ModelResource
 from flask_potion.contrib.alchemy import SQLAlchemyManager
 from flask_potion.contrib.principals import principals
+from flask_potion.routes import Relation
 
 from app.model.Organization import Organization
 
@@ -16,12 +17,10 @@ class ManagerResource(ModelResource):
 
 
 class OrganizationResource(ManagerResource):
+    users = Relation('user')
+    ecoes = Relation('ecoe')
+
     class Meta:
         model = Organization
         natural_key = 'name'
-
-    class Schema:
-        users = fields.ToMany('user')
-        ecoes = fields.ToMany('ecoe')
-
 

@@ -1,18 +1,21 @@
 from flask_potion import ModelResource, fields
+from flask_potion.routes import Relation
 from app.model.Schedule import Schedule
 
 
 class ScheduleResource(ModelResource):
+    events = Relation('event')
+
     class Meta:
         model = Schedule
-        natural_key = (
-            ('id_ecoe', 'id_stage'),
-            ('id_station', 'id_stage')
-        )
+        #natural_key = (
+        #    ('ecoe', 'stage'),
+        #    ('station', 'stage')
+        #)
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
         stage = fields.ToOne('stage')
         station = fields.ToOne('station')
-        events = fields.ToMany('event')
+
 
