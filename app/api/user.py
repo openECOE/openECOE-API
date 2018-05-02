@@ -6,6 +6,8 @@ from datetime import datetime
 
 from app.model.User import User
 
+# TODO: check this resource file
+
 class PrincipalResource(ModelResource):
     class Meta:
         manager = principals(SQLAlchemyManager)

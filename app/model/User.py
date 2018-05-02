@@ -7,6 +7,7 @@ from flask_login import UserMixin
 import base64
 from datetime import datetime, timedelta
 
+# TODO: check this file
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
