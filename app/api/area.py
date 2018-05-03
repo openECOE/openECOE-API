@@ -4,7 +4,7 @@ from app.model.Area import Area
 
 
 class AreaResource(ModelResource):
-    question = Relation('question')
+    questions = Relation('question')
 
     class Meta:
         model = Area
@@ -12,4 +12,6 @@ class AreaResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
+        questions = fields.ToMany('question')
+
 

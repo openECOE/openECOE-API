@@ -4,7 +4,6 @@ bp = Blueprint('api', __name__)
 
 from flask_potion import Api
 
-from app.api.answer import AnswerResource
 from app.api.area import AreaResource
 from app.api.day import DayResource
 from app.api.ecoe import EcoeResource
@@ -28,7 +27,6 @@ api.add_resource(ScheduleResource)
 api.add_resource(StageResource)
 api.add_resource(UserResource)
 api.add_resource(OptionResource)
-api.add_resource(AnswerResource)
 api.add_resource(QuestionResource)
 api.add_resource(QblockResource)
 api.add_resource(AreaResource)

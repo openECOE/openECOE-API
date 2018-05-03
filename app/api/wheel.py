@@ -8,10 +8,11 @@ class WheelResource(ModelResource):
 
     class Meta:
         model = Wheel
-        natural_key = ('code', 'shift')
+        natural_key = ('wheel_code', 'shift')
 
     class Schema:
         shift = fields.ToOne('shift')
+        students = fields.ToMany('student')
 
 
 

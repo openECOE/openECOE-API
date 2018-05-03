@@ -4,7 +4,6 @@ from app.model.Option import Option
 
 
 class OptionResource(ModelResource):
-    # answers = Relation('answer')
 
     class Meta:
         model = Option

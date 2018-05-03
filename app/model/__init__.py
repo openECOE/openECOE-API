@@ -1,4 +1,3 @@
-from app.model.Answer import Answer
 from app.model.Area import Area
 from app.model.Day import Day
 from app.model.ECOE import ECOE

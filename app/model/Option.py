@@ -1,5 +1,5 @@
 from app import db
-from .many_to_many_tables import answers_options
+from .many_to_many_tables import students_options
 
 
 class Option(db.Model):
@@ -9,5 +9,6 @@ class Option(db.Model):
     points = db.Column(db.Integer, nullable=False)
     label = db.Column(db.String(255))
     id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    order = db.Column(db.Integer, nullable=False)
 
-    answers = db.relationship('Answer', secondary=answers_options, lazy=True, back_populates='options')
+    students = db.relationship('Student', secondary=students_options, lazy=True, back_populates='answers')

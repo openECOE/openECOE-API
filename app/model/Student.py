@@ -1,4 +1,5 @@
 from app import db
+from app.model.many_to_many_tables import students_options
 
 
 class Student(db.Model):
@@ -10,6 +11,10 @@ class Student(db.Model):
     dni = db.Column(db.String(10))  # dni is not unique
 
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'), nullable=False)
-    id_wheel = db.Column(db.Integer, db.ForeignKey('wheel.id'))
+    id_wheel = db.Column(db.Integer, db.ForeignKey('wheel.id'), nullable=True)
 
-    answers = db.relationship('Answer', backref='student')
+    answers = db.relationship('Option', secondary=students_options, lazy=True, back_populates='students')
+
+    __table_args__ = (
+        db.UniqueConstraint(name, surnames, id_ecoe, name='student_name_ecoe_uk'),
+    )

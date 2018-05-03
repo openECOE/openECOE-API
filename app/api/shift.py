@@ -8,9 +8,10 @@ class ShiftResource(ModelResource):
 
     class Meta:
         model = Shift
-        natural_key = ('code', 'day')
+        natural_key = ('shift_code', 'day')
 
     class Schema:
         day = fields.ToOne('day')
+        wheels = fields.ToMany('wheel')
 
 
