@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 
 # TODO: check this file
 
+
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -35,6 +36,7 @@ class User(UserMixin, db.Model):
     def get_token(self, expires_in=3600):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
+            self.token_expiration = now + timedelta(seconds=expires_in)
             return self.token
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
@@ -44,14 +46,10 @@ class User(UserMixin, db.Model):
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
 
     @staticmethod
-    def check_token(token):
+    def check_token(token, expires_in=3600):
+        now = datetime.utcnow()
         user = User.query.filter_by(token=token).first()
         if user is None or user.token_expiration < datetime.utcnow():
             return None
+        user.token_expiration = now + timedelta(seconds=expires_in)
         return user
-
-# db.session.add(User(name='admin', surname='orga', is_superadmin=True))
-#
-# db.session.add(User(email='amoreno@goumh.umh.es', password='1234567890'))
-#
-# db.session.commit()

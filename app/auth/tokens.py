@@ -2,7 +2,6 @@ from flask import jsonify, g
 from flask_login import login_required, current_user
 from app import db
 from app.auth import bp
-from app.auth.auth import token_auth
 
 
 @bp.route('/tokens', methods=['POST'])
@@ -14,7 +13,7 @@ def get_token():
 
 
 @bp.route('/tokens', methods=['DELETE'])
-@token_auth.login_required
+@login_required
 def revoke_token():
     g.current_user.revoke_token()
     db.session.commit()

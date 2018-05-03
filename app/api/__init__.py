@@ -3,7 +3,6 @@ from flask import Blueprint
 bp = Blueprint('api', __name__)
 
 from flask_potion import Api
-from app.auth.auth import token_auth
 
 from app.api.answer import AnswerResource
 from app.api.area import AreaResource
@@ -27,7 +26,7 @@ api = Api(bp)
 api.add_resource(EventResource)
 api.add_resource(ScheduleResource)
 api.add_resource(StageResource)
-api.add_resource(UserResource)  #
+api.add_resource(UserResource)
 api.add_resource(OptionResource)
 api.add_resource(AnswerResource)
 api.add_resource(QuestionResource)
@@ -40,6 +39,3 @@ api.add_resource(StationResource)
 api.add_resource(DayResource)
 api.add_resource(EcoeResource)
 api.add_resource(OrganizationResource)
-
-
-#from app.api import user
