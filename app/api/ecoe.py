@@ -8,7 +8,8 @@ class EcoeResource(ModelResource):
     stations = Relation('station')
     schedules = Relation('schedule')
     students = Relation('student')
-    days = Relation('day')
+    wheels = Relation('wheel')
+    shifts = Relation('shift')
 
     class Meta:
         model = ECOE
@@ -16,9 +17,11 @@ class EcoeResource(ModelResource):
 
     class Schema:
         organization = fields.ToOne('organization')
-        days = fields.ToMany('day')
         areas = fields.ToMany('area')
         stations = fields.ToMany('station')
         schedules = fields.ToMany('schedule')
         students = fields.ToMany('student')
+        wheels = fields.ToMany('wheel')
+        shifts = fields.ToMany('shift')
+
 

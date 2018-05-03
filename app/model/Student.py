@@ -11,7 +11,7 @@ class Student(db.Model):
     dni = db.Column(db.String(10))  # dni is not unique
 
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'), nullable=False)
-    id_wheel = db.Column(db.Integer, db.ForeignKey('wheel.id'), nullable=True)
+    id_planner = db.Column(db.Integer, db.ForeignKey('planner.id'), nullable=True)
 
     answers = db.relationship('Option', secondary=students_options, lazy=True, back_populates='students')
 

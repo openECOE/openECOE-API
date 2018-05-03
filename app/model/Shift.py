@@ -5,13 +5,12 @@ class Shift(db.Model):
     __tablename__ = 'shift'
 
     id = db.Column(db.Integer, primary_key=True)
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'))
     shift_code = db.Column(db.String(20), nullable=False)
-    id_day = db.Column(db.Integer, db.ForeignKey('day.id'), nullable=False)
-    time_start = db.Column(db.String(5))  # HH:MM TODO:Review better relation with datetime or string
+    time_start = db.Column(db.DateTime(), nullable=False)
 
-    wheels = db.relationship('Wheel', backref='shift')
+    planners = db.relationship('Planner', backref='shift')
 
     __table_args__ = (
-        db.UniqueConstraint(shift_code, id_day, name='shift_day_uk'),
+        db.UniqueConstraint(shift_code, id_ecoe, name='shift_ecoe_uk'),
     )
-

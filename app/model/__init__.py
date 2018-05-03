@@ -1,5 +1,4 @@
 from app.model.Area import Area
-from app.model.Day import Day
 from app.model.ECOE import ECOE
 from app.model.Event import Event
 from app.model.Option import Option
@@ -13,3 +12,4 @@ from app.model.Station import Station
 from app.model.Student import Student
 from app.model.User import User
 from app.model.Wheel import Wheel
+from app.model.Planner import Planner

@@ -1,5 +1,4 @@
 from app import db
-from .many_to_many_tables import ecoes_days
 
 
 class ECOE(db.Model):
@@ -13,7 +12,8 @@ class ECOE(db.Model):
     stations = db.relationship('Station', backref='ecoe')
     schedules = db.relationship('Schedule', backref='ecoe')
     students = db.relationship('Student', backref='ecoe')
-    days = db.relationship('Day', secondary=ecoes_days, lazy=True, back_populates='ecoes')
+    wheels = db.relationship('Wheel', backref='ecoe')
+    shifts = db.relationship('Shift', backref='ecoe')
 
 
 

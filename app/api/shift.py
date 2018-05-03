@@ -4,14 +4,16 @@ from app.model.Shift import Shift
 
 
 class ShiftResource(ModelResource):
-    wheels = Relation('wheel')
+    planners = Relation('planner')
 
     class Meta:
         model = Shift
-        natural_key = ('shift_code', 'day')
+        natural_key = ('ecoe', 'shift_code')
 
     class Schema:
-        day = fields.ToOne('day')
-        wheels = fields.ToMany('wheel')
+        ecoe = fields.ToOne('ecoe')
+        planners = fields.ToMany('planner')
+        time_start = fields.DateTimeString()
+
 
 

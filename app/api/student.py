@@ -12,6 +12,5 @@ class StudentResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        # id_wheel = fields.Integer()
-        wheel = fields.ToOne('wheel', nullable=True)
+        planner = fields.ToOne('planner', nullable=True)
         answers = fields.ToMany('option')

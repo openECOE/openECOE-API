@@ -4,15 +4,12 @@ from app.model.Wheel import Wheel
 
 
 class WheelResource(ModelResource):
-    students = Relation('student')
+    planners = Relation('planner')
 
     class Meta:
         model = Wheel
-        natural_key = ('wheel_code', 'shift')
+        natural_key = ('ecoe', 'wheel_code')
 
     class Schema:
-        shift = fields.ToOne('shift')
-        students = fields.ToMany('student')
-
-
-
+        ecoe = fields.ToOne('ecoe')
+        planners = fields.ToMany('planner')
