@@ -1,6 +1,7 @@
 from flask import jsonify
 from werkzeug.http import HTTP_STATUS_CODES
 
+# TODO: check this file (delete file?)
 
 def error_response(status_code, message=None):
     payload = {'error': HTTP_STATUS_CODES.get(status_code, 'Unknown error')}

@@ -1,13 +1,12 @@
 from app import db
-from .ECOE import ECOE
-
-from sqlalchemy.orm import backref
+from .many_to_many_tables import ecoes_days
 
 
 class Day(db.Model):
     __tablename__ = 'day'
 
     id = db.Column(db.Integer, primary_key=True)
-    date = db.Column(db.Date, nullable=False)
-    id_ecoe = db.Column(db.Integer, db.ForeignKey(ECOE.id), nullable=False)
-    ecoe = db.relationship(ECOE, backref=backref('days', lazy='dynamic'))
+    date = db.Column(db.Date, nullable=False, unique=True)
+
+    ecoes = db.relationship('ECOE', secondary=ecoes_days, lazy=True, back_populates='days')
+    shifts = db.relationship('Shift', backref='day')

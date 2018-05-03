@@ -7,6 +7,7 @@ from flask_login import UserMixin
 import base64
 from datetime import datetime, timedelta
 
+# TODO: check this file
 
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
@@ -19,6 +20,7 @@ class User(UserMixin, db.Model):
     is_superadmin = db.Column(db.Boolean(), nullable=False, default=False)
     token = db.Column(db.String(255), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)
+    id_organization = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
 
     def encode_password(self, password):
         self.password = bcrypt.generate_password_hash(
