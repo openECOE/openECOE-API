@@ -1,14 +1,16 @@
 from app import db
-from sqlalchemy.orm import backref
-
-from .Day import Day
 
 
 class Shift(db.Model):
     __tablename__ = 'shift'
 
     id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DATETIME)
-    id_day = db.Column(db.Integer, db.ForeignKey(Day.id), nullable=False)
-    day = db.relationship(Day, backref=backref('shifts', lazy='dynamic'))
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'))
+    shift_code = db.Column(db.String(20), nullable=False)
+    time_start = db.Column(db.DateTime(), nullable=False)
 
+    planners = db.relationship('Planner', backref='shift')
+
+    __table_args__ = (
+        db.UniqueConstraint(shift_code, id_ecoe, name='shift_ecoe_uk'),
+    )

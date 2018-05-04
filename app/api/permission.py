@@ -6,6 +6,8 @@ from werkzeug.exceptions import abort
 
 from model import Permission, User
 
+# TODO: chech this file (delete file?)
+
 @app.route('/api/v1.0/permission/', methods=['GET'])
 def getPermissions():
     permissions = []

@@ -1,9 +1,6 @@
 from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
-from app.model.Question import Question
-
-from app.model.Option import Option
-from app.model.Answer import Answer
+from app.model.Question import Question, QType
 
 
 class QuestionResource(ModelResource):
@@ -13,24 +10,9 @@ class QuestionResource(ModelResource):
         model = Question
 
     class Schema:
-        group = fields.ToOne('group')
         area = fields.ToOne('area')
+        question_type = fields.String(enum=QType)
+        options = fields.ToMany('option')
+        qblocks = fields.ToMany('qblock')
 
 # TODO: Comprobar al crear una pregunta que el area y el grupo introducido pertenecen a la misma ECOE
-
-
-class OptionResource(ModelResource):
-    class Meta:
-        model = Option
-
-    class Schema:
-        question = fields.ToOne('question')
-
-
-class AnswerResource(ModelResource):
-    class Meta:
-        model = Answer
-
-    class Schema:
-        student = fields.ToOne('student')
-        option = fields.ToOne('option')

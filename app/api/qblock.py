@@ -1,14 +1,14 @@
 from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
+from app.model.QBlock import QBlock
 
-from app.model.Group import Group
 
-class GroupResource(ModelResource):
+class QblockResource(ModelResource):
     questions = Relation('question')
 
     class Meta:
-        model = Group
-        natural_key = ('name')
+        model = QBlock
 
     class Schema:
         station = fields.ToOne('station')
+
