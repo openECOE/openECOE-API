@@ -11,5 +11,5 @@ from app.model.Stage import Stage
 from app.model.Station import Station
 from app.model.Student import Student
 from app.model.User import User
-from app.model.Wheel import Wheel
+from app.model.Round import Round
 from app.model.Planner import Planner

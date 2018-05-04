@@ -9,5 +9,5 @@ class PlannerResource(ModelResource):
 
     class Schema:
         shift = fields.ToOne('shift')
-        wheel = fields.ToOne('wheel')
+        round = fields.ToOne('round')
         students = fields.ToMany('student')
