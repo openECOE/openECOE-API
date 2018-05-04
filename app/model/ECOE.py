@@ -12,7 +12,7 @@ class ECOE(db.Model):
     stations = db.relationship('Station', backref='ecoe')
     schedules = db.relationship('Schedule', backref='ecoe')
     students = db.relationship('Student', backref='ecoe')
-    wheels = db.relationship('Wheel', backref='ecoe')
+    rounds = db.relationship('Round', backref='ecoe')
     shifts = db.relationship('Shift', backref='ecoe')
 
 

@@ -8,7 +8,7 @@ class EcoeResource(ModelResource):
     stations = Relation('station')
     schedules = Relation('schedule')
     students = Relation('student')
-    wheels = Relation('wheel')
+    rounds = Relation('round')
     shifts = Relation('shift')
 
     class Meta:
@@ -21,7 +21,7 @@ class EcoeResource(ModelResource):
         stations = fields.ToMany('station')
         schedules = fields.ToMany('schedule')
         students = fields.ToMany('student')
-        wheels = fields.ToMany('wheel')
+        rounds = fields.ToMany('round')
         shifts = fields.ToMany('shift')
 
 

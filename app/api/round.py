@@ -1,14 +1,14 @@
 from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
-from app.model.Wheel import Wheel
+from app.model.Round import Round
 
 
-class WheelResource(ModelResource):
+class RoundResource(ModelResource):
     planners = Relation('planner')
 
     class Meta:
-        model = Wheel
-        natural_key = ('ecoe', 'wheel_code')
+        model = Round
+        natural_key = ('ecoe', 'round_code')
 
     class Schema:
         ecoe = fields.ToOne('ecoe')

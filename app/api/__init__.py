@@ -17,7 +17,7 @@ from app.api.stage import StageResource
 from app.api.station import StationResource
 from app.api.student import StudentResource
 from app.api.planner import PlannerResource
-from app.api.wheel import WheelResource
+from app.api.round import RoundResource
 from app.api.user import UserResource
 
 api = Api(bp)
@@ -32,7 +32,7 @@ api.add_resource(QblockResource)
 api.add_resource(AreaResource)
 api.add_resource(PlannerResource)
 api.add_resource(StudentResource)
-api.add_resource(WheelResource)
+api.add_resource(RoundResource)
 api.add_resource(ShiftResource)
 api.add_resource(StationResource)
 api.add_resource(EcoeResource)
