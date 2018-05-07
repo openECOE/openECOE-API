@@ -5,32 +5,49 @@ app = create_app()
 
 
 @app.cli.command()
-@click.option('--email', prompt='Your email')
+@click.option('--name', prompt='Organization name', help='Organization name')
+def create_orga(name):
+    with app.app_context():
+        from app.api.organization import Organization 
+
+        """Create organization"""
+        orga = Organization()
+
+        orga.name = name
+
+        db.session.add(orga)
+        db.session.commit()
+
+        click.echo('Organization {} created'.format(name))
+
+
+@app.cli.command()
+@click.option('--email', prompt='Your email', help='User email')
 @click.password_option('--password', prompt='Type password')
-@click.option('--name')
-@click.option('--surname')
+@click.option('--name', help='User name')
+@click.option('--surname', help='User suername')
 @click.option('--admin',  is_flag=True,
               help='Indicates if user is admin', )
-@click.option('--organization', default=1)
+@click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
 def create_user(email, password, name, surname, admin, organization):
     with app.app_context():
         from app.api.user import User
         from datetime import datetime
 
         """Create user"""
-        admin_user = User()
+        user = User()
 
-        admin_user.email = email
-        admin_user.is_superadmin = admin
-        admin_user.encode_password(password)
-        admin_user.id_organization = organization
+        user.email = email
+        user.is_superadmin = admin
+        user.encode_password(password)
+        user.id_organization = organization
 
-        admin_user.name = name
-        admin_user.surname = surname
+        user.name = name
+        user.surname = surname
 
-        admin_user.registered_on = datetime.now()
+        user.registered_on = datetime.now()
 
-        db.session.add(admin_user)
+        db.session.add(user)
 
         db.session.commit()
 
