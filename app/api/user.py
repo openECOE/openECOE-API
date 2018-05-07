@@ -22,13 +22,19 @@ class UserResource(PrincipalResource):
         model = User
         write_only_fields = ['password', 'is_superadmin', 'token', 'token_expiration', 'registered_on']
         permissions = {
-            'create': 'yes',
+            'create': 'superadmin',
             'update': 'create',
             'delete': 'update'
         }
 
+    class Schema:
+        organization = fields.ToOne('organization')
+
     @Route.GET
     def me(self):
+        if not current_user.is_authenticated:
+            return None, 401
+
         return self.manager.read(current_user.id)
 
     me.request_schema = None
