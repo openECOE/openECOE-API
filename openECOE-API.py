@@ -23,11 +23,11 @@ def create_orga(name):
 
 @app.cli.command()
 @click.option('--email', prompt='Your email', help='User email')
-@click.password_option('--password', prompt='Type password')
+@click.password_option('--password', prompt='Type password', help='User password')
 @click.option('--name', help='User name')
 @click.option('--surname', help='User suername')
 @click.option('--admin',  is_flag=True,
-              help='Indicates if user is admin', )
+              help='Flag to indicate user is admin', )
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
 def create_user(email, password, name, surname, admin, organization):
     with app.app_context():
