@@ -1,4 +1,5 @@
 from flask import Blueprint
+from flask_login import login_required
 
 bp = Blueprint('api', __name__)
 
@@ -20,7 +21,7 @@ from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource
 
-api = Api(bp)
+api = Api(bp, decorators=[login_required])
 
 api.add_resource(EventResource)
 api.add_resource(ScheduleResource)
