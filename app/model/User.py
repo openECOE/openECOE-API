@@ -37,10 +37,10 @@ class User(UserMixin, db.Model):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             self.token_expiration = now + timedelta(seconds=expires_in)
-            return self.token
+            return self
         self.token = base64.b64encode(os.urandom(24)).decode('utf-8')
         self.token_expiration = now + timedelta(seconds=expires_in)
-        return self.token
+        return self
 
     def revoke_token(self):
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)

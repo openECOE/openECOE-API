@@ -1,8 +1,9 @@
 from flask import Blueprint
+from app import api_app as api
 
 bp = Blueprint('api', __name__)
 
-from flask_potion import Api
+api.init_app(bp)
 
 from app.api.area import AreaResource
 from app.api.ecoe import EcoeResource
@@ -19,8 +20,6 @@ from app.api.student import StudentResource
 from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource
-
-api = Api(bp)
 
 api.add_resource(EventResource)
 api.add_resource(ScheduleResource)

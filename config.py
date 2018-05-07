@@ -7,11 +7,12 @@ database_name = os.environ.get('DATABASE_NAME')
 
 class BaseConfig:
     """Base configuration."""
-    SERVER_NAME = "10.1.56.84:5000"
+    SERVER_NAME = "10.1.56.112:5000"
     SECRET_KEY = os.getenv('SECRET_KEY', 'TEST_ECOE')
     DEBUG = False
     BCRYPT_LOG_ROUNDS = 13
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    API_AUTH = True
 
 
 class DevelopmentConfig(BaseConfig):
