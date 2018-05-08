@@ -1,0 +1,7 @@
+---
+# configuration for vagrant
+
+env: vagrant
+hostname: openecoe-vagrant
+base_path: /vagrant
+app_fqdn: openecoe.loc

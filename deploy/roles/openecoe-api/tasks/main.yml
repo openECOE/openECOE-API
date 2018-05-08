@@ -1,0 +1,6 @@
+- name: Create virtualenv
+  become: no
+  pip:
+    virtualenv: "{{ venv_path }}"
+    virtualenv_python: python3
+    requirements: "{{ requirements_path }}"

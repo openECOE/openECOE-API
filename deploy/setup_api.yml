@@ -1,0 +1,6 @@
+---
+- hosts: all
+  become: yes # This means that all tasks will be executed with sudo
+
+  roles:
+    - role: openecoe-api

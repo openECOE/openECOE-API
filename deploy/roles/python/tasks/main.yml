@@ -4,12 +4,6 @@
     state: present
     update_cache: yes
 
-- name: Install Git
-  apt:
-    name: git
-    state: present
-    update_cache: yes
-
 - name: Install pip3
   apt:
     name: python3-pip
@@ -21,9 +15,3 @@
     name: virtualenv
     executable: pip3
 
-- name: Create virtualenv
-  become: no
-  pip:
-    virtualenv: "{{ venv_path }}"
-    virtualenv_python: python3
-    requirements: "{{ requirements_path }}"
