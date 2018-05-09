@@ -20,12 +20,6 @@
     mode: 0600
   no_log: true
 
-- name: Install Git
-  apt:
-    name: git
-    state: present
-    update_cache: yes
-
 - git:
     repo: "git@github.com:openECOE/openECOE-API.git"
     dest: "{{project_path}}"

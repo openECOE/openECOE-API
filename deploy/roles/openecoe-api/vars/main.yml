@@ -1,12 +1,14 @@
 project_name: openECOE-API
 project_path: "{{base_path}}/{{project_name}}"
+
+git_repo: "git@github.com:openECOE/openECOE-API.git"
+
 venv_path: "{{project_path}}/.venv"
 requirements_path: "{{project_path}}/requirements.txt"
 
 database_name: "{{project_name}}"
 database_user: "openecoe"
 database_password: "8luz80d6OAqboKCasW2X"
-use_repo: false
 
 environment_config:
   FLASK_APP: openECOE-API.py

@@ -1,13 +1,11 @@
 ---
 # configure base dependencies
-  - name: make sure git is installed
-    apt: name=git state=present
-
   - name: make sure nginx is installed
     apt:
       name: nginx
       state: present
       update_cache: yes
+    when: env != "develop"
 
   - name: make sure Python 3 is installed
     apt:

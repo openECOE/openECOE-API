@@ -1,3 +1,4 @@
+# Require file ansible_vault.pass with passsword string for Ansible Vault
 ---
 - hosts: all
   become: yes # This means that all tasks will be executed with sudo

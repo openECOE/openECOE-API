@@ -17,6 +17,7 @@ class BaseConfig:
 
 class DevelopmentConfig(BaseConfig):
     """Development configuration."""
+    SERVER_NAME = "dev.api.openecoe.com:5000"
     DEBUG = True
     BCRYPT_LOG_ROUNDS = 4
     SQLALCHEMY_DATABASE_URI = local_base + database_name
@@ -24,6 +25,7 @@ class DevelopmentConfig(BaseConfig):
 
 class TestingConfig(BaseConfig):
     """Testing configuration."""
+    SERVER_NAME = "test.api.openecoe.com:5000"
     DEBUG = True
     TESTING = True
     BCRYPT_LOG_ROUNDS = 4
@@ -33,7 +35,7 @@ class TestingConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
     """Production configuration."""
-    SECRET_KEY = 'my_precious'
+    SECRET_KEY = 'f24b05095b4748a8b9d13df5cdb8d83c'
     DEBUG = False
     API_AUTH = True
     SQLALCHEMY_DATABASE_URI = local_base + database_name + '_prod'

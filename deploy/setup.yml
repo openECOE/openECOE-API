@@ -6,4 +6,4 @@
     - base
     - configure
 
-- include: setup_api.yml
+- import_playbook: setup_api.yml

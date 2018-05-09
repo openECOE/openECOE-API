@@ -1,7 +1,8 @@
 ---
 # configuration for vagrant
 
-env: vagrant
+env: develop
 hostname: openecoe-vagrant
 base_path: /vagrant
 app_fqdn: openecoe.loc
+git_repo_setup: false
