@@ -6,7 +6,7 @@
 - name: make sure SSL certificate is installed
   copy:
     content: "{{ certificate.ssl_certificate }}"
-    dest: "{{base_path}}/secrets/cert.pem"
+    dest: "{{base_path}}/cert.pem"
     owner: root
     group: root
     mode: 0644
@@ -15,7 +15,7 @@
 - name: make sure SSL private key is installed
   copy:
     content: "{{ certificate.ssl_private_key }}"
-    dest: "{{base_path}}/secrets/key.pem"
+    dest: "{{base_path}}/key.pem"
     owner: root
     group: root
     mode: 0600

@@ -1,3 +1,8 @@
-DATABASE_URL=mysql+pymysql://{{database_user}}:{{database_password}}@localhost/
-DATABASE_NAME="{{database_name}}"
-APP_SETTINGS="{{app_settings}}"
+SERVER_NAME = {{app_fqdn}}
+SECRET_KEY = {{app_secret_key}}
+DEBUG = {{app_debug}}
+TESTING = {{app_testing}}
+BCRYPT_LOG_ROUNDS = {{bcrypt_log_rounds}}
+SQLALCHEMY_TRACK_MODIFICATIONS = {{sqlalchemy_track_modifications}}
+API_AUTH = {{api_auth}}
+SQLALCHEMY_DATABASE_URI = mysql+pymysql://{{database_user}}:{{database_password}}@localhost/{{database_name}}

@@ -5,20 +5,15 @@ from dotenv import load_dotenv
 basedir = os.path.abspath(os.path.dirname(__file__))
 load_dotenv(os.path.join(basedir, '.env'))
 
-local_base = os.environ.get('DATABASE_URL') or \
-             'sqlite:///' + basedir
-database_name = os.environ.get('DATABASE_NAME')
-
-
 class BaseConfig:
     """Base configuration."""
-    SERVER_NAME = "api.openecoe.com"
-    SECRET_KEY = os.environ.get('SECRET_KEY', 'TEST_ECOE')
-    DEBUG = False
-    BCRYPT_LOG_ROUNDS = 13
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    API_AUTH = True
-    SQLALCHEMY_DATABASE_URI = local_base + database_name
+    SERVER_NAME = os.environ.get('SERVER_NAME')
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    DEBUG = os.environ.get('DEBUG')
+    BCRYPT_LOG_ROUNDS = os.environ.get('BCRYPT_LOG_ROUNDS')
+    SQLALCHEMY_TRACK_MODIFICATIONS = os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS')
+    API_AUTH = os.environ.get('API_AUTH')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
 
 
 class DevelopmentConfig(BaseConfig):

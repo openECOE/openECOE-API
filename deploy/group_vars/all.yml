@@ -2,3 +2,18 @@
 base_path: /opt
 project_name: openECOE-API
 project_path: "{{base_path}}/{{project_name}}"
+
+database_name: "{{project_name}}_{{env}}"
+database_user: "openecoe"
+database_password: "8luz80d6OAqboKCasW2X"
+
+"""Base configuration."""
+app_port: 5000
+
+app_secret_key: 'TEST_ECOE'
+app_debug: False
+app_testing: False
+bcrypt_log_rounds: 13
+sqlalchemy_track_modifications: False
+
+api_auth: True
