@@ -1,4 +1,3 @@
 ---
 dependencies:
   - role: geerlingguy.pip
-  - role: geerlingguy.supervisor

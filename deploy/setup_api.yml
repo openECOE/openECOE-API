@@ -1,11 +1,13 @@
 # Require file ansible_vault.pass with passsword string for Ansible Vault
 ---
-- hosts: production
+- name: Pull projecto openECOE-API form GIT
+  hosts: production
   become: yes
   roles:
     - openecoe-api_prod
 
-- hosts: all
+- name: Install openECOE-API
+  hosts: all
   become: yes # This means that all tasks will be executed with sudo
 
   roles:
@@ -16,3 +18,4 @@
   become: yes
   roles:
     - openecpe-api_supervisor
+    - geerlingguy.supervisor

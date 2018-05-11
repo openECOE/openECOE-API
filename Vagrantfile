@@ -27,7 +27,7 @@ Vagrant.configure("2") do |config|
       #ansible.verbose = "vvv"
       ansible.limit = "production"
       ansible.vault_password_file  = "deploy/ansible_vault.pass"
-      ansible.galaxy_role_file = "deploy/requeriments.yml"
+      #ansible.galaxy_role_file = "deploy/requeriments.yml"
       ansible.playbook = "deploy/setup.yml"
       ansible.inventory_path = "deploy/inventory/production"
     end

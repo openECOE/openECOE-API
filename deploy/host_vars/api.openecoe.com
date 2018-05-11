@@ -17,4 +17,4 @@ api_auth: True
 app_workers: 4
 
 supervisor_user: root
-supervisor_password: '&g3#HR0t#1EWxDgOJ!S@qwpBinB&5$&z'
+#supervisor_password: '&g3#HR0t#1EWxDgOJ!S@qwpBinB&5$&z'

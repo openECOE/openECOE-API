@@ -3,6 +3,9 @@ base_path: /opt
 project_name: openECOE-API
 project_path: "{{base_path}}/{{project_name}}"
 
+venv_path: "{{project_path}}/.venv"
+requirements_path: "{{project_path}}/requirements.txt"
+
 database_name: "{{project_name}}_{{env}}"
 database_user: "openecoe"
 database_password: "8luz80d6OAqboKCasW2X"
@@ -17,9 +20,3 @@ sqlalchemy_track_modifications: False
 api_auth: True
 
 app_workers: 1
-
-supervisor_user: root
-supervisor_password:
-
-supervisor_inet_http_server_enable: false
-supervisor_inet_http_server_port: '*:9001'

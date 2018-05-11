@@ -1,9 +1,3 @@
-project_name: openECOE-API
-project_path: "{{base_path}}/{{project_name}}"
-
-venv_path: "{{project_path}}/.venv"
-requirements_path: "{{project_path}}/requirements.txt"
-
 environment_config:
   FLASK_APP: "{{project_path}}/openECOE-API.py"
 

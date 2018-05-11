@@ -6,6 +6,9 @@
 - src: geerlingguy.pip
   state: present
 
+- src: geerlingguy.nginx
+  state: present
+
 - src: geerlingguy.supervisor
   version: "1.2.0"
   state: present
