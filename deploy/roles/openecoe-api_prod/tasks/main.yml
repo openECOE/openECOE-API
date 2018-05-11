@@ -1,3 +1,9 @@
+- name: make sure nginx is installed
+  apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
 - name: Include SSL certificates
   include_vars:
     file: certificate.yml

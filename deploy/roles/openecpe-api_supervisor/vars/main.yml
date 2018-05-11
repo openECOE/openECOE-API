@@ -1,0 +1,17 @@
+supervisor_started: true
+supervisor_enabled: true
+
+supervisor_programs:
+  - name: 'openECOE-API'
+    command: "{{project_path}}/.venv/bin/gunicorn -b localhost:8000 -w {{app_workers}} openECOE-API:app"
+    state: present
+    configuration: |
+      directory={{project_path}}
+      user=ubuntu
+      autostart=true
+      autorestart=true
+      startretries=2
+      startsecs=1
+      stopasgroup=true
+      killasgroup=true
+      environment = FLASK_APP="openECOE-API"

@@ -3,10 +3,16 @@
 - hosts: production
   become: yes
   roles:
-    - role: openecoe-api_prod
+    - openecoe-api_prod
 
 - hosts: all
   become: yes # This means that all tasks will be executed with sudo
 
   roles:
-    - role: openecoe-api
+    - openecoe-api
+
+- name: Running supervisor
+  hosts: production
+  become: yes
+  roles:
+    - openecpe-api_supervisor

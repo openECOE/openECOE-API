@@ -3,6 +3,9 @@
   version: "2.9.0"
   state: present
 
+- src: geerlingguy.pip
+  state: present
+
 - src: geerlingguy.supervisor
   version: "1.2.0"
   state: present

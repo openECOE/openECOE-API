@@ -10,7 +10,11 @@ app_fqdn: api.openecoe.com
 git_branch: server_deployment
 
 # Enviroment Config
-app_port: 443
-secret_key: 'f24b05095b4748a8b9d13df5cdb8d83c'
+app_secret_key: 'f24b05095b4748a8b9d13df5cdb8d83c'
 app_debug: False
 api_auth: True
+
+app_workers: 4
+
+supervisor_user: root
+supervisor_password: '&g3#HR0t#1EWxDgOJ!S@qwpBinB&5$&z'
