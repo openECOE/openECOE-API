@@ -16,7 +16,7 @@ api_app = Api()
 
 
 def create_app():
-    app_settings = os.getenv(
+    app_settings = os.environ.get(
         'APP_SETTINGS',
         'config.DevelopmentConfig'
     )

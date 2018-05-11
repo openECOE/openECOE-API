@@ -9,13 +9,13 @@ Vagrant.configure("2") do |config|
 
   config.vm.define "develop" do |dev|
     dev.vm.network "private_network", ip: "192.168.11.11"
-    dev.vm.synced_folder ".", "/vagrant/"+ config.vm.hostname
+    dev.vm.synced_folder ".", "/opt/"+ config.vm.hostname
 
     dev.vm.provision "ansible" do |ansible|
       #ansible.verbose = "v"
-      ansible.limit = "vagrant"
+      ansible.limit = "develop"
       ansible.galaxy_role_file = "deploy/requeriments.yml"
-      ansible.inventory_path = "deploy/inventory/vagrant"
+      ansible.inventory_path = "deploy/inventory/develop"
       ansible.playbook = "deploy/setup.yml"
     end
   end
@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
 
     prod.vm.provision "ansible" do |ansible|
       #ansible.verbose = "vvv"
-      ansible.limit = "openecoe.com"
+      ansible.limit = "production"
       ansible.vault_password_file  = "deploy/ansible_vault.pass"
       #ansible.galaxy_role_file = "deploy/requeriments.yml"
       ansible.playbook = "deploy/setup.yml"

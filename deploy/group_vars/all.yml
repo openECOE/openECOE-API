@@ -1,2 +1,4 @@
 ---
 base_path: /opt
+project_name: openECOE-API
+project_path: "{{base_path}}/{{project_name}}"

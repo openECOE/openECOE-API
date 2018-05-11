@@ -1,42 +1,12 @@
-- name: Include SSL certificates
-  include_vars:
-    file: certificate.yml
-    name: certificate
-  when: git_repo_setup is defined and git_repo_setup
-
-- name: make sure SSL certificate is installed
-  copy:
-    content: "{{ certificate.ssl_certificate }}"
-    dest: "{{base_path}}/cert.pem"
-    owner: root
-    group: root
-    mode: 0644
-  when: certificate is defined
-
-- name: make sure SSL private key is installed
-  copy:
-    content: "{{ certificate.ssl_private_key }}"
-    dest: "{{base_path}}/key.pem"
-    owner: root
-    group: root
-    mode: 0600
-  no_log: true
-  when: certificate is defined
-
-- name: Pull openECOE-API from github
-  git:
-    repo: "{{git_repo}}"
-    dest: "{{project_path}}"
-    version: "{{git_branch}}"
-    key_file: "{{base_path}}/key.pem"
-    accept_hostkey: yes
-    force: yes
-  when: git_repo_setup is defined and git_repo_setup
-  tags: git
-
 - name: Create virtualenv
   pip:
     virtualenv: "{{ venv_path }}"
     virtualenv_python: python3
     requirements: "{{ requirements_path }}"
   tags: virtualenv
+
+- name: Create .env configuration file
+  template:
+    src: env_template
+    dest: "{{project_path}}/.env"
+    mode: 0644

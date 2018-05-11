@@ -1,0 +1,34 @@
+- name: Include SSL certificates
+  include_vars:
+    file: certificate.yml
+    name: certificate
+
+- name: make sure SSL certificate is installed
+  copy:
+    content: "{{ certificate.ssl_certificate }}"
+    dest: "{{base_path}}/secrets/cert.pem"
+    owner: root
+    group: root
+    mode: 0644
+  when: certificate is defined
+
+- name: make sure SSL private key is installed
+  copy:
+    content: "{{ certificate.ssl_private_key }}"
+    dest: "{{base_path}}/secrets/key.pem"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+  when: certificate is defined
+
+- name: Pull openECOE-API from github
+  git:
+    repo: "{{git_repo}}"
+    dest: "{{project_path}}"
+    version: "{{git_branch}}"
+    key_file: "{{base_path}}/key.pem"
+    accept_hostkey: yes
+    update: yes
+    force: yes
+  tags: git
