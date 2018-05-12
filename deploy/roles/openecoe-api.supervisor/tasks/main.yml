@@ -1,0 +1,14 @@
+- name: Ensure Gunicorn is installed.
+  pip:
+    name: gunicorn
+    state: present
+    virtualenv: "{{ venv_path }}"
+    virtualenv_python: python3
+
+- name: Force unlink supervisor socket
+  command: "unlink {{supervisor_unix_http_server_socket_path}}"
+  register: unlink_status
+  ignore_errors: yes
+
+- include_role:
+    name: geerlingguy.supervisor

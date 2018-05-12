@@ -6,6 +6,7 @@ hostname: openecoe-api
 app_fqdn: api.openecoe.com
 #ansible_ssh_user: ubuntu
 #ansible_ssh_private_key_file: "{{ lookup('env', 'PWD') }}/server.pem"
+ansible_connection: local
 
 git_branch: server_deployment
 
@@ -17,4 +18,4 @@ api_auth: True
 app_workers: 4
 
 supervisor_user: root
-#supervisor_password: '&g3#HR0t#1EWxDgOJ!S@qwpBinB&5$&z'
+supervisor_password: '&g3#HR0t#1EWxDgOJ!S@qwpBinB&5$&z'

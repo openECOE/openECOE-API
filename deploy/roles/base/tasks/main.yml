@@ -20,3 +20,4 @@
   - name: make sure 'setuptools' package is installed
     pip:
       name: setuptools
+      executable: pip3

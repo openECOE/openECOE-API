@@ -2,7 +2,7 @@ git_repo: "git@github.com:openECOE/openECOE-API.git"
 
 nginx_vhosts:
   - listen: "80"
-    server_name: "_"
+    server_name: "{{app_fqdn}}"
     state: "present"
     filename: "{{app_fqdn}}_80.conf"
     template: "{{ nginx_vhost_template }}"
@@ -13,7 +13,7 @@ nginx_vhosts:
       }
 
   - listen: "443 ssl" # listen on port 443 (https)
-    server_name: "_"
+    server_name: "{{app_fqdn}}"
     state: "present"
     filename: "{{app_fqdn}}_443.conf"
     template: "{{ nginx_vhost_template }}"

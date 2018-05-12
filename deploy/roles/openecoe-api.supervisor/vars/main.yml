@@ -1,15 +1,13 @@
-supervisor_user: root
-
 supervisor_started: true
 supervisor_enabled: true
 
-supervisor_unix_http_server_enable: true
-supervisor_unix_http_server_socket_path: /var/run/supervisor.sock
-supervisor_inet_http_server_port: '*:20001'
+supervisor_unix_http_server_enable: false
+supervisor_unix_http_server_socket_path: /var/run/supervisord.sock
+supervisor_inet_http_server_port: '*:9001'
 
 supervisor_programs:
   - name: '{{project_name}}'
-    command: "{{project_path}}/.venv/bin/gunicorn -b localhost:8000 -w {{app_workers}} openECOE-API:app"
+    command: "{{venv_path}}/bin/gunicorn -b localhost:8000 -w {{app_workers}} openECOE-API:app"
     state: present
     configuration: |
       directory={{project_path}}

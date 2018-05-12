@@ -1,17 +1,3 @@
-- name: Ensure python OpenSSL dependencies are installed.
-  pip:
-    name: pyOpenSSL
-    state: present
-
-
-#- name: Generate a Self Signed OpenSSL certificate
-#  openssl_certificate:
-#    path: "/etc/ssl/crt/{{app_fqdn}}.crt"
-#    privatekey_path: "/etc/ssl/private/{{app_fqdn}}.pem"
-#    csr_path: "/etc/ssl/csr/{{app_fqdn}}.csr"
-#    provider: selfsigned
-
-
 - name: Generate RSA Key
   command: openssl genrsa \
     -out "/etc/ssl/private/{{app_fqdn}}.pem" 2048

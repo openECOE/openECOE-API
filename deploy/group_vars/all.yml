@@ -3,7 +3,7 @@ base_path: /opt
 project_name: openECOE-API
 project_path: "{{base_path}}/{{project_name}}"
 
-venv_path: "{{project_path}}/.venv"
+venv_path: "{{base_path}}/.venv"
 requirements_path: "{{project_path}}/requirements.txt"
 
 database_name: "{{project_name}}_{{env}}"
@@ -20,3 +20,6 @@ sqlalchemy_track_modifications: False
 api_auth: True
 
 app_workers: 1
+
+supervisor_user: root
+supervisor_password: '1234'
