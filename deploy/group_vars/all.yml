@@ -1,12 +1,12 @@
 ---
 base_path: /opt
-project_name: openECOE-API
-project_path: "{{base_path}}/{{project_name}}"
+project_main_controller: openECOE-API
+project_path: "{{base_path}}/{{project_main_controller}}"
 
 venv_path: "{{base_path}}/.venv"
 requirements_path: "{{project_path}}/requirements.txt"
 
-database_name: "{{project_name}}_{{env}}"
+database_name: "{{project_main_controller}}_{{env}}"
 database_user: "openecoe"
 database_password: "8luz80d6OAqboKCasW2X"
 
@@ -23,3 +23,6 @@ app_workers: 1
 
 supervisor_user: root
 supervisor_password: '1234'
+
+supervisor_inet_http_server_enable: true
+supervisor_inet_http_server_port: '*:9001'

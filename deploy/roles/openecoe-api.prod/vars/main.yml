@@ -19,8 +19,8 @@ nginx_vhosts:
     template: "{{ nginx_vhost_template }}"
 
     # write access and error logs to /var/log
-    access_log: "/var/log/nginx/{{project_name}}_access.log"
-    error_log: "/var/log/nginx/{{project_name}}_error.log"
+    access_log: "/var/log/nginx/{{project_main_controller}}_access.log"
+    error_log: "/var/log/nginx/{{project_main_controller}}_error.log"
     extra_parameters: |
       # location of the self-signed SSL certificate
       ssl_certificate /etc/ssl/{{app_fqdn}}.pem;

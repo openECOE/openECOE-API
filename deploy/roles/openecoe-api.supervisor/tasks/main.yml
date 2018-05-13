@@ -5,10 +5,13 @@
     virtualenv: "{{ venv_path }}"
     virtualenv_python: python3
 
-- name: Force unlink supervisor socket
-  command: "unlink {{supervisor_unix_http_server_socket_path}}"
-  register: unlink_status
-  ignore_errors: yes
+#- name: Ensure supervisor program {{project_main_controller}} is stopped
+#  supervisorctl:
+#    name: "{{project_main_controller}}"
+#    state: stopped
+#    username: "{{supervisor_user}}"
+#    password: "{{supervisor_password}}"
+#  ignore_errors: yes
 
 - include_role:
     name: geerlingguy.supervisor

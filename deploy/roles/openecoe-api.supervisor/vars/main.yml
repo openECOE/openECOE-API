@@ -1,21 +1,17 @@
-supervisor_started: true
-supervisor_enabled: true
-
-supervisor_unix_http_server_enable: false
+supervisor_unix_http_server_enable: true
+#supervisor_unix_http_server_socket_path: /var/run/supervisord.sock
 supervisor_unix_http_server_socket_path: /var/run/supervisord.sock
-supervisor_inet_http_server_port: '*:9001'
 
 supervisor_programs:
-  - name: '{{project_name}}'
-    command: "{{venv_path}}/bin/gunicorn -b localhost:8000 -w {{app_workers}} openECOE-API:app"
+  - name: '{{project_main_controller}}'
+    command: "{{venv_path}}/bin/gunicorn -b localhost:8000 -w {{app_workers}} {{project_main_controller}}:app"
     state: present
     configuration: |
       directory={{project_path}}
       user=ubuntu
       autostart=true
       autorestart=true
-      startretries=2
-      startsecs=1
       stopasgroup=true
       killasgroup=true
-      environment = FLASK_APP="openECOE-API"
+      stopsignal=INT
+      environment = FLASK_APP="{{project_main_controller}}"
