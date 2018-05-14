@@ -6,7 +6,6 @@ hostname: openecoe-api-vagrant
 app_fqdn: dev.api.openecoe.com
 app_port: 5000
 
-host_key_checking: False
 #ansible_ssh_user: ubuntu
 #ansible_ssh_private_key_file: "{{ lookup('env', 'PWD') }}/server.pem"
 ansible_connection: local
