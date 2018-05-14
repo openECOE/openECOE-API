@@ -28,12 +28,14 @@ class User(UserMixin, db.Model):
             password, current_app.config['BCRYPT_LOG_ROUNDS']
         ).decode()
 
+        db.session.commit()
+
     def check_password(self, candidate):
         return bcrypt.check_password_hash(
             self.password, candidate
         )
 
-    def get_token(self, expires_in=3600):
+    def get_token(self, expires_in=86400):
         now = datetime.utcnow()
         if self.token and self.token_expiration > now + timedelta(seconds=60):
             self.token_expiration = now + timedelta(seconds=expires_in)
@@ -46,7 +48,7 @@ class User(UserMixin, db.Model):
         self.token_expiration = datetime.utcnow() - timedelta(seconds=1)
 
     @staticmethod
-    def check_token(token, expires_in=3600):
+    def check_token(token, expires_in=86400):
         now = datetime.utcnow()
         user = User.query.filter_by(token=token).first()
         if user is None or user.token_expiration < datetime.utcnow():

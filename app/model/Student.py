@@ -12,6 +12,7 @@ class Student(db.Model):
 
     id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'), nullable=False)
     id_planner = db.Column(db.Integer, db.ForeignKey('planner.id'), nullable=True)
+    planner_order = db.Column(db.Integer)
 
     answers = db.relationship('Option', secondary=students_options, lazy=True, back_populates='students')
 

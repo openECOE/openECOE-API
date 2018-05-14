@@ -1,9 +1,0 @@
-[program:{{project_main_controller}}]
-command={{project_path}}/.venv/bin/gunicorn -b localhost:8000 -w {{app_workers}} openECOE-API:app
-directory={{project_path}}
-user=ubuntu
-autostart=true
-autorestart=true
-stopasgroup=true
-killasgroup=true
-environment = FLASK_APP="openECOE-API"
