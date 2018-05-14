@@ -28,6 +28,8 @@ class User(UserMixin, db.Model):
             password, current_app.config['BCRYPT_LOG_ROUNDS']
         ).decode()
 
+        db.session.commit()
+
     def check_password(self, candidate):
         return bcrypt.check_password_hash(
             self.password, candidate
