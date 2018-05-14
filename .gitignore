@@ -194,3 +194,4 @@ venv.bak/
 .mypy_cache/
 
 
+ansible_vault.pass
