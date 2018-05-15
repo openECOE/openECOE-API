@@ -1,0 +1,65 @@
+- name: Generate RSA Key
+  command: openssl genrsa \
+    -out "/etc/ssl/private/{{app_fqdn}}.pem" 2048
+  args:
+    creates: "/etc/ssl/private/{{app_fqdn}}.pem"
+
+- name: Generate CSR
+  command: openssl req \
+    -new \
+    -subj '/C=ES/ST=AL/L=Elche/O=UMN/CN={{ app_fqdn }}'
+    -key "/etc/ssl/private/{{app_fqdn}}.pem" \
+    -out "/etc/ssl/{{app_fqdn}}.csr"
+  args:
+    creates: "/etc/ssl/{{app_fqdn}}.csr"
+
+- name: Generate Self-signed Certificate
+  command: openssl req \
+    -x509 \
+    -days 1825 \
+    -key "/etc/ssl/private/{{app_fqdn}}.pem" \
+    -in "/etc/ssl/{{app_fqdn}}.csr" \
+    -out "/etc/ssl/{{app_fqdn}}.pem"
+  args:
+    creates: "/etc/ssl/{{app_fqdn}}.pem"
+
+- name: Include Github Deploy SSL certificates
+  include_vars:
+    file: certificate.yml
+    name: certificate
+
+- name: make sure Github Deploy SSL certificate is installed
+  copy:
+    content: "{{ certificate.ssl_certificate }}"
+    dest: "/etc/ssl/certs/github_deploy_cert.pem"
+    owner: root
+    group: root
+    mode: 0644
+  when: certificate is defined
+
+- name: make sure Github Deploy SSL private key is installed
+  copy:
+    content: "{{ certificate.ssl_private_key }}"
+    dest: "/etc/ssl/private/github_deploy_key.pem"
+    owner: root
+    group: root
+    mode: 0600
+  no_log: true
+  when: certificate is defined
+
+- name: make sure git is installed
+  apt:
+    name: git
+    state: present
+    update_cache: yes
+
+- name: Pull openECOE-API from github
+  git:
+    repo: "{{git_repo}}"
+    dest: "{{project_path}}"
+    version: "{{git_branch}}"
+    key_file: "/etc/ssl/private/github_deploy_key.pem"
+    accept_hostkey: yes
+    update: yes
+    force: yes
+  tags: git

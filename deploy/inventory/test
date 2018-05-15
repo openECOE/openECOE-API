@@ -1,0 +1,5 @@
+[apiservers]
+test.api.openecoe.com
+
+[test:children]
+apiservers

@@ -1,0 +1,17 @@
+- name: Ensure Gunicorn is installed.
+  pip:
+    name: gunicorn
+    state: present
+    virtualenv: "{{ venv_path }}"
+    virtualenv_python: python3
+
+#- name: Ensure supervisor program {{project_main_controller}} is stopped
+#  supervisorctl:
+#    name: "{{project_main_controller}}"
+#    state: stopped
+#    username: "{{supervisor_user}}"
+#    password: "{{supervisor_password}}"
+#  ignore_errors: yes
+
+- include_role:
+    name: geerlingguy.supervisor

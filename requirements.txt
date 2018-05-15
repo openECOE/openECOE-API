@@ -32,3 +32,4 @@ six==1.11.0
 SQLAlchemy==1.2.7
 strict-rfc3339==0.7
 Werkzeug==0.14.1
+python-dotenv

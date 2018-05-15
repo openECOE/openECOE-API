@@ -1,0 +1,9 @@
+---
+- hosts: all
+  become: yes # This means that all tasks will be executed with sudo
+
+  roles:
+    - base
+    - configure
+
+- import_playbook: setup_api.yml
