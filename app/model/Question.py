@@ -17,5 +17,7 @@ class Question(db.Model):
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=False)
     question_type = db.Column(db.Enum(QType), nullable=False)
 
+    order = db.Column(db.Integer)
+
     options = db.relationship('Option', backref='question')
     qblocks = db.relationship('QBlock', secondary=qblocks_questions, lazy=True, back_populates='questions')
