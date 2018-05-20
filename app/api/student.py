@@ -1,6 +1,7 @@
 from flask_potion import ModelResource, fields, signals
 from flask_potion.routes import Relation, ItemRoute, RouteSet, ResourceBound, ResourceReference, cached_property, RelationInstances, attribute_to_route_uri, to_camel_case
 from app.model.Student import Student
+from app.model.Question import QType
 
 from flask_potion.reference import _bind_schema
 from flask_potion.fields import ToOne, Integer
@@ -110,4 +111,12 @@ def before_update_planner(sender, item, changes):
                 student.planner_order = order + item.planner_order
 
         item.planner_order = len(changes['planner'].students) + 1
+
+@signals.before_add_to_relation.connect_via(StudentResource)
+def before_add_relation(sender, item, attribute, child):
+    if attribute == 'answers':
+        if child.question.question_type == QType.RADIO_BUTTON:
+            # Delete other answers
+            for answer in item.answers:
+                sender.manager.relation_remove(item, attribute, StudentResource, answer)
 
