@@ -13,7 +13,7 @@ class ShiftResource(ModelResource):
     class Schema:
         ecoe = fields.ToOne('ecoe')
         planners = fields.ToMany('planner')
-        time_start = fields.DateTimeString()
+        time_start = fields.DateTime()
 
 
 
