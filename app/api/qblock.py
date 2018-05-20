@@ -11,4 +11,5 @@ class QblockResource(ModelResource):
 
     class Schema:
         station = fields.ToOne('station')
+        questions = fields.ToMany('question')
 
