@@ -116,7 +116,8 @@ def before_update_planner(sender, item, changes):
 def before_add_relation(sender, item, attribute, child):
     if attribute == 'answers':
         if child.question.question_type == QType.RADIO_BUTTON:
-            # Delete other answers
+            # Delete other answers for this question
             for answer in item.answers:
-                sender.manager.relation_remove(item, attribute, StudentResource, answer)
+                if answer.question.id == child.question.id:
+                    sender.manager.relation_remove(item, attribute, StudentResource, answer)
 
