@@ -117,7 +117,7 @@ def before_add_relation(sender, item, attribute, child):
     if attribute == 'answers':
         if child.question.question_type == QType.RADIO_BUTTON:
             # Delete other answers for this question
-            for answer in item.answers:
-                if answer.question.id == child.question.id:
-                    sender.manager.relation_remove(item, attribute, StudentResource, answer)
+            answers_question = filter(lambda answer_q: answer_q.id_question == child.question.id, item.answers)
+            for answer in answers_question:
+                sender.manager.relation_remove(item, attribute, StudentResource, answer)
 

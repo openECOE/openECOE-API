@@ -9,7 +9,6 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 class BaseConfig:
     """Base configuration."""
-    SERVER_NAME = os.environ.get('SERVER_NAME')
     SECRET_KEY = os.environ.get('SECRET_KEY')
     BCRYPT_LOG_ROUNDS = literal_eval(os.environ.get('BCRYPT_LOG_ROUNDS'))
     DEBUG = literal_eval(os.environ.get('DEBUG'))
