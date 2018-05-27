@@ -1,10 +1,11 @@
 from flask_potion import ModelResource, fields
-from flask_potion.routes import Relation
+from flask_potion.routes import Relation, ItemAttributeRoute
 from app.model.Question import Question, QType
 
 
 class QuestionResource(ModelResource):
     options = Relation('option')
+    points = ItemAttributeRoute(fields.Integer)
 
     class Meta:
         model = Question
