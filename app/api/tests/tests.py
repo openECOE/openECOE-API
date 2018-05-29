@@ -1499,8 +1499,143 @@ class UserModelCase(BaseTestCase):
             "reference": "Reference 1"
         }, response.json)
 
-    # def test_api_options(self):
+    def test_api_options(self):
+        self.test_api_question()
+        response = self.client.post('/api/option', data={'points': 0, 'question': 1, 'label': 'Option 1', 'order': 1})
 
+        self.assertEqual({
+            "$uri": "/api/option/1",
+            "label": "Option 1",
+            "order": 1,
+            "points": 0,
+            "question": {
+                "$ref": "/api/question/1"
+            }
+        }, response.json)
+
+        self.assertEqual({
+            "$uri": "/api/option/1",
+            "label": "Option 1",
+            "order": 1,
+            "points": 0,
+            "question": {
+                "$ref": "/api/question/1"
+            }
+        }, OptionResource.manager.read(1))
+
+        response = self.client.patch('/api/option/1', data={'label': 'Option Test 1'})
+        self.assertEqual({
+            "$uri": "/api/option/1",
+            "label": "Option Test 1",
+            "order": 1,
+            "points": 0,
+            "question": {
+                "$ref": "/api/question/1"
+            }
+        }, response.json)
+
+        self.client.post('/api/option', data={'points': 10, 'question': 1, 'label': 'Option 2', 'order': 2})
+        self.client.post('/api/option', data={'points': 0, 'question': 1, 'label': 'Option 3', 'order': 3})
+        response = self.client.get("/api/option")
+
+        self.assertEqual([
+            {
+                "$uri": "/api/option/1",
+                "label": "Option Test 1",
+                "order": 1,
+                "points": 0,
+                "question": {
+                    "$ref": "/api/question/1"
+                }
+            },
+            {
+                "$uri": "/api/option/1",
+                "label": "Option 2",
+                "order": 2,
+                "points": 10,
+                "question": {
+                    "$ref": "/api/question/1"
+                }
+            },
+            {
+                "$uri": "/api/option/1",
+                "label": "Option 3",
+                "order": 3,
+                "points": 0,
+                "question": {
+                    "$ref": "/api/question/1"
+                }
+            }
+        ], response.json)
+
+        response = self.client.get('/api/option?where={"label":"Option 2"}')
+        self.assertEqual([
+            {
+                "$uri": "/api/option/1",
+                "label": "Option 2",
+                "order": 2,
+                "points": 10,
+                "question": {
+                    "$ref": "/api/question/1"
+                }
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/option/3')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/option/2', data={'label': None})
+        self.assert400(response)
+
+        response = self.client.get('/api/question/1')
+        self.assertEqual({
+            "$uri": "/api/question/1",
+            "area": {
+                "$ref": "/api/area/1"
+            },
+            "description": "Question 1",
+            "options": [
+                {
+                    "$ref": "/api/option/1"
+                },
+                {
+                    "$ref": "/api/option/2"
+                }
+            ],
+            "order": 1,
+            "qblocks": [
+                {
+                    "$ref": "/api/qblock/1"
+                }
+            ],
+            "question_type": "CH",
+            "reference": "Reference 1"
+        }, response.json)
+
+        self.test_api_students()
+        response = self.client.post('/api/student/1/answers', data=1)
+        self.assertEqual({
+            "$ref": "/api/option/1"
+        }, response.json)
+
+        response = self.client.get('/api/student/1')
+        self.assertEqual({
+                "$uri": "/api/student/1",
+                "answers": [
+                    {
+                        "$ref": "/api/option/1"
+                    }
+                ],
+                "dni": "123456789",
+                "ecoe": {
+                    "$ref": "/api/ecoe/1"
+                },
+                "name": "Student Test 1",
+                # TODO: revisar estos None
+                "planner": None,
+                "planner_order": None,
+                "surnames": "Student 1 surnames"
+            }, response.json)
 
     # def test(self):
     #     round1 = Round(description='Description round 1', round_code='Round A', id_ecoe=ecoe1.id)
