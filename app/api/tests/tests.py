@@ -1130,6 +1130,378 @@ class UserModelCase(BaseTestCase):
             "round_code": "Round Test A"
         }, response.json)
 
+        self.test_api_students()
+        response = self.client.patch('/api/student/1', data={'planner': 1})
+
+        self.assertEqual({
+            "$uri": "/api/student/1",
+            "answers": [],
+            "dni": "123456789",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "name": "Student Test 1",
+            # TODO: revisar estos None
+            "planner": {
+                "$ref": "/api/planner/1"
+            },
+            "planner_order": 1,
+            "surnames": "Student 1 surnames"
+        }, response.json)
+
+    # def test_api_stages(self):
+    #     response = self.client.post('/api/stage', data={'duration': 540, 'order': 0, 'name': 'Evaluation'})
+    #
+    #     self.assertEqual({
+    #         "$uri": "/api/stage/1",
+    #         "duration": 540,
+    #         "name": "Evaluation",
+    #         "order": 0
+    #     }, response.json)
+    #
+    #     self.assertEqual({
+    #         "$uri": "/api/stage/1",
+    #         "duration": 540,
+    #         "name": "Evaluation",
+    #         "order": 0
+    #     }, OrganizationResource.manager.read(1))
+    #
+    #     response = self.client.patch('/api/stage/1', data={'name': 'UMH 5'})
+    #     self.assertEqual({
+    #         "$uri": "/api/organization/1",
+    #         "ecoes": [],
+    #         "name": "UMH 5"
+    #     }, response.json)
+    #
+    #     self.client.post('/api/organization', data={'name': 'UMH 2'})
+    #     self.client.post('/api/organization', data={'name': 'UMH 3'})
+    #     response = self.client.get("/api/organization")
+    #
+    #     self.assertEqual([
+    #         {
+    #             "$uri": "/api/organization/1",
+    #             "ecoes": [],
+    #             "name": "UMH 5"
+    #         },
+    #         {
+    #             "$uri": "/api/organization/2",
+    #             "ecoes": [],
+    #             "name": "UMH 2"
+    #         },
+    #         {
+    #             "$uri": "/api/organization/3",
+    #             "ecoes": [],
+    #             "name": "UMH 3"
+    #         }
+    #     ], response.json)
+    #
+    #     response = self.client.get('/api/organization?where={"name":"UMH 2"}')
+    #     self.assertEqual([
+    #         {
+    #             "$uri": "/api/organization/2",
+    #             "ecoes": [],
+    #             "name": "UMH 2"
+    #         }
+    #     ], response.json)
+    #
+    #     response = self.client.delete('/api/organization/3')
+    #     self.assertStatus(response, 204)
+    #
+    #     response = self.client.patch('/api/organization/2', data={'name': None})
+    #     self.assert400(response)
+
+    # def test_api_schedules(self):
+    #     self.test_api_stages()
+
+    # def test_api_events(self):
+    #     self.test_api_schedules()
+
+    def test_api_qblocks(self):
+        self.test_api_stations()
+        response = self.client.post('/api/qblock', data={'name': 'Qblock 1', 'station': 1, 'order': 0})
+
+        self.assertEqual({
+            "$uri": "/api/qblock/1",
+            "name": "Qblock 1",
+            "order": 0,
+            "questions": [],
+            "station": {
+                "$ref": "/api/station/1"
+            }
+        }, response.json)
+
+        self.assertEqual({
+            "$uri": "/api/qblock/1",
+            "name": "Qblock 1",
+            "order": 0,
+            "questions": [],
+            "station": {
+                "$ref": "/api/station/1"
+            }
+        }, QblockResource.manager.read(1))
+
+        response = self.client.patch('/api/qblock/1', data={'name': 'Qblock Test 1'})
+        self.assertEqual({
+            "$uri": "/api/qblock/1",
+            "name": "Qblock Test 1",
+            "order": 0,
+            "questions": [],
+            "station": {
+                "$ref": "/api/station/1"
+            }
+        }, response.json)
+
+        self.client.post('/api/qblock', data={'name': 'Qblock 2', 'station': 1, 'order': 1})
+        self.client.post('/api/qblock', data={'name': 'Qblock 3', 'station': 1, 'order': 2})
+        response = self.client.get("/api/qblock")
+
+        self.assertEqual([
+            {
+                "$uri": "/api/qblock/1",
+                "name": "Qblock Test 1",
+                "order": 0,
+                "questions": [],
+                "station": {
+                    "$ref": "/api/station/1"
+                }
+            },
+            {
+                "$uri": "/api/qblock/2",
+                "name": "Qblock 2",
+                "order": 1,
+                "questions": [],
+                "station": {
+                    "$ref": "/api/station/1"
+                }
+            },
+            {
+                "$uri": "/api/qblock/3",
+                "name": "Qblock 3",
+                "order": 2,
+                "questions": [],
+                "station": {
+                    "$ref": "/api/station/1"
+                }
+            }
+        ], response.json)
+
+        response = self.client.get('/api/qblock?where={"name":"Qblock 2"}')
+        self.assertEqual([
+            {
+                "$uri": "/api/qblock/2",
+                "name": "Qblock 2",
+                "order": 1,
+                "questions": [],
+                "station": {
+                    "$ref": "/api/station/1"
+                }
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/qblock/3')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/qblock/2', data={'name': None})
+        self.assert400(response)
+
+    def test_api_question(self):
+        self.test_api_areas()
+        response = self.client.post('/api/question', data={'reference': 'Ref 1', 'description': 'Question 1', 'area': 1, 'question_type': 'CH', 'order': 1})
+
+        self.assertEqual({
+            "$uri": "/api/question/1",
+            "area": {
+                "$ref": "/api/area/1"
+            },
+            "description": "Question 1",
+            "options": [],
+            "order": 1,
+            "qblocks": [],
+            "question_type": "CH",
+            "reference": "Ref 1"
+        }, response.json)
+
+        self.assertEqual({
+            "$uri": "/api/question/1",
+            "area": {
+                "$ref": "/api/area/1"
+            },
+            "description": "Question 1",
+            "options": [],
+            "order": 1,
+            "qblocks": [],
+            "question_type": "CH",
+            "reference": "Ref 1"
+        }, QuestionResource.manager.read(1))
+
+        response = self.client.patch('/api/question/1', data={'reference': 'Reference 1'})
+        self.assertEqual({
+            "$uri": "/api/question/1",
+            "area": {
+                "$ref": "/api/area/1"
+            },
+            "description": "Question 1",
+            "options": [],
+            "order": 1,
+            "qblocks": [],
+            "question_type": "CH",
+            "reference": "Reference 1"
+        }, response.json)
+
+        self.client.post('/api/question', data={'reference': 'Ref 2', 'description': 'Question 2', 'area': 1, 'question_type': 'CH', 'order': 2})
+        self.client.post('/api/question', data={'reference': 'Ref 3', 'description': 'Question 3', 'area': 1, 'question_type': 'RB', 'order': 3})
+        response = self.client.get("/api/question")
+
+        self.assertEqual([
+            {
+                "$uri": "/api/question/1",
+                "area": {
+                    "$ref": "/api/area/1"
+                },
+                "description": "Question 1",
+                "options": [],
+                "order": 1,
+                "qblocks": [],
+                "question_type": "CH",
+                "reference": "Reference 1"
+            },
+            {
+                "$uri": "/api/question/2",
+                "area": {
+                    "$ref": "/api/area/1"
+                },
+                "description": "Question 2",
+                "options": [],
+                "order": 2,
+                "qblocks": [],
+                "question_type": "CH",
+                "reference": "Ref 2"
+            },
+            {
+                "$uri": "/api/question/3",
+                "area": {
+                    "$ref": "/api/area/1"
+                },
+                "description": "Question 3",
+                "options": [],
+                "order": 3,
+                "qblocks": [],
+                "question_type": "RB",
+                "reference": "Ref 3"
+            }
+        ], response.json)
+
+        response = self.client.get('/api/question?where={"question_type":"CH"}')
+        self.assertEqual([
+            {
+                "$uri": "/api/question/1",
+                "area": {
+                    "$ref": "/api/area/1"
+                },
+                "description": "Question 1",
+                "options": [],
+                "order": 1,
+                "qblocks": [],
+                "question_type": "CH",
+                "reference": "Reference 1"
+            },
+            {
+                "$uri": "/api/question/2",
+                "area": {
+                    "$ref": "/api/area/1"
+                },
+                "description": "Question 2",
+                "options": [],
+                "order": 2,
+                "qblocks": [],
+                "question_type": "CH",
+                "reference": "Ref 2"
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/question/3')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/question/2', data={'reference': None})
+        self.assert400(response)
+
+        response = self.client.get('/api/area/1')
+        self.assertEqual({
+            "$uri": "/api/area/1",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "name": "Area Test 1",
+            "questions": [
+                {
+                    "$uri": "/api/question/1",
+                    "area": {
+                        "$ref": "/api/area/1"
+                    },
+                    "description": "Question 1",
+                    "options": [],
+                    "order": 1,
+                    "qblocks": [],
+                    "question_type": "CH",
+                    "reference": "Reference 1"
+                },
+                {
+                    "$uri": "/api/question/2",
+                    "area": {
+                        "$ref": "/api/area/1"
+                    },
+                    "description": "Question 2",
+                    "options": [],
+                    "order": 2,
+                    "qblocks": [],
+                    "question_type": "CH",
+                    "reference": "Ref 2"
+                }
+            ]
+        }, response.json)
+
+        self.test_api_qblocks()
+        response = self.client.post('/api/qblock/1/questions', data=1)
+        self.assertEqual({
+            "$ref": "/api/question/1"
+        }, response.json)
+
+        response = self.client.get('/api/qblock/1')
+        self.assertEqual({
+            "$uri": "/api/qblock/1",
+            "name": "Qblock Test 1",
+            "order": 0,
+            "questions": [
+                {
+                    "$ref": "/api/question/1"
+                }
+            ],
+            "station": {
+                "$ref": "/api/station/1"
+            }
+        }, response.json)
+
+        response = self.client.get('/api/question/1')
+        self.assertEqual({
+            "$uri": "/api/question/1",
+            "area": {
+                "$ref": "/api/area/1"
+            },
+            "description": "Question 1",
+            "options": [],
+            "order": 1,
+            "qblocks": [
+                {
+                    "$ref": "/api/qblock/1"
+                }
+            ],
+            "question_type": "CH",
+            "reference": "Reference 1"
+        }, response.json)
+
+    # def test_api_options(self):
+
+
     # def test(self):
     #     round1 = Round(description='Description round 1', round_code='Round A', id_ecoe=ecoe1.id)
     #     round2 = Round(description='Description round 2', round_code='Round B', id_ecoe=ecoe1.id)
