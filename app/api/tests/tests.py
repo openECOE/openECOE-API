@@ -1141,7 +1141,6 @@ class UserModelCase(BaseTestCase):
                 "$ref": "/api/ecoe/1"
             },
             "name": "Student Test 1",
-            # TODO: revisar estos None
             "planner": {
                 "$ref": "/api/planner/1"
             },
@@ -1149,72 +1148,263 @@ class UserModelCase(BaseTestCase):
             "surnames": "Student 1 surnames"
         }, response.json)
 
-    # def test_api_stages(self):
-    #     response = self.client.post('/api/stage', data={'duration': 540, 'order': 0, 'name': 'Evaluation'})
-    #
-    #     self.assertEqual({
-    #         "$uri": "/api/stage/1",
-    #         "duration": 540,
-    #         "name": "Evaluation",
-    #         "order": 0
-    #     }, response.json)
-    #
-    #     self.assertEqual({
-    #         "$uri": "/api/stage/1",
-    #         "duration": 540,
-    #         "name": "Evaluation",
-    #         "order": 0
-    #     }, OrganizationResource.manager.read(1))
-    #
-    #     response = self.client.patch('/api/stage/1', data={'name': 'UMH 5'})
-    #     self.assertEqual({
-    #         "$uri": "/api/organization/1",
-    #         "ecoes": [],
-    #         "name": "UMH 5"
-    #     }, response.json)
-    #
-    #     self.client.post('/api/organization', data={'name': 'UMH 2'})
-    #     self.client.post('/api/organization', data={'name': 'UMH 3'})
-    #     response = self.client.get("/api/organization")
-    #
-    #     self.assertEqual([
-    #         {
-    #             "$uri": "/api/organization/1",
-    #             "ecoes": [],
-    #             "name": "UMH 5"
-    #         },
-    #         {
-    #             "$uri": "/api/organization/2",
-    #             "ecoes": [],
-    #             "name": "UMH 2"
-    #         },
-    #         {
-    #             "$uri": "/api/organization/3",
-    #             "ecoes": [],
-    #             "name": "UMH 3"
-    #         }
-    #     ], response.json)
-    #
-    #     response = self.client.get('/api/organization?where={"name":"UMH 2"}')
-    #     self.assertEqual([
-    #         {
-    #             "$uri": "/api/organization/2",
-    #             "ecoes": [],
-    #             "name": "UMH 2"
-    #         }
-    #     ], response.json)
-    #
-    #     response = self.client.delete('/api/organization/3')
-    #     self.assertStatus(response, 204)
-    #
-    #     response = self.client.patch('/api/organization/2', data={'name': None})
-    #     self.assert400(response)
+    def test_api_stages(self):
+        response = self.client.post('/api/stage', data={'duration': 540, 'order': 0, 'name': 'Evaluation'})
 
-    # def test_api_schedules(self):
-    #     self.test_api_stages()
+        self.assertEqual({
+            "$uri": "/api/stage/1",
+            "duration": 540,
+            "name": "Evaluation",
+            "order": 0
+        }, response.json)
 
-    # def test_api_events(self):
-    #     self.test_api_schedules()
+        self.assertEqual({
+            "$uri": "/api/stage/1",
+            "duration": 540,
+            "name": "Evaluation",
+            "order": 0
+        }, StageResource.manager.read(1))
+
+        response = self.client.patch('/api/stage/1', data={'name': 'Evaluation Test'})
+        self.assertEqual({
+            "$uri": "/api/stage/1",
+            "duration": 540,
+            "name": "Evaluation Test",
+            "order": 0
+        }, response.json)
+
+        self.client.post('/api/stage', data={'duration': 120, 'order': 1, 'name': 'Rest 1'})
+        self.client.post('/api/stage', data={'duration': 120, 'order': 2, 'name': 'Rest 2'})
+        response = self.client.get("/api/stage")
+
+        self.assertEqual([
+            {
+                "$uri": "/api/stage/1",
+                "duration": 540,
+                "name": "Evaluation Test",
+                "order": 0
+            },
+            {
+                "$uri": "/api/stage/2",
+                "duration": 120,
+                "name": "Rest 1",
+                "order": 1
+            },
+            {
+                "$uri": "/api/stage/3",
+                "duration": 120,
+                "name": "Rest 2",
+                "order": 2
+            }
+        ], response.json)
+
+        response = self.client.get('/api/stage?where={"name":"Rest 1"}')
+        self.assertEqual([
+            {
+                "$uri": "/api/stage/2",
+                "duration": 120,
+                "name": "Rest 1",
+                "order": 1
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/stage/3')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/stage/2', data={'name': None})
+        self.assert400(response)
+
+    def test_api_schedules(self):
+        self.test_api_ecoe()
+        self.test_api_stages()
+
+        response = self.client.post('/api/schedule', data={'stage': 2, 'ecoe': 1})
+
+        self.assertEqual({
+            "$uri": "/api/schedule/1",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "events": [],
+            "stage": {
+                "$ref": "/api/stage/2"
+            },
+            "station": None
+        }, response.json)
+
+        self.assertEqual({
+            "$uri": "/api/schedule/1",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "events": [],
+            "stage": {
+                "$ref": "/api/stage/2"
+            },
+            "station": None
+        }, ScheduleResource.manager.read(1))
+
+        response = self.client.patch('/api/schedule/1', data={'stage': 1})
+        self.assertEqual({
+            "$uri": "/api/schedule/1",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "events": [],
+            "stage": {
+                "$ref": "/api/stage/1"
+            },
+            "station": None
+        }, response.json)
+
+        self.client.post('/api/schedule', data={'stage': 2, 'ecoe': 1})
+        response = self.client.get("/api/schedule")
+
+        self.assertEqual([
+            {
+                "$uri": "/api/schedule/1",
+                "ecoe": {
+                    "$ref": "/api/ecoe/1"
+                },
+                "events": [],
+                "stage": {
+                    "$ref": "/api/stage/1"
+                },
+                "station": None
+            },
+            {
+                "$uri": "/api/schedule/1",
+                "ecoe": {
+                    "$ref": "/api/ecoe/1"
+                },
+                "events": [],
+                "stage": {
+                    "$ref": "/api/stage/2"
+                },
+                "station": None
+            }
+        ], response.json)
+
+        response = self.client.get('/api/schedule?where={"stage":2}')
+        self.assertEqual([
+            {
+                "$uri": "/api/schedule/1",
+                "ecoe": {
+                    "$ref": "/api/ecoe/1"
+                },
+                "events": [],
+                "stage": {
+                    "$ref": "/api/stage/2"
+                },
+                "station": None
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/schedule/2')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/schedule/1', data={'stage': None})
+        self.assert400(response)
+
+        response = self.client.get('/api/ecoe/1')
+        self.assertEqual({
+            "$uri": "/api/ecoe/1",
+            "areas": [],
+            "name": "ECOE TEST 1",
+            "organization": {
+                "$ref": "/api/organization/1"
+            },
+            "rounds": [],
+            "schedules": [
+                {
+                    "$ref": "/api/schedule/1"
+                }
+            ],
+            "shifts": [],
+            "stations": [],
+            "students": []
+        }, response.json)
+
+    def test_api_events(self):
+        self.test_api_schedules()
+
+        response = self.client.post('/api/event', data={'schedule': 1, 'time': 360, 'sound': '/file/file1.mp3'})
+
+        self.assertEqual({
+            "schedule": 1,
+            "time": 360,
+            "sound": "/file/file1.mp3"
+        }, response.json)
+
+        self.assertEqual({
+            "schedule": 1,
+            "time": 360,
+            "sound": "/file/file1.mp3"
+        }, EventResource.manager.read(1))
+
+        response = self.client.patch('/api/event/1', data={'sound': '/file/file_test1.mp3'})
+        self.assertEqual({
+            "schedule": 1,
+            "time": 360,
+            "sound": "/file/file_test1.mp3"
+        }, response.json)
+
+        self.client.post('/api/event', data={'schedule': 1, 'time': 120, 'sound': '/file/file2.mp3'})
+        self.client.post('/api/event', data={'schedule': 1, 'time': 120, 'sound': '/file/file3.mp3'})
+        response = self.client.get("/api/event")
+
+        self.assertEqual([
+            {
+                "schedule": 1,
+                "time": 360,
+                "sound": "/file/file_test1.mp3"
+            },
+            {
+                "schedule": 1,
+                "time": 120,
+                "sound": "/file/file2.mp3"
+            },
+            {
+                "schedule": 1,
+                "time": 120,
+                "sound": "/file/file3.mp3"
+            }
+        ], response.json)
+
+        response = self.client.get('/api/event?where={"time":360}')
+        self.assertEqual([
+            {
+                "schedule": 1,
+                "time": 360,
+                "sound": "/file/file_test1.mp3"
+            }
+        ], response.json)
+
+        response = self.client.delete('/api/event/3')
+        self.assertStatus(response, 204)
+
+        response = self.client.patch('/api/event/2', data={'time': None})
+        self.assert400(response)
+
+        response = self.client.get('/api/schedule/1')
+        self.assertEqual({
+            "$uri": "/api/schedule/1",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "events": [
+                {
+                    "$ref": "/api/event/1"
+                },
+                {
+                    "$ref": "/api/event/2"
+                }
+            ],
+            "stage": {
+                "$ref": "/api/stage/1"
+            },
+            "station": None
+        }, response.json)
 
     def test_api_qblocks(self):
         self.test_api_stations()
@@ -1620,22 +1810,22 @@ class UserModelCase(BaseTestCase):
 
         response = self.client.get('/api/student/1')
         self.assertEqual({
-                "$uri": "/api/student/1",
-                "answers": [
-                    {
-                        "$ref": "/api/option/1"
-                    }
-                ],
-                "dni": "123456789",
-                "ecoe": {
-                    "$ref": "/api/ecoe/1"
-                },
-                "name": "Student Test 1",
-                # TODO: revisar estos None
-                "planner": None,
-                "planner_order": None,
-                "surnames": "Student 1 surnames"
-            }, response.json)
+            "$uri": "/api/student/1",
+            "answers": [
+                {
+                    "$ref": "/api/option/1"
+                }
+            ],
+            "dni": "123456789",
+            "ecoe": {
+                "$ref": "/api/ecoe/1"
+            },
+            "name": "Student Test 1",
+            # TODO: revisar estos None
+            "planner": None,
+            "planner_order": None,
+            "surnames": "Student 1 surnames"
+        }, response.json)
 
     # def test(self):
     #     round1 = Round(description='Description round 1', round_code='Round A', id_ecoe=ecoe1.id)
