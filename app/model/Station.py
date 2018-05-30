@@ -1,5 +1,4 @@
 from app import db
-from sqlalchemy.event import listen
 
 class Station(db.Model):
     __tablename__ = 'station'

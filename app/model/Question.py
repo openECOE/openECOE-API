@@ -7,7 +7,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 class QType(str, enum.Enum):
     RADIO_BUTTON = 'RB'
     CHECK_BOX = 'CH'
-
+    RANGE_SELECT = 'RS'
 
 class Question(db.Model):
     __tablename__ = 'question'
