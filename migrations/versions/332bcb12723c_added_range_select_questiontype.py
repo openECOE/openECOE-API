@@ -1,7 +1,7 @@
 """Added RANGE_SELECT QuestionType
 
 Revision ID: 332bcb12723c
-Revises: aca54da4f713
+Revises: be3a27c5c76b
 Create Date: 2018-05-28 16:38:17.914830
 
 """
