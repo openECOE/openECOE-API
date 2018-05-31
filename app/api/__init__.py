@@ -3,6 +3,14 @@ from app import api_app as api
 
 bp = Blueprint('api', __name__)
 
+@bp.after_request
+def set_response_headers(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+
 api.init_app(bp)
 
 from app.api.area import AreaResource

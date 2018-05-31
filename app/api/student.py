@@ -41,7 +41,7 @@ def before_update_planner(sender, item, changes):
 @signals.before_add_to_relation.connect_via(StudentResource)
 def before_add_relation(sender, item, attribute, child):
     if attribute == 'answers':
-        if child.question.question_type == QType.RADIO_BUTTON:
+        if child.question.question_type in [QType.RADIO_BUTTON, QType.RANGE_SELECT]:
             # Delete other answers for this question
             answers_question = filter(lambda answer_q: answer_q.id_question == child.question.id, item.answers)
             for answer in answers_question:
