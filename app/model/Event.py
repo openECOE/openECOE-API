@@ -10,3 +10,5 @@ class Event(db.Model):
     text = db.Column(db.String(255), nullable=True)
     id_schedule = db.Column(db.Integer, db.ForeignKey('schedule.id'), nullable=False)
 
+    is_countdown = db.Column(db.Boolean(), nullable=False, default=False)
+
