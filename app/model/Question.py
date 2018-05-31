@@ -1,12 +1,13 @@
 from app import db
 from .many_to_many_tables import qblocks_questions
 import enum
+from sqlalchemy.ext.hybrid import hybrid_property
 
 
 class QType(str, enum.Enum):
     RADIO_BUTTON = 'RB'
     CHECK_BOX = 'CH'
-
+    RANGE_SELECT = 'RS'
 
 class Question(db.Model):
     __tablename__ = 'question'
@@ -21,3 +22,10 @@ class Question(db.Model):
 
     options = db.relationship('Option', backref='question')
     qblocks = db.relationship('QBlock', secondary=qblocks_questions, lazy=True, back_populates='questions')
+
+    @hybrid_property
+    def points(self):
+
+        return max([opt.points for opt in self.options])
+
+
