@@ -29,9 +29,9 @@ class ECOE(db.Model):
             for ev in sch.events:
                 stage_events[sch.stage.id].append({
                     "t": ev.time,
-                    "accion": ev.text,
+                    "message": ev.text,
                     "sound": ev.sound,
-                    "estaciones": [0] + [station.id for station in self.stations] if sch.station is None else [sch.station.id],
+                    "stations": [0] + [station.id for station in self.stations] if sch.station is None else [sch.station.id],
                     "is_countdown": ev.is_countdown
                 })
 
@@ -45,10 +45,10 @@ class ECOE(db.Model):
                 break
 
         config = {
-            "ruedas": [r.id for r in self.rounds],
-            "vueltas": len(self.stations) + (1 if exists_dependant else 0),
-            "planificaciones": [
-                {'fase': st.name, 'duracion': st.duration, 'orden': st.order, 'eventos': stage_events[st.id]} for st in stages
+            "rounds_id": [r.id for r in self.rounds],
+            "reruns": len(self.stations) + (1 if exists_dependant else 0),
+            "schedules": [
+                {'name': st.name, 'duration': st.duration, 'order': st.order, 'events': stage_events[st.id]} for st in stages
             ]
         }
 
