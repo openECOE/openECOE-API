@@ -1,4 +1,4 @@
-"""empty message
+"""Merge revisions 332bcb12723c, be3a27c5c76b
 
 Revision ID: bb4fc44a6102
 Revises: 332bcb12723c, be3a27c5c76b
