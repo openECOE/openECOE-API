@@ -1,4 +1,4 @@
-"""empty message
+"""Countdown event and new uk schedule
 
 Revision ID: d6fa83f62534
 Revises: bb4fc44a6102
