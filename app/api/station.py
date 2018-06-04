@@ -13,6 +13,8 @@ class StationResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
+        parent_station = fields.ToOne('station')
+        children_stations = fields.ToMany('station')
 
 
 def order_station(item, op='add'):

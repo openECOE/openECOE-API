@@ -12,6 +12,5 @@ class Schedule(db.Model):
     events = db.relationship('Event', backref='schedule')
 
     __table_args__ = (
-        db.UniqueConstraint(id_ecoe, id_stage, name='ecoe_stage_uk'),
-        db.UniqueConstraint(id_station, id_stage, name='station_stage_uk'),
+        db.UniqueConstraint(id_ecoe, id_stage, id_station, name='ecoe_stage_station_uk'),
     )
