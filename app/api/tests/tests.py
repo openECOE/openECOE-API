@@ -6,23 +6,36 @@ from app import api_app
 from config import BaseConfig
 from datetime import datetime
 from flask_potion import Api
-from app.api.tests import BaseTestCase
+from app.api.tests import ApiClient
 from flask import request, url_for
 from flask import Flask
-# from flask_testing import TestCase
 
 
-class UserModelCase(BaseTestCase):
-    # def setUp(self):
-    #     self.app = create_app(TestConfig)
-    #     self.app_context = self.app.app_context()
-    #     self.app_context.push()
-    #     db.create_all()
-    #
-    # def tearDown(self):
-    #     db.session.remove()
-    #     db.drop_all()
-    #     self.app_context.pop()
+class TestConfig(BaseConfig):
+    TESTING = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    BCRYPT_LOG_ROUNDS = 4
+    DEBUG = True
+    API_AUTH = False
+
+
+class UserModelCase(unittest.TestCase):
+    def setUp(self):
+        self.app = create_app(TestConfig)
+        self.app.test_client_class = ApiClient
+        self.app.app_context = self.app.app_context()
+        self.app.app_context.push()
+        self.client = self.app.test_client()
+        db.create_all()
+
+    def tearDown(self):
+        db.session.remove()
+        db.drop_all()
+        self.app.app_context.pop()
+
+    def test_api_user(self):
+        response = self.client.post('/api/user', data={'email': 'antonio', 'password': 'antonio'})
+        self.assert401(response)
 
     def test_organization(self):
         organization = Organization(id=1, name='Orga 1')
