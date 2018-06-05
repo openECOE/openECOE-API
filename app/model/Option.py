@@ -6,7 +6,7 @@ class Option(db.Model):
     __tablename__ = 'option'
 
     id = db.Column(db.Integer, primary_key=True)
-    points = db.Column(db.Numeric, nullable=False)
+    points = db.Column(db.Numeric(10,2), nullable=False)
     label = db.Column(db.String(255))
     id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     order = db.Column(db.Integer, nullable=False)
