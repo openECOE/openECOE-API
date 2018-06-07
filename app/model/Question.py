@@ -26,6 +26,10 @@ class Question(db.Model):
     @hybrid_property
     def points(self):
 
-        return max([opt.points for opt in self.options])
+        if self.question_type in (QType.RADIO_BUTTON, QType.RANGE_SELECT):
+            return max([opt.points for opt in self.options])
+
+        if self.question_type == QType.CHECK_BOX:
+            return sum([opt.points for opt in self.options])
 
 
