@@ -13,7 +13,7 @@ class Question(db.Model):
     __tablename__ = 'question'
 
     id = db.Column(db.Integer, primary_key=True)
-    reference = db.Column(db.String(50))
+    reference = db.Column(db.String(100))
     description = db.Column(db.String(500))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=False)
     question_type = db.Column(db.Enum(QType), nullable=False)
