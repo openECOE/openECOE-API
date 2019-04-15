@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager, login_required
 from flask_principal import Principal
 from flask_potion import Api
+from flask_cors import CORS
 from config import BaseConfig
 
 db = SQLAlchemy()
@@ -24,6 +25,7 @@ def create_app(config_class=BaseConfig):
     login_manager.init_app(app)
     bcrypt.init_app(app)
     principals.init_app(app)
+    CORS(app)
 
     if app.config.get('API_AUTH'):
         api_app.decorators.append(login_required)

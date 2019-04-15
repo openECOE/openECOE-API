@@ -22,21 +22,30 @@ def before_add_planner(sender, item):
     if item.planner:
         item.planner_order = len(item.planner.students)
 
+
 @signals.before_update.connect_via(StudentResource)
 def before_update_planner(sender, item, changes):
     if 'planner' in changes.keys():
         # Reorder students from old planner
-        if item.planner:
-            old_planner_students = Student.query\
-                .filter(Student.id_planner == item.planner.id)\
-                .filter(Student.id != item.id)\
-                .filter(Student.planner_order > item.planner_order)\
-                .order_by(Student.planner_order).all()
+        if changes['planner']:
+            planner_order = 0
 
-            for order, student in enumerate(old_planner_students):
-                student.planner_order = order + item.planner_order
+            if item.planner_order:
+                planner_order = item.planner_order
 
-        item.planner_order = len(changes['planner'].students) + 1
+            # If the item has another planner reorder the old planner students
+            if item.planner:
+                old_planner_students = Student.query \
+                    .filter(Student.id_planner == item.planner.id) \
+                    .filter(Student.id != item.id) \
+                    .filter(Student.planner_order > planner_order) \
+                    .order_by(Student.planner_order).all()
+
+                for order, student in enumerate(old_planner_students):
+                    student.planner_order = order + planner_order
+
+            item.planner_order = len(changes['planner'].students) + 1
+
 
 @signals.before_add_to_relation.connect_via(StudentResource)
 def before_add_relation(sender, item, attribute, child):
@@ -46,4 +55,3 @@ def before_add_relation(sender, item, attribute, child):
             answers_question = filter(lambda answer_q: answer_q.id_question == child.question.id, item.answers)
             for answer in answers_question:
                 sender.manager.relation_remove(item, attribute, StudentResource, answer)
-
