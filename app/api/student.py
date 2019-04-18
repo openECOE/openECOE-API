@@ -27,24 +27,17 @@ def before_add_planner(sender, item):
 def before_update_planner(sender, item, changes):
     if 'planner' in changes.keys():
         # Reorder students from old planner
-        if changes['planner']:
-            planner_order = 0
-
-            if item.planner_order:
-                planner_order = item.planner_order
-
+        if item.planner and item.planner_order:
             # If the item has another planner reorder the old planner students
-            if item.planner:
-                old_planner_students = Student.query \
-                    .filter(Student.id_planner == item.planner.id) \
-                    .filter(Student.id != item.id) \
-                    .filter(Student.planner_order > planner_order) \
-                    .order_by(Student.planner_order).all()
+            old_planner_students = Student.query \
+                .filter(Student.id_planner == item.planner.id) \
+                .filter(Student.id != item.id) \
+                .filter(Student.planner_order > item.planner_order) \
+                .order_by(Student.planner_order).all()
 
-                for order, student in enumerate(old_planner_students):
-                    student.planner_order = order + planner_order
+            for order, student in enumerate(old_planner_students):
+                student.planner_order = order + item.planner_order
 
-            item.planner_order = len(changes['planner'].students) + 1
 
 
 @signals.before_add_to_relation.connect_via(StudentResource)

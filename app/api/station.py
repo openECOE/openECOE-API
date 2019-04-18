@@ -9,7 +9,7 @@ class StationResource(ModelResource):
 
     class Meta:
         model = Station
-        natural_key = 'name'
+        natural_key = ('ecoe', 'name')
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
