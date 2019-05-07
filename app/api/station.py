@@ -34,17 +34,19 @@ def order_station(item, op='add'):
         for order, station_ecoe in enumerate(stations_ecoe):
             station_ecoe.order = order + item.order + order_correction
 
+
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
     if 'order' in changes.keys():
         item.order = changes['order']
         order_station(item)
 
+
 @signals.before_create.connect_via(StationResource)
 def before_create_station(sender, item):
     order_station(item)
 
+
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
     order_station(item, 'del')
-
