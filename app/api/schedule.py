@@ -17,6 +17,5 @@ class ScheduleResource(ModelResource):
         ecoe = fields.ToOne('ecoe', nullable=True)
         stage = fields.ToOne('stage')
         station = fields.ToOne('station', nullable=True)
-        events = fields.ToMany('event')
 
 
