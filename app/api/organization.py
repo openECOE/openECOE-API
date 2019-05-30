@@ -18,7 +18,7 @@ class ManagerResource(ModelResource):
 
 class OrganizationResource(ManagerResource):
     users = Relation('user')
-    # ecoes = Relation('ecoe')
+    ecoes = Relation('ecoe')
 
     class Meta:
         model = Organization
