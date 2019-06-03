@@ -39,9 +39,10 @@ def before_update_qblock(sender, item, changes):
         item.order = changes['order']
         order_qblock(item)
 
-@signals.before_create.connect_via(QblockResource)
-def before_create_qblock(sender, item):
-    order_qblock(item)
+# TODO: Review Creation QBlock order
+# @signals.before_create.connect_via(QblockResource)
+# def before_create_qblock(sender, item):
+#     order_qblock(item)
 
 @signals.before_delete.connect_via(QblockResource)
 def before_delete_qblock(sender, item):

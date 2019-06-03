@@ -41,10 +41,10 @@ def before_update_station(sender, item, changes):
         item.order = changes['order']
         order_station(item)
 
-
-@signals.before_create.connect_via(StationResource)
-def before_create_station(sender, item):
-    order_station(item)
+# TODO: Review Create Station Order
+# @signals.before_create.connect_via(StationResource)
+# def before_create_station(sender, item):
+#     order_station(item)
 
 
 @signals.before_delete.connect_via(StationResource)
