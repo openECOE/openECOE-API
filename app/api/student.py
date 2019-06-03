@@ -17,10 +17,10 @@ class StudentResource(ModelResource):
         answers = fields.ToMany('option')
 
 
-@signals.before_create.connect_via(StudentResource)
-def before_add_planner(sender, item):
-    if item.planner:
-        item.planner_order = len(item.planner.students)
+# @signals.before_create.connect_via(StudentResource)
+# def before_add_planner(sender, item):
+#     if item.planner:
+#         item.planner_order = len(item.planner.students)
 
 
 @signals.before_update.connect_via(StudentResource)
