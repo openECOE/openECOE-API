@@ -21,7 +21,7 @@ class PrincipalResource(ModelResource):
 class UserResource(PrincipalResource):
     class Meta:
         model = User
-        write_only_fields = ['password', 'is_superadmin', 'token', 'token_expiration', 'registered_on']
+        write_only_fields = ['password', 'token', 'registered_on']
         permissions = {
             'create': 'yes',
             'update': 'create',
