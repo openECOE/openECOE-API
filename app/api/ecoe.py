@@ -21,11 +21,5 @@ class EcoeResource(ModelResource):
 
     class Schema:
         organization = fields.ToOne('organization')
-        areas = fields.ToMany('area')
-        stations = fields.ToMany('station')
-        schedules = fields.ToMany('schedule')
-        students = fields.ToMany('student')
-        rounds = fields.ToMany('round')
-        shifts = fields.ToMany('shift')
 
 

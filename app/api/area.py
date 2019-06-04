@@ -12,6 +12,5 @@ class AreaResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        questions = fields.ToMany('question')
 
 

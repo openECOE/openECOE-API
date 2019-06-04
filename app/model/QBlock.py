@@ -6,7 +6,7 @@ class QBlock(db.Model):
     __tablename__ = 'qblock'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
+    name = db.Column(db.String(300))
     id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
     order = db.Column(db.Integer, nullable=False)
 

@@ -12,4 +12,3 @@ class RoundResource(ModelResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoe')
-        planners = fields.ToMany('planner')
