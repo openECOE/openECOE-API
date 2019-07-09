@@ -4,9 +4,10 @@ from app.model.Stage import Stage
 
 
 class StageResource(ModelResource):
-    schedules = Relation('schedule')
+    schedules = Relation('schedules')
 
     class Meta:
+        name = 'stages'
         model = Stage
 
 

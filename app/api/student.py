@@ -5,16 +5,16 @@ from app.model.Question import QType
 
 
 class StudentResource(ModelResource):
-    answers = Relation('option')
+    answers = Relation('options')
 
     class Meta:
+        name = 'students'
         model = Student
         natural_key = ('name', 'surnames')
 
     class Schema:
-        ecoe = fields.ToOne('ecoe')
-        planner = fields.ToOne('planner', nullable=True)
-        answers = fields.ToMany('option')
+        ecoe = fields.ToOne('ecoes')
+        planner = fields.ToOne('planners', nullable=True)
 
 
 # @signals.before_create.connect_via(StudentResource)

@@ -17,10 +17,11 @@ class ManagerResource(ModelResource):
 
 
 class OrganizationResource(ManagerResource):
-    users = Relation('user')
-    ecoes = Relation('ecoe')
+    users = Relation('users')
+    ecoes = Relation('ecoes')
 
     class Meta:
+        name = 'organizations'
         model = Organization
         natural_key = 'name'
 

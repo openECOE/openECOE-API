@@ -6,9 +6,9 @@ from app.model.Option import Option
 class OptionResource(ModelResource):
 
     class Meta:
+        name = 'options'
         model = Option
 
     class Schema:
-        question = fields.ToOne('question')
-
+        question = fields.ToOne('questions')
 

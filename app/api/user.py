@@ -20,6 +20,7 @@ class PrincipalResource(ModelResource):
 
 class UserResource(PrincipalResource):
     class Meta:
+        name = 'users'
         model = User
         write_only_fields = ['password', 'token', 'registered_on']
         permissions = {
@@ -29,7 +30,7 @@ class UserResource(PrincipalResource):
         }
 
     class Schema:
-        organization = fields.ToOne('organization')
+        organization = fields.ToOne('organizations')
 
     @Route.GET
     def me(self):

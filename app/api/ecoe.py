@@ -4,22 +4,23 @@ from app.model.ECOE import ECOE
 
 
 class EcoeResource(ModelResource):
-    areas = Relation('area')
-    stations = Relation('station')
-    schedules = Relation('schedule')
-    students = Relation('student')
-    rounds = Relation('round')
-    shifts = Relation('shift')
+    areas = Relation('areas')
+    stations = Relation('stations')
+    schedules = Relation('schedules')
+    students = Relation('students')
+    rounds = Relation('rounds')
+    shifts = Relation('shifts')
 
     @ItemRoute.GET('/configuration')
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
 
     class Meta:
+        name = 'ecoes'
         model = ECOE
         natural_key = 'name'
 
     class Schema:
-        organization = fields.ToOne('organization')
+        organization = fields.ToOne('organizations')
 
 

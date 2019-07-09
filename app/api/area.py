@@ -4,13 +4,14 @@ from app.model.Area import Area
 
 
 class AreaResource(ModelResource):
-    questions = Relation('question')
+    questions = Relation('questions')
 
     class Meta:
+        name = 'areas'
         model = Area
         natural_key = 'name'
 
     class Schema:
-        ecoe = fields.ToOne('ecoe')
+        ecoe = fields.ToOne('ecoes')
 
 

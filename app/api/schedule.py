@@ -4,18 +4,15 @@ from app.model.Schedule import Schedule
 
 
 class ScheduleResource(ModelResource):
-    events = Relation('event')
+    events = Relation('events')
 
     class Meta:
+        name = 'schedules'
         model = Schedule
-        #natural_key = (
-        #    ('ecoe', 'stage'),
-        #    ('station', 'stage')
-        #)
 
     class Schema:
-        ecoe = fields.ToOne('ecoe', nullable=True)
-        stage = fields.ToOne('stage')
-        station = fields.ToOne('station', nullable=True)
+        ecoe = fields.ToOne('ecoes', nullable=True)
+        stage = fields.ToOne('stages')
+        station = fields.ToOne('stations', nullable=True)
 
 

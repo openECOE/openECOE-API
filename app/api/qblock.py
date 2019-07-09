@@ -5,13 +5,14 @@ from app.model.QBlock import QBlock
 
 
 class QblockResource(ModelResource):
-    questions = Relation('question')
+    questions = Relation('questions')
 
     class Meta:
+        name = 'qblocks'
         model = QBlock
 
     class Schema:
-        station = fields.ToOne('station')
+        station = fields.ToOne('stations')
 
 
 def order_qblock(item, op='add'):

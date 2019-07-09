@@ -4,17 +4,18 @@ from app.model.Station import Station
 
 
 class StationResource(ModelResource):
-    schedules = Relation('schedule')
-    qblocks = Relation('qblock')
+    schedules = Relation('schedules')
+    qblocks = Relation('qblocks')
 
     class Meta:
+        name = 'stations'
         model = Station
         natural_key = ('ecoe', 'name')
 
     class Schema:
-        ecoe = fields.ToOne('ecoe')
-        parent_station = fields.ToOne('station', nullable=True)
-        children_stations = fields.ToMany('station', nullable=True)
+        ecoe = fields.ToOne('ecoes')
+        parent_station = fields.ToOne('stations', nullable=True)
+        children_stations = fields.ToMany('stations', nullable=True)
 
 
 def order_station(item, op='add'):

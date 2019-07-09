@@ -4,11 +4,12 @@ from app.model.Round import Round
 
 
 class RoundResource(ModelResource):
-    planners = Relation('planner')
+    planners = Relation('planners')
 
     class Meta:
+        name = 'rounds'
         model = Round
         natural_key = ('ecoe', 'round_code')
 
     class Schema:
-        ecoe = fields.ToOne('ecoe')
+        ecoe = fields.ToOne('ecoes')
