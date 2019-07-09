@@ -2,5 +2,5 @@ from flask import Blueprint
 
 bp = Blueprint('auth', __name__)
 
-from app.auth import auth
-from app.auth import tokens
+from . import auth
+from . import tokens
