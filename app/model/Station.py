@@ -17,4 +17,5 @@ class Station(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint(name, id_ecoe, name='station_ecoe_uk'),
-    )
+        db.Index('ix_station_parent', id_parent_station)
+)

@@ -16,7 +16,8 @@ from .station import StationResource
 from .student import StudentResource
 from .planner import PlannerResource
 from .round import RoundResource
-from .user import UserResource
+from .user import UserResource, RoleResource, PermissionResource
+
 
 bp = Blueprint('api', __name__)
 CORS(bp, expose_headers='Content-Length, X-Total-Count')
@@ -29,6 +30,8 @@ api.title = 'openECOE API ' + version
 api.add_resource(EventResource)
 api.add_resource(ScheduleResource)
 api.add_resource(StageResource)
+api.add_resource(RoleResource)
+api.add_resource(PermissionResource)
 api.add_resource(UserResource)
 api.add_resource(OptionResource)
 api.add_resource(QuestionResource)

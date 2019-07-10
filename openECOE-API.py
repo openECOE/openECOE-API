@@ -38,7 +38,7 @@ def create_user(email, password, name, surname, admin, organization):
         user = User()
 
         user.email = email
-        user.is_superadmin = admin
+        user.is_superadmin = admin  # TODO: Remove superadmin RoleNeed when permissions active
         user.encode_password(password)
         user.id_organization = organization
 

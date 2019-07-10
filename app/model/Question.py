@@ -9,6 +9,7 @@ class QType(str, enum.Enum):
     CHECK_BOX = 'CH'
     RANGE_SELECT = 'RS'
 
+
 class Question(db.Model):
     __tablename__ = 'question'
 

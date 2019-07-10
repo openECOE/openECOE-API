@@ -1,11 +1,11 @@
 from flask import g
 from flask_login import current_user
-from flask_principal import Identity, UserNeed, AnonymousIdentity, identity_loaded, RoleNeed
+from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed
 from flask_httpauth import HTTPTokenAuth
 from werkzeug.exceptions import abort
 
 from app import login_manager, principals
-from app.model.User import User
+from app.model.User import User, RoleType
 
 token_auth = HTTPTokenAuth()
 
@@ -41,8 +41,24 @@ def on_identity_loaded(sender, identity):
     if not isinstance(identity, AnonymousIdentity):
         identity.provides.add(UserNeed(identity.id))
 
-        if current_user.is_superadmin:
-            identity.provides.add(RoleNeed('superadmin'))
+        # Have permission to manage their own User
+        identity.provides.add(ItemNeed('manage', current_user.id, 'users'))
+        identity.provides.add(ItemNeed('read', current_user.id_organization, 'organizations'))
+
+        # TODO: Remove superadmin RoleNeed when permissions active
+        # if current_user.is_superadmin:
+        #     identity.provides.add(RoleNeed('superadmin'))
+
+        if hasattr(current_user, 'roles'):
+            for role in current_user.roles:
+                identity.provides.add(RoleNeed(role.name))
+                if role.name == RoleType.SUPERADMIN:
+                    for roleType in RoleType:
+                        identity.provides.add(RoleNeed(roleType))
+
+        if hasattr(current_user, 'permissions'):
+            for permission in current_user.permissions:
+                identity.provides.add(ItemNeed(permission.name, permission.id_object, permission.object))
 
 
 @token_auth.verify_token

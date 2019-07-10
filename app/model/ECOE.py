@@ -54,5 +54,3 @@ class ECOE(db.Model):
 
         return config
 
-
-
