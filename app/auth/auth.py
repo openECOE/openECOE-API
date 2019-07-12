@@ -1,6 +1,6 @@
 from flask import g
 from flask_login import current_user
-from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed
+from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed, TypeNeed
 from flask_httpauth import HTTPTokenAuth
 from werkzeug.exceptions import abort
 
@@ -45,13 +45,16 @@ def on_identity_loaded(sender, identity):
         identity.provides.add(ItemNeed('manage', current_user.id, 'users'))
         identity.provides.add(ItemNeed('read', current_user.id_organization, 'organizations'))
 
-        # TODO: Remove superadmin RoleNeed when permissions active
-        # if current_user.is_superadmin:
-        #     identity.provides.add(RoleNeed('superadmin'))
-
         if hasattr(current_user, 'roles'):
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
+
+                # If user is ADMIN gives permission to manage all ECOEs in their organization
+                if role.name == RoleType.ADMIN:
+                    for ecoe in current_user.organization.ecoes:
+                        identity.provides.add(ItemNeed('manage', ecoe.id, 'ecoes'))
+
+                # User SUPERADMIN obtain all roles
                 if role.name == RoleType.SUPERADMIN:
                     for roleType in RoleType:
                         identity.provides.add(RoleNeed(roleType))

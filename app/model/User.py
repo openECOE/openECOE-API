@@ -31,6 +31,8 @@ class User(UserMixin, db.Model):
     token_expiration = db.Column(db.DateTime)
     roles = db.relationship('Role', backref='user')
     permissions = db.relationship('Permission', backref='user')
+    ecoeCoordinators = db.relationship('ECOE', backref='user')
+    stationManagers = db.relationship('Station', backref='user')
 
     def encode_password(self, password):
         self.password = bcrypt.generate_password_hash(

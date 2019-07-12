@@ -8,6 +8,8 @@ class ECOE(db.Model):
     name = db.Column(db.String(255), unique=True)
     id_organization = db.Column(db.Integer, db.ForeignKey('organization.id'), nullable=False)
 
+    id_coordinator = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     areas = db.relationship('Area', backref='ecoe')
     stations = db.relationship('Station', backref='ecoe')
     schedules = db.relationship('Schedule', backref='ecoe')

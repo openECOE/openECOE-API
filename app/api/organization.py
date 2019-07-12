@@ -16,10 +16,7 @@ class OrganizationResource(PrincipalResource):
         permissions = {
             'read': ['manage', 'read'],
             'create': 'manage',
-            'update': 'manage',
+            'update': ['manage', RoleType.ADMIN],
             'delete': 'manage',
             'manage': RoleType.SUPERADMIN
         }
-
-
-

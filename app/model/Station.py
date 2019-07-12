@@ -9,6 +9,8 @@ class Station(db.Model):
     order = db.Column(db.Integer)
     id_parent_station = db.Column(db.Integer, db.ForeignKey('station.id'))
 
+    id_manager = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     schedules = db.relationship('Schedule', backref='station')
     qblocks = db.relationship('QBlock', backref='station')
 
@@ -18,4 +20,4 @@ class Station(db.Model):
     __table_args__ = (
         db.UniqueConstraint(name, id_ecoe, name='station_ecoe_uk'),
         db.Index('ix_station_parent', id_parent_station)
-)
+    )

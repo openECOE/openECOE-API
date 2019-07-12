@@ -1,9 +1,11 @@
+from flask_login import current_user
 from flask_potion import ModelResource, fields, signals
 from flask_potion.routes import Relation
 from app.model.Station import Station
+from .ecoe import EcoePrincipalResource
 
 
-class StationResource(ModelResource):
+class StationResource(EcoePrincipalResource):
     schedules = Relation('schedules')
     qblocks = Relation('qblocks')
 
@@ -12,8 +14,17 @@ class StationResource(ModelResource):
         model = Station
         natural_key = ('ecoe', 'name')
 
+        permissions = {
+            'read': 'manage',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': ['manage:ecoe', 'manage', 'user:user']
+        }
+
     class Schema:
         ecoe = fields.ToOne('ecoes')
+        user = fields.ToOne('users')
         parent_station = fields.ToOne('stations', nullable=True)
         children_stations = fields.ToMany('stations', nullable=True)
 
@@ -43,9 +54,12 @@ def before_update_station(sender, item, changes):
         order_station(item)
 
 # TODO: Review Create Station Order
-# @signals.before_create.connect_via(StationResource)
-# def before_create_station(sender, item):
-#     order_station(item)
+# Add permissions to manage to creator
+@signals.before_create.connect_via(StationResource)
+def before_create_station(sender, item):
+    # order_station(item)
+    if not hasattr(item, 'manager'):
+        item.manager = current_user.id
 
 
 @signals.before_delete.connect_via(StationResource)

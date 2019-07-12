@@ -40,7 +40,7 @@ class RoleResource(PrincipalResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage',  RoleType.SUPERADMIN]
+            'manage': ['manage',  RoleType.ADMIN]
         }
 
     class Schema:
@@ -57,7 +57,7 @@ class PermissionResource(PrincipalResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage', RoleType.SUPERADMIN]
+            'manage': ['manage', RoleType.ADMIN]
         }
 
     class Schema:
@@ -78,7 +78,7 @@ class UserResource(PrincipalResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage', RoleType.SUPERADMIN]
+            'manage': ['manage', RoleType.ADMIN]
         }
 
     class Schema:
