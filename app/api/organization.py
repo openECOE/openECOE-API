@@ -1,6 +1,6 @@
 from flask_potion.routes import Relation
 
-from .user import PrincipalResource, RoleType
+from .user import PrincipalResource, RoleType, PermissionType
 from app.model.Organization import Organization
 
 
@@ -14,9 +14,9 @@ class OrganizationResource(PrincipalResource):
         natural_key = 'name'
 
         permissions = {
-            'read': ['manage', 'read'],
-            'create': 'manage',
-            'update': ['manage', RoleType.ADMIN],
-            'delete': 'manage',
-            'manage': RoleType.SUPERADMIN
+            'read': ['update', 'read'],
+            'create': 'delete',
+            'update': ['manage', 'delete'],
+            'delete': RoleType.SUPERADMIN,
+            'manage': [PermissionType.MANAGE, RoleType.SUPERADMIN]
         }

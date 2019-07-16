@@ -1,11 +1,12 @@
 from flask_potion import fields, signals
-from flask_potion.routes import Route, Relation
+from flask_potion.routes import Route, Relation, ItemRoute
 from flask_potion.fields import Inline
+from flask_potion.contrib.principals import principals
 from werkzeug.exceptions import Forbidden
 from datetime import datetime
 from flask_login import current_user
 
-from app.model.User import User, Role, Permission, RoleType
+from app.model.User import User, Role, Permission, RoleType, PermissionType
 
 from flask_potion import ModelResource
 from flask_potion.contrib.alchemy import SQLAlchemyManager
@@ -13,6 +14,16 @@ from flask_potion.contrib.principals import principals
 
 
 class PrincipalResource(ModelResource):
+    @ItemRoute.GET('/permissions')
+    def item_permissions(self, item) -> fields.String():
+        object_permissions = self.manager.get_permissions_for_item(item)
+        return object_permissions
+
+    @Route.GET('/permissions')
+    def object_permissions(self) -> fields.String():
+        object_permissions = self.manager.get_permissions_for_item(self)
+        return object_permissions
+
     class Meta:
         manager = principals(SQLAlchemyManager)
 
@@ -32,6 +43,15 @@ class ForbiddenSuperadmin(Forbidden):
 
 
 class RoleResource(PrincipalResource):
+    @Route.GET('/types')
+    def roletypes(self) -> fields.String():
+        roles = []
+
+        for order, role in enumerate(RoleType, start=0):
+            roles.append({"name": role, "order": order})
+
+        return roles
+
     class Meta:
         name = 'roles'
         model = Role
@@ -49,6 +69,15 @@ class RoleResource(PrincipalResource):
 
 
 class PermissionResource(PrincipalResource):
+    @Route.GET('/types')
+    def permissiontypes(self) -> fields.String():
+        permissions = []
+
+        for order, permission in enumerate(PermissionType, start=0):
+            permissions.append({"name": permission, "order": order})
+
+        return permissions
+
     class Meta:
         name = 'permissions'
         model = Permission
@@ -62,6 +91,8 @@ class PermissionResource(PrincipalResource):
 
     class Schema:
         user = fields.ToOne('users')
+        name = fields.String(enum=PermissionType)
+
 
 
 class UserResource(PrincipalResource):

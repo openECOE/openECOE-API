@@ -2,8 +2,8 @@ from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation, ItemRoute
 from app.model.ECOE import ECOE
-from app import db
 from .user import PrincipalResource, RoleType
+
 
 # Permissions to ECOE childs resources
 class EcoePrincipalResource(PrincipalResource):
@@ -36,19 +36,22 @@ class EcoeResource(PrincipalResource):
 
         permissions = {
             'read': ['manage', 'read'],
-            'create': 'manage',
-            'update': 'manage',
+            'create': 'update',
+            'update': [RoleType.ADMIN, 'manage'],
             'delete': 'manage',
             'manage': ['manage', RoleType.SUPERADMIN, 'user:user']
         }
 
     class Schema:
-        organization = fields.ToOne('organizations')
-        user = fields.ToOne('users')
+        organization = fields.ToOne('organizations', nullable=True)
+        user = fields.ToOne('users', nullable=True)
 
 
-# # Add permissions to manage to creator
-# @signals.before_create.connect_via(EcoeResource)
-# def before_create_ecoe(sender, item):
-#     if not hasattr(item, 'coordinator'):
-#         item.coordinator = current_user.id
+# Add permissions to manage to creator
+@signals.before_create.connect_via(EcoeResource)
+def before_create_ecoe(sender, item):
+    if not item.organization:
+        item.organization = current_user.organization
+
+    if not item.user:
+        item.user = current_user

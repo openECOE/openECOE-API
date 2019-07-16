@@ -9,14 +9,6 @@ import enum
 from datetime import datetime, timedelta
 
 
-class RoleType(str, enum.Enum):
-    SUPERADMIN = 'superadmin'
-    ADMIN = 'administrator'
-    USER = 'user'
-    EVAL = 'evaluator'
-    STUDENT = 'student'
-
-
 class User(UserMixin, db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -68,6 +60,14 @@ class User(UserMixin, db.Model):
         return user
 
 
+class RoleType(str, enum.Enum):
+    SUPERADMIN = 'superadmin'
+    ADMIN = 'administrator'
+    USER = 'user'
+    EVAL = 'evaluator'
+    STUDENT = 'student'
+
+
 class Role(db.Model):
     __tablename__ = 'role'
 
@@ -78,6 +78,11 @@ class Role(db.Model):
     __table_args__ = (
         db.UniqueConstraint(id_user, name, name='uq_role_id_user_name'),
     )
+
+
+class PermissionType(str, enum.Enum):
+    MANAGE = 'manage'
+    READ = 'read'
 
 
 class Permission(db.Model):
