@@ -18,5 +18,6 @@ class QuestionResource(ModelResource):
         area = fields.ToOne('areas')
         question_type = fields.String(enum=QType)
         options = fields.ToMany('options')
+        qblocks = fields.ToMany('qblocks')
 
 # TODO: Comprobar al crear una pregunta que el area y el grupo introducido pertenecen a la misma ECOE
