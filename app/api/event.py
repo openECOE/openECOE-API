@@ -1,8 +1,9 @@
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from app.model.Event import Event
+from app.api.ecoe import EcoePrincipalResource
 
 
-class EventResource(ModelResource):
+class EventResource(EcoePrincipalResource):
     class Meta:
         name = 'events'
         model = Event

@@ -1,10 +1,11 @@
-from flask_potion import ModelResource, fields, signals
+from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.model.Student import Student
 from app.model.Question import QType
+from app.api.ecoe import EcoePrincipalResource
 
 
-class StudentResource(ModelResource):
+class StudentResource(EcoePrincipalResource):
     answers = Relation('options')
 
     class Meta:

@@ -1,9 +1,10 @@
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from flask_potion.routes import Relation, ItemRoute
 from app.model.Question import Question, QType
+from .user import PrincipalResource
 
 
-class QuestionResource(ModelResource):
+class QuestionResource(PrincipalResource):
     options = Relation('options')
 
     @ItemRoute.GET('/points')
@@ -13,6 +14,14 @@ class QuestionResource(ModelResource):
     class Meta:
         name = 'questions'
         model = Question
+
+        permissions = {
+            'read': 'read:area',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:area'
+        }
 
     class Schema:
         area = fields.ToOne('areas')

@@ -1,9 +1,10 @@
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Shift import Shift
+from app.api.ecoe import EcoePrincipalResource
 
 
-class ShiftResource(ModelResource):
+class ShiftResource(EcoePrincipalResource):
     planners = Relation('planners')
 
     class Meta:

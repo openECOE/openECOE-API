@@ -1,15 +1,25 @@
-from flask_potion import ModelResource, fields, signals
+from flask_potion import fields, signals
 from flask_potion.routes import Relation
+from .user import PrincipalResource
+
 
 from app.model.QBlock import QBlock
 
 
-class QblockResource(ModelResource):
+class QblockResource(PrincipalResource):
     questions = Relation('questions')
 
     class Meta:
         name = 'qblocks'
         model = QBlock
+
+        permissions = {
+            'read': 'read:station',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:station'
+        }
 
     class Schema:
         station = fields.ToOne('stations')

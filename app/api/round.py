@@ -1,9 +1,10 @@
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Round import Round
+from app.api.ecoe import EcoePrincipalResource
 
 
-class RoundResource(ModelResource):
+class RoundResource(EcoePrincipalResource):
     planners = Relation('planners')
 
     class Meta:
