@@ -1,10 +1,9 @@
-from flask_potion import fields
+from flask_potion import ModelResource, fields
 from flask_potion.routes import Relation
 from app.model.Planner import Planner
-from app.api.ecoe import EcoePrincipalResource
 
 
-class PlannerResource(EcoePrincipalResource):
+class PlannerResource(ModelResource):
     students = Relation('students')
 
     class Meta:
