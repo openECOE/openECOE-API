@@ -1,20 +1,37 @@
-from flask_potion import ModelResource, fields, signals
+#  Copyright (c) 2019 Miguel Hernandez University of Elche
+#  This file is part of openECOE-API.
+#
+#      openECOE-API is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      openECOE-API is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
+
+from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.model.Student import Student
 from app.model.Question import QType
+from app.api.ecoe import EcoePrincipalResource
 
 
-class StudentResource(ModelResource):
-    answers = Relation('option')
+class StudentResource(EcoePrincipalResource):
+    answers = Relation('options')
 
     class Meta:
+        name = 'students'
         model = Student
         natural_key = ('name', 'surnames')
 
     class Schema:
-        ecoe = fields.ToOne('ecoe')
-        planner = fields.ToOne('planner', nullable=True)
-        answers = fields.ToMany('option')
+        ecoe = fields.ToOne('ecoes')
+        planner = fields.ToOne('planners', nullable=True)
 
 
 # @signals.before_create.connect_via(StudentResource)
@@ -37,7 +54,6 @@ def before_update_planner(sender, item, changes):
 
             for order, student in enumerate(old_planner_students):
                 student.planner_order = order + item.planner_order
-
 
 
 @signals.before_add_to_relation.connect_via(StudentResource)
