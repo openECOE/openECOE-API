@@ -47,7 +47,7 @@ def create_orga(name):
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
 def create_user(email, password, name, surname, admin, organization):
     with app.app_context():
-        from app.api.user import User
+        from app.api.user import User, Role, RoleType
         from datetime import datetime
 
         """Create user"""
@@ -64,8 +64,14 @@ def create_user(email, password, name, surname, admin, organization):
         user.registered_on = datetime.now()
 
         db.session.add(user)
-
         db.session.commit()
+
+        if admin:
+            role = Role()
+            role.id_user = user.id
+            role.name = RoleType.ADMIN
+            db.session.add(role)
+            db.session.commit()
 
         click.echo('User {} created in organization {}'.format(email, organization))
 
