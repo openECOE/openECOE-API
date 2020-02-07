@@ -14,12 +14,14 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+from flask import current_app
 from flask_login import current_user
 from flask_potion import fields, signals
+from flask_potion.exceptions import BackendConflict
 from flask_potion.routes import Relation, ItemRoute
-from app.model.ECOE import ECOE
+from app.model.ECOE import ECOE, ECOEstatus
 from .user import PrincipalResource, RoleType
-
+import requests
 
 # Permissions to ECOE childs resources
 class EcoePrincipalResource(PrincipalResource):
@@ -43,6 +45,26 @@ class EcoeResource(PrincipalResource):
 
     @ItemRoute.GET('/configuration')
     def configuration(self, ecoe) -> fields.String():
+        return ecoe.configuration
+
+    @ItemRoute.POST('/start')
+    def chrono_start(self, ecoe) -> fields.String():
+        ecoe.start()
+        return ecoe.configuration
+
+    @ItemRoute.POST('/play')
+    def chrono_play(self, ecoe) -> fields.String():
+        ecoe.play()
+        return ecoe.configuration
+
+    @ItemRoute.POST('/pause')
+    def chrono_pause(self, ecoe) -> fields.String():
+        ecoe.pause()
+        return ecoe.configuration
+
+    @ItemRoute.POST('/abort')
+    def chrono_abort(self, ecoe) -> fields.String():
+        ecoe.abort()
         return ecoe.configuration
 
     class Meta:
@@ -71,3 +93,12 @@ def before_create_ecoe(sender, item):
 
     if not item.user:
         item.user = current_user
+
+# Update ECOE
+@signals.before_update.connect_via(EcoeResource)
+def before_update_ecoe(sender, item, changes):
+    if 'status' in changes.keys():
+        if changes['status'] == ECOEstatus.PUBLISHED:
+            item.load_config()
+        elif changes['status'] == ECOEstatus.DRAFT:
+            item.delete_config()
