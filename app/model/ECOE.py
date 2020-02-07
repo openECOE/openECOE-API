@@ -75,8 +75,15 @@ class ECOE(db.Model):
                 exists_dependant = True
                 break
 
+        time_start = ""
+
+        try:
+            time_start = self.shifts[0].time_start
+        except:
+            pass
+
         config = {
-            "ecoe": {"id":self.id,"name":self.name,"time_start":self.shifts[0].time_start},
+            "ecoe": {"id":self.id,"name":self.name,"time_start":time_start},
             "rounds_id": [r.id for r in self.rounds],
             "reruns": len(self.stations) + (1 if exists_dependant else 0),
             "schedules": [
