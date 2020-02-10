@@ -112,20 +112,28 @@ class ECOE(db.Model):
             raise BackendConflict(err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason})
 
     def start(self):
-        self.__call_chrono('start')
+        return self.__call_chrono('start')
 
-    def play(self):
-        self.__call_chrono('play')
+    def play(self, round_id=None):
+        endpoint = 'play'
+        if round_id is not None:
+            endpoint += '/' + str(round_id)
+        return self.__call_chrono(endpoint)
 
-    def pause(self):
-        self.__call_chrono('pause')
+    def pause(self, round_id=None):
+        endpoint = 'pause'
+        if round_id is not None:
+            endpoint += '/' + str(round_id)
+        return self.__call_chrono(endpoint)
 
     def abort(self):
-        self.__call_chrono('abort')
+        return self.__call_chrono('abort')
 
     def __call_chrono(self, endpoint):
-        r = requests.post(url=current_app.config['CHRONO_ROUTE'] + '/' + endpoint, json={"tfc": self.chrono_token})
+        r = requests.post(url=current_app.config['CHRONO_ROUTE'] + '/' + endpoint, headers={"tfc": self.chrono_token})
         # extracting response text
         if r.status_code != 200:
             raise BackendConflict(
                 err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
+        else:
+            return {"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text}

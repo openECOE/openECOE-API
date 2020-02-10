@@ -14,14 +14,11 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask import current_app
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.exceptions import BackendConflict
 from flask_potion.routes import Relation, ItemRoute
 from app.model.ECOE import ECOE, ECOEstatus
 from .user import PrincipalResource, RoleType
-import requests
 
 # Permissions to ECOE childs resources
 class EcoePrincipalResource(PrincipalResource):
@@ -49,23 +46,19 @@ class EcoeResource(PrincipalResource):
 
     @ItemRoute.POST('/start')
     def chrono_start(self, ecoe) -> fields.String():
-        ecoe.start()
-        return ecoe.configuration
+        return ecoe.start()
 
     @ItemRoute.POST('/play')
     def chrono_play(self, ecoe) -> fields.String():
-        ecoe.play()
-        return ecoe.configuration
+        return ecoe.play()
 
     @ItemRoute.POST('/pause')
     def chrono_pause(self, ecoe) -> fields.String():
-        ecoe.pause()
-        return ecoe.configuration
+        return ecoe.pause()
 
     @ItemRoute.POST('/abort')
     def chrono_abort(self, ecoe) -> fields.String():
-        ecoe.abort()
-        return ecoe.configuration
+        return ecoe.abort()
 
     class Meta:
         name = 'ecoes'
