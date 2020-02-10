@@ -13,7 +13,7 @@
 #
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
-
+import json
 import os
 
 from flask import current_app
@@ -49,8 +49,6 @@ class ECOE(db.Model):
     @property
     def configuration(self):
 
-        self.chrono_token = base64.b64encode(os.urandom(250)).decode('utf-8')[:250]
-
         stages = []
         stage_events = {}
 
@@ -83,7 +81,8 @@ class ECOE(db.Model):
             pass
 
         config = {
-            "ecoe": {"id":self.id,"name":self.name,"time_start":time_start},
+            "ecoe": {"id":self.id,"name":self.name,"time_start":time_start.__str__()},
+            "rounds": [{'id': r.id, 'name': r.description} for r in self.rounds],
             "rounds_id": [r.id for r in self.rounds],
             "reruns": len(self.stations) + (1 if exists_dependant else 0),
             "schedules": [
@@ -95,6 +94,7 @@ class ECOE(db.Model):
         return config
 
     def load_config(self):
+        self.chrono_token = base64.b64encode(os.urandom(250)).decode('utf-8')[:250]
         config = self.configuration
         # sending post request and saving response as response object
         r = requests.post(url=current_app.config['CHRONO_ROUTE'] + '/load', json=config)
