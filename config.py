@@ -32,4 +32,5 @@ class BaseConfig:
     SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'))
     API_AUTH = literal_eval(os.environ.get('API_AUTH'))
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    CHRONO_ROUTE = os.environ.get('CHRONO_ROUTE')
     CORS_EXPOSE_HEADERS = 'x-total-count'

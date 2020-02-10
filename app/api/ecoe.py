@@ -17,9 +17,8 @@
 from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation, ItemRoute
-from app.model.ECOE import ECOE
+from app.model.ECOE import ECOE, ECOEstatus
 from .user import PrincipalResource, RoleType
-
 
 # Permissions to ECOE childs resources
 class EcoePrincipalResource(PrincipalResource):
@@ -44,6 +43,22 @@ class EcoeResource(PrincipalResource):
     @ItemRoute.GET('/configuration')
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
+
+    @ItemRoute.POST('/start')
+    def chrono_start(self, ecoe) -> fields.String():
+        return ecoe.start()
+
+    @ItemRoute.POST('/play')
+    def chrono_play(self, ecoe) -> fields.String():
+        return ecoe.play()
+
+    @ItemRoute.POST('/pause')
+    def chrono_pause(self, ecoe) -> fields.String():
+        return ecoe.pause()
+
+    @ItemRoute.POST('/abort')
+    def chrono_abort(self, ecoe) -> fields.String():
+        return ecoe.abort()
 
     class Meta:
         name = 'ecoes'
@@ -71,3 +86,12 @@ def before_create_ecoe(sender, item):
 
     if not item.user:
         item.user = current_user
+
+# Update ECOE
+@signals.before_update.connect_via(EcoeResource)
+def before_update_ecoe(sender, item, changes):
+    if 'status' in changes.keys():
+        if changes['status'] == ECOEstatus.PUBLISHED:
+            item.load_config()
+        elif changes['status'] == ECOEstatus.DRAFT:
+            item.delete_config()

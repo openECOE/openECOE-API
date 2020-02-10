@@ -15,7 +15,7 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields
-from flask_potion.routes import Relation
+from flask_potion.routes import Relation, ItemRoute
 from app.model.Round import Round
 from app.api.ecoe import EcoePrincipalResource
 
@@ -30,3 +30,11 @@ class RoundResource(EcoePrincipalResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoes')
+
+    @ItemRoute.POST('/play')
+    def chrono_play(self, round) -> fields.String():
+        return round.ecoe.play(round.id)
+
+    @ItemRoute.POST('/pause')
+    def chrono_pause(self, round) -> fields.String():
+        return round.ecoe.pause(round.id)
