@@ -101,36 +101,40 @@ class ECOE(db.Model):
         # extracting response text
         if r.status_code != 200:
             raise BackendConflict(
-                err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "config": config})
+                err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text, "config": config})
 
     def delete_config(self):
-        r = requests.delete(url=current_app.config['CHRONO_ROUTE'])
+        endpoint = '%s/%d' % (current_app.config['CHRONO_ROUTE'], self.id)
+        r = requests.delete(url=endpoint, headers={"tfc": self.chrono_token})
         # extracting response text
         if r.status_code == 200:
             self.chrono_token = None
         else:
-            raise BackendConflict(err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason})
+            raise BackendConflict(err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
 
     def start(self):
-        return self.__call_chrono('start')
+        endpoint = 'start/%d' % self.id
+        return self.__call_chrono(endpoint)
 
     def play(self, round_id=None):
-        endpoint = 'play'
+        endpoint = 'play/%d'%self.id
         if round_id is not None:
             endpoint += '/' + str(round_id)
         return self.__call_chrono(endpoint)
 
     def pause(self, round_id=None):
-        endpoint = 'pause'
+        endpoint = 'pause/%d'%self.id
         if round_id is not None:
             endpoint += '/' + str(round_id)
         return self.__call_chrono(endpoint)
 
     def abort(self):
-        return self.__call_chrono('abort')
+        endpoint = 'abort/%d'%self.id
+        return self.__call_chrono(endpoint)
 
     def __call_chrono(self, endpoint):
-        r = requests.post(url=current_app.config['CHRONO_ROUTE'] + '/' + endpoint, headers={"tfc": self.chrono_token})
+        endpoint = '%s/%s' % (current_app.config['CHRONO_ROUTE'], endpoint)
+        r = requests.post(url=endpoint, headers={"tfc": self.chrono_token})
         # extracting response text
         if r.status_code != 200:
             raise BackendConflict(
