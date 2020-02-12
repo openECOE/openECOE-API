@@ -17,16 +17,27 @@ import json
 import os
 
 from flask import current_app
-from flask_potion.exceptions import BackendConflict
+from flask_potion.exceptions import BackendConflict, PageNotFound
 from app import db
 
 import enum
 import base64
 import requests
 
+class ChronoNotFound(PageNotFound):
+    def __init__(self, **kwargs):
+        self.data = kwargs
+        self.data.update(description="Chrono module not found")
+
+    def as_dict(self):
+        dct = super(PageNotFound, self).as_dict()
+        dct.update(self.data)
+        return dct
+
 class ECOEstatus(str, enum.Enum):
     DRAFT = 'draft'
     PUBLISHED = 'published'
+    ARCHIVED = 'archived'
 
 class ECOE(db.Model):
     __tablename__ = 'ecoe'
@@ -96,16 +107,26 @@ class ECOE(db.Model):
     def load_config(self):
         self.chrono_token = base64.b64encode(os.urandom(250)).decode('utf-8')[:250]
         config = self.configuration
+        endpoint = current_app.config['CHRONO_ROUTE'] + '/load'
+
         # sending post request and saving response as response object
-        r = requests.post(url=current_app.config['CHRONO_ROUTE'] + '/load', json=config)
+        try:
+            r = requests.post(url=endpoint, json=config)
+        except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+            raise ChronoNotFound(url=endpoint)
         # extracting response text
-        if r.status_code != 200:
+        if r.status_code == 200:
+            return self.configuration
+        else:
             raise BackendConflict(
                 err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text, "config": config})
 
     def delete_config(self):
         endpoint = '%s/%d' % (current_app.config['CHRONO_ROUTE'], self.id)
-        r = requests.delete(url=endpoint, headers={"tfc": self.chrono_token})
+        try:
+            r = requests.delete(url=endpoint, headers={"tfc": self.chrono_token})
+        except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+            raise ChronoNotFound(url=endpoint)
         # extracting response text
         if r.status_code == 200:
             self.chrono_token = None
@@ -133,11 +154,17 @@ class ECOE(db.Model):
         return self.__call_chrono(endpoint)
 
     def __call_chrono(self, endpoint):
+
         endpoint = '%s/%s' % (current_app.config['CHRONO_ROUTE'], endpoint)
-        r = requests.post(url=endpoint, headers={"tfc": self.chrono_token})
+        try:
+            r = requests.post(url=endpoint, headers={"tfc": self.chrono_token})
+        except (requests.exceptions.ConnectionError, requests.exceptions.ConnectTimeout):
+            raise ChronoNotFound(url=endpoint)
+
         # extracting response text
         if r.status_code != 200:
             raise BackendConflict(
                 err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
         else:
             return {"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text}
+
