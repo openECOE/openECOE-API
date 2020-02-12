@@ -15,10 +15,12 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields, signals
-from flask_potion.routes import Relation
+from flask_potion.exceptions import ItemNotFound
+from flask_potion.routes import Relation, ItemRoute
 from app.model.Student import Student
 from app.model.Question import QType
 from app.api.ecoe import EcoePrincipalResource
+from app.api.option import OptionResource
 
 
 class StudentResource(EcoePrincipalResource):
@@ -32,6 +34,14 @@ class StudentResource(EcoePrincipalResource):
     class Schema:
         ecoe = fields.ToOne('ecoes')
         planner = fields.ToOne('planners', nullable=True)
+
+    @ItemRoute.GET('/answers/<int:option>')
+    def get_option(self, student, option) -> fields.Inline(OptionResource):
+        item = OptionResource.manager.read(option)
+        if item in student.answers:
+            return item
+        else:
+            raise ItemNotFound(OptionResource, id=option)
 
 
 # @signals.before_create.connect_via(StudentResource)
