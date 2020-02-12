@@ -33,7 +33,7 @@ class QuestionResource(PrincipalResource):
 
         permissions = {
             'read': 'read:area',
-            'create': 'managCe',
+            'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
             'manage': 'manage:area'

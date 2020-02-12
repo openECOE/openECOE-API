@@ -16,7 +16,7 @@
 
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.routes import Relation, ItemRoute
+from flask_potion.routes import Relation, ItemRoute, Route
 from app.model.ECOE import ECOE, ECOEstatus
 from .user import PrincipalResource, RoleType
 
@@ -40,6 +40,15 @@ class EcoeResource(PrincipalResource):
     rounds = Relation('rounds')
     shifts = Relation('shifts')
 
+    @Route.GET('/statuses')
+    def statustypes(self) -> fields.String():
+        statuses= []
+
+        for order, status in enumerate(ECOEstatus, start=0):
+            statuses.append({"status": status, "order": order})
+
+        return statuses
+
     @ItemRoute.GET('/configuration')
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
@@ -59,6 +68,10 @@ class EcoeResource(PrincipalResource):
     @ItemRoute.POST('/abort')
     def chrono_abort(self, ecoe) -> fields.String():
         return ecoe.abort()
+
+    @ItemRoute.POST('/load')
+    def chrono_load(self, ecoe) -> fields.String():
+        return ecoe.load_config()
 
     class Meta:
         name = 'ecoes'
