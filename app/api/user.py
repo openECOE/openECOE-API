@@ -17,7 +17,6 @@
 from flask_potion import fields, signals
 from flask_potion.routes import Route, Relation, ItemRoute
 from flask_potion.fields import Inline
-from flask_potion.contrib.principals import principals
 from werkzeug.exceptions import Forbidden
 from datetime import datetime
 from flask_login import current_user
@@ -28,6 +27,7 @@ from flask_potion import ModelResource
 from flask_potion.contrib.alchemy import SQLAlchemyManager
 from flask_potion.contrib.principals import principals
 
+MainManager = principals(SQLAlchemyManager)
 
 class PrincipalResource(ModelResource):
     @ItemRoute.GET('/permissions')
@@ -41,17 +41,10 @@ class PrincipalResource(ModelResource):
         return object_permissions
 
     class Meta:
-        manager = principals(SQLAlchemyManager)
+        manager = MainManager
 
 
 class ForbiddenSuperadmin(Forbidden):
-
-    """*403* `Forbidden`
-
-    Raise if the user doesn't have the permission for the requested resource
-    but was authenticated.
-    """
-    code = 403
     description = (
         'You don\'t have the permission to change superadmin permissions. '
         'It is either read-protected or not readable by the server.'
