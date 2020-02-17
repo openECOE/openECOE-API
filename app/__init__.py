@@ -23,6 +23,10 @@ from flask_principal import Principal
 from flask_potion import Api
 from flask_cors import CORS
 from config import BaseConfig
+from sqlalchemy import event
+from sqlalchemy.engine import Engine
+import time
+import logging
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -30,6 +34,24 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 principals = Principal()
 api_app = Api()
+
+
+logging.basicConfig()
+logger = logging.getLogger("myapp.sqltime")
+logger.setLevel(logging.DEBUG)
+
+@event.listens_for(Engine, "before_cursor_execute")
+def before_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    conn.info.setdefault('query_start_time', []).append(time.time())
+    logger.debug("Start Query: %s", statement)
+
+@event.listens_for(Engine, "after_cursor_execute")
+def after_cursor_execute(conn, cursor, statement,
+                        parameters, context, executemany):
+    total = time.time() - conn.info['query_start_time'].pop(-1)
+    logger.debug("Query Complete!")
+    logger.debug("Total Time: %f", total)
 
 
 def create_app(config_class=BaseConfig):

@@ -20,7 +20,7 @@ from flask import current_app
 from flask_potion.exceptions import BackendConflict, PageNotFound
 from app import db
 
-import enum
+from enum import Enum
 import base64
 import requests
 
@@ -34,7 +34,7 @@ class ChronoNotFound(PageNotFound):
         dct.update(self.data)
         return dct
 
-class ECOEstatus(str, enum.Enum):
+class ECOEstatus(str, Enum):
     DRAFT = 'draft'
     PUBLISHED = 'published'
     ARCHIVED = 'archived'
