@@ -17,10 +17,15 @@
 from flask_potion import fields, signals
 from flask_potion.exceptions import ItemNotFound
 from flask_potion.routes import Relation, ItemRoute
+from sqlalchemy.orm import Session
+
 from app.model.Student import Student
 from app.model.Question import QType
 from app.api.ecoe import EcoePrincipalResource
 from app.api.option import OptionResource
+from app.model.many_to_many_tables import students_options
+
+from app import db
 
 
 class StudentResource(EcoePrincipalResource):
@@ -35,14 +40,39 @@ class StudentResource(EcoePrincipalResource):
         ecoe = fields.ToOne('ecoes')
         planner = fields.ToOne('planners', nullable=True)
 
-    @ItemRoute.GET('/answers/<int:option>')
-    def get_option(self, student, option) -> fields.Inline(OptionResource):
-        item = OptionResource.manager.read(option)
-        if item in student.answers:
+    # @ItemRoute.GET('/answers/all')
+    # def get_option(self) -> fields.Inline(OptionResource):
+    #
+    #
+    #     return item
+    #     # if item in student.answers:
+    #     #     return item
+    #     # else:
+    #     #     raise ItemNotFound(OptionResource, id=option)
+
+    @ItemRoute.GET('/answers/<int:option_id>')
+    def get_option(self, student, option_id) -> fields.Inline(OptionResource):
+        # item = OptionResource.manager.read(option)
+        item = student.answers.filter_by(id = option_id).first()
+
+        # return item
+        if item:
             return item
         else:
-            raise ItemNotFound(OptionResource, id=option)
+            raise ItemNotFound(OptionResource, id=option_id)
 
+    @ItemRoute.GET('/answers/all')
+    def get_all_answers(self, student) -> fields.List(fields.Inline(OptionResource)):
+        return student.answers.all()
+
+    # @ItemRoute.GET('/answers/station/<int:station_id>')
+    # def find_answer(self, student, option_id) -> fields.Inline(OptionResource):
+    #
+    #     student_option = db.session.query(students_options) \
+    #         .filter(students_options.c.student_id == student.id) \
+    #         .filter(students_options.c.option_id == option_id).first()
+    #
+    #     return OptionResource.manager.read(student_option.option_id)
 
 # @signals.before_create.connect_via(StudentResource)
 # def before_add_planner(sender, item):

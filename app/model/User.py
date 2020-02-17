@@ -75,6 +75,14 @@ class User(UserMixin, db.Model):
         user.token_expiration = now + timedelta(seconds=expires_in)
         return user
 
+    @staticmethod
+    def check_email_password(username, password):
+        user = User.query.filter_by(email=username).first()
+        if user and user.check_password(password):
+            return user
+        else:
+            return None
+
 
 class RoleType(str, enum.Enum):
     SUPERADMIN = 'superadmin'

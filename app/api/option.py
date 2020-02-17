@@ -30,9 +30,9 @@ class OptionResource(ModelResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage:question', RoleType.ADMIN, RoleType.EVAL]
+            'manage': [RoleType.ADMIN, RoleType.EVAL]
         }
 
-    class Schema:
-        question = fields.ToOne('questions')
+    # class Schema:
+    #     question = fields.ToOne('questions')
 

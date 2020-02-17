@@ -30,7 +30,7 @@ class Student(db.Model):
     id_planner = db.Column(db.Integer, db.ForeignKey('planner.id'), nullable=True)
     planner_order = db.Column(db.Integer)
 
-    answers = db.relationship('Option', secondary=students_options, lazy=True, back_populates='students')
+    answers = db.relationship('Option', secondary=students_options, lazy='dynamic', back_populates='students')
 
     __table_args__ = (
         db.UniqueConstraint(name, surnames, id_ecoe, name='student_name_ecoe_uk'),

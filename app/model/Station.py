@@ -37,3 +37,7 @@ class Station(db.Model):
         db.UniqueConstraint(name, id_ecoe, name='station_ecoe_uk'),
         db.Index('ix_station_parent', id_parent_station)
     )
+
+    # @ItemRoute.GET('/student/<int:student>/answers')
+    # def get_student_answers:
+
