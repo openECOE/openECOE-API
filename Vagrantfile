@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-        config.vm.box = "ubuntu/bionic64"
+    config.vm.box = "ubuntu/bionic64"
     config.vm.define "develop"
     config.vm.hostname = "openecoe-api-dev"
 
@@ -20,7 +20,7 @@ Vagrant.configure("2") do |config|
         ansible.provisioning_path = "/tmp/deploy"
         #ansible.galaxy_role_file = "requeriments.yml"
         ansible.inventory_path = "inventory/develop"
-        ansible.playbook = "setup.api.yml"
+        ansible.playbook = "setup.yml"
     end
 
 
