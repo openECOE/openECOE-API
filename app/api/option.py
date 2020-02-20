@@ -33,6 +33,6 @@ class OptionResource(ModelResource):
             'manage': [RoleType.ADMIN, RoleType.EVAL]
         }
 
-    # class Schema:
-    #     question = fields.ToOne('questions')
+    class Schema:
+        question = fields.ToOne('questions')
 
