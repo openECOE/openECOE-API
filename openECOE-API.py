@@ -24,17 +24,20 @@ app = create_app()
 @click.option('--name', prompt='Organization name', help='Organization name')
 def create_orga(name):
     with app.app_context():
-        from app.api.organization import Organization 
+        from app.api.organization import Organization
 
-        """Create organization"""
-        orga = Organization()
+        if Organization.query.filter_by(name=name).first():
+            click.echo('Organization {} not created because exists'.format(name))
+        else:
+            """Create organization"""
+            orga = Organization()
 
-        orga.name = name
+            orga.name = name
 
-        db.session.add(orga)
-        db.session.commit()
+            db.session.add(orga)
+            db.session.commit()
 
-        click.echo('Organization {} created'.format(name))
+            click.echo('Organization {} created'.format(name))
 
 
 @app.cli.command()
@@ -50,30 +53,35 @@ def create_user(email, password, name, surname, admin, organization):
         from app.api.user import User, Role, RoleType
         from datetime import datetime
 
-        """Create user"""
-        user = User()
+        if User.query.filter_by(email=email).first():
+            click.echo('User {} not created because exists in organization {}'.format(email, organization))
+        else:
+            """Create user"""
+            user = User()
+            user.registered_on = datetime.now()
 
-        user.email = email
-        user.is_superadmin = admin  # TODO: Remove superadmin RoleNeed when permissions active
-        user.encode_password(password)
-        user.id_organization = organization
+            user.email = email
+            user.is_superadmin = admin  # TODO: Remove superadmin RoleNeed when permissions active
+            user.encode_password(password)
+            user.id_organization = organization
 
-        user.name = name
-        user.surname = surname
+            user.name = name
+            user.surname = surname
 
-        user.registered_on = datetime.now()
+            db.session.add(user)
 
-        db.session.add(user)
-        db.session.commit()
 
-        if admin:
-            role = Role()
-            role.id_user = user.id
-            role.name = RoleType.ADMIN
-            db.session.add(role)
             db.session.commit()
 
-        click.echo('User {} created in organization {}'.format(email, organization))
+            if admin:
+                role = Role()
+                role.id_user = user.id
+                role.name = RoleType.ADMIN
+                db.session.add(role)
+                db.session.commit()
+
+            click.echo('User {} created in organization {}'.format(email, organization))
+
 
 
 @app.shell_context_processor
