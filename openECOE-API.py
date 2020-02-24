@@ -47,13 +47,30 @@ def create_orga(name):
 @click.option('--surname', help='User suername')
 @click.option('--admin',  is_flag=True,
               help='Flag to indicate user is admin', )
+@click.option('--organization_name', default=None, help='Organization name, if not exists, create new organization')
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
-def create_user(email, password, name, surname, admin, organization):
+def create_user(email, password, name, surname, admin, organization, organization_name):
     with app.app_context():
         from app.api.user import User, Role, RoleType
+        from app.api.organization import Organization
         from datetime import datetime
 
-        if User.query.filter_by(email=email).first():
+        if organization_name:
+            org = Organization.query.filter_by(name=organization_name).first()
+            if org:
+                organization = org.id
+            else:
+                organization = None
+        else:
+            org = Organization.query.filter_by(id=organization).first()
+            if org:
+                organization = org.id
+            else:
+                organization = None
+
+        if not organization:
+            click.echo('User {} not created because organization not exists'.format(email))
+        elif User.query.filter_by(email=email).first():
             click.echo('User {} not created because exists in organization {}'.format(email, organization))
         else:
             """Create user"""
@@ -81,6 +98,7 @@ def create_user(email, password, name, surname, admin, organization):
                 db.session.commit()
 
             click.echo('User {} created in organization {}'.format(email, organization))
+
 
 
 
