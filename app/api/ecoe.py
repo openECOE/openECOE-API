@@ -17,7 +17,7 @@ from enum import Enum
 
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.exceptions import ItemNotFound
+from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
@@ -196,6 +196,7 @@ def before_update_ecoe(sender, item, changes):
                 pass
         elif changes['status']  in (ECOEstatus.DRAFT, ECOEstatus.ARCHIVED):
             try:
-                item.delete_config()
+                if item.chrono_token:
+                    item.delete_config()
             except ChronoNotFound:
                 pass
