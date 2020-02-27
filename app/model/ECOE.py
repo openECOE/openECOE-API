@@ -105,7 +105,6 @@ class ECOE(db.Model):
         return config
 
     def load_config(self):
-        self.chrono_token = base64.b64encode(os.urandom(250)).decode('utf-8')[:250]
         config = self.configuration
         endpoint = current_app.config['CHRONO_ROUTE'] + '/load'
 
@@ -116,6 +115,7 @@ class ECOE(db.Model):
             raise ChronoNotFound(url=endpoint)
         # extracting response text
         if r.status_code == 200:
+            self.chrono_token = base64.b64encode(os.urandom(250)).decode('utf-8')[:250]
             return self.configuration
         else:
             raise BackendConflict(

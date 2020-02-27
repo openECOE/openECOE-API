@@ -198,5 +198,5 @@ def before_update_ecoe(sender, item, changes):
             try:
                 if item.chrono_token:
                     item.delete_config()
-            except ChronoNotFound:
+            except (ChronoNotFound, BackendConflict):
                 pass
