@@ -1,3 +1,19 @@
+#  Copyright (c) 2019 Miguel Hernandez University of Elche
+#  This file is part of openECOE-API.
+#
+#      openECOE-API is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, either version 3 of the License, or
+#      (at your option) any later version.
+#
+#      openECOE-API is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
+
 from app import db
 
 class Station(db.Model):
@@ -9,6 +25,8 @@ class Station(db.Model):
     order = db.Column(db.Integer)
     id_parent_station = db.Column(db.Integer, db.ForeignKey('station.id'))
 
+    id_manager = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
     schedules = db.relationship('Schedule', backref='station')
     qblocks = db.relationship('QBlock', backref='station')
 
@@ -17,4 +35,9 @@ class Station(db.Model):
 
     __table_args__ = (
         db.UniqueConstraint(name, id_ecoe, name='station_ecoe_uk'),
+        db.Index('ix_station_parent', id_parent_station)
     )
+
+    # @ItemRoute.GET('/student/<int:student>/answers')
+    # def get_student_answers:
+
