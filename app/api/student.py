@@ -15,21 +15,14 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields, signals
-from flask_potion.exceptions import ItemNotFound
 from flask_potion.routes import Relation, ItemRoute
-from sqlalchemy.orm import Session
 
-from app.model.Student import Student
-from app.model.Question import QType
+from app.model.Student import Answer, Student
 from app.api.ecoe import EcoePrincipalResource
-from app.api.option import OptionResource
-from app.model.many_to_many_tables import students_options
-
-from app import db
 
 
 class StudentResource(EcoePrincipalResource):
-    answers = Relation('options')
+    answers = Relation('answers')
 
     class Meta:
         name = 'students'
@@ -40,44 +33,21 @@ class StudentResource(EcoePrincipalResource):
         ecoe = fields.ToOne('ecoes')
         planner = fields.ToOne('planners', nullable=True)
 
-    # @ItemRoute.GET('/answers/all')
-    # def get_option(self) -> fields.Inline(OptionResource):
-    #
-    #
-    #     return item
-    #     # if item in student.answers:
-    #     #     return item
-    #     # else:
-    #     #     raise ItemNotFound(OptionResource, id=option)
-
-    @ItemRoute.GET('/answers/<int:option_id>')
-    def get_option(self, student, option_id) -> fields.Inline(OptionResource):
-        # item = OptionResource.manager.read(option)
-        item = student.answers.filter_by(id = option_id).first()
-
-        # return item
-        if item:
-            return item
-        else:
-            raise ItemNotFound(OptionResource, id=option_id)
-
     @ItemRoute.GET('/answers/all')
-    def get_all_answers(self, student) -> fields.List(fields.Inline(OptionResource)):
+    def get_all_answers(self, student) -> fields.List(fields.Inline(Answer)):
         return student.answers.all()
 
-    # @ItemRoute.GET('/answers/station/<int:station_id>')
-    # def find_answer(self, student, option_id) -> fields.Inline(OptionResource):
-    #
-    #     student_option = db.session.query(students_options) \
-    #         .filter(students_options.c.student_id == student.id) \
-    #         .filter(students_options.c.option_id == option_id).first()
-    #
-    #     return OptionResource.manager.read(student_option.option_id)
+class AnswerResource(EcoePrincipalResource):
 
-# @signals.before_create.connect_via(StudentResource)
-# def before_add_planner(sender, item):
-#     if item.planner:
-#         item.planner_order = len(item.planner.students)
+    class Meta:
+        name = 'answers'
+        model = Answer
+        natural_key = ('id_student', 'id_question')
+
+    # class Schema:
+    #     question = fields.ToOne('questions')
+    #     student = fields.ToOne('student')
+
 
 
 @signals.before_update.connect_via(StudentResource)
@@ -94,13 +64,3 @@ def before_update_planner(sender, item, changes):
 
             for order, student in enumerate(old_planner_students):
                 student.planner_order = order + item.planner_order
-
-
-@signals.before_add_to_relation.connect_via(StudentResource)
-def before_add_relation(sender, item, attribute, child):
-    if attribute == 'answers':
-        if child.question.question_type in [QType.RADIO_BUTTON, QType.RANGE_SELECT]:
-            # Delete other answers for this question
-            answers_question = filter(lambda answer_q: answer_q.id_question == child.question.id, item.answers)
-            for answer in answers_question:
-                sender.manager.relation_remove(item, attribute, StudentResource, answer)

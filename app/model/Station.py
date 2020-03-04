@@ -28,7 +28,8 @@ class Station(db.Model):
     id_manager = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     schedules = db.relationship('Schedule', backref='station')
-    qblocks = db.relationship('QBlock', backref='station')
+    blocks = db.relationship('Block', backref='station')
+    questions = db.relationship('Question', backref='station')
 
     # adjacency list pattern
     children_stations = db.relationship('Station', backref=db.backref('parent_station', remote_side=[id]))

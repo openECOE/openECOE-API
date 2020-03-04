@@ -15,9 +15,6 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app import db
-from .many_to_many_tables import qblocks_questions
-import enum
-from sqlalchemy.ext.hybrid import hybrid_property
 
 
 class Question(db.Model):
@@ -25,16 +22,20 @@ class Question(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=False)
+    id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    order = db.Column(db.Integer, nullable=False)
     id_block = db.Column(db.Integer, db.ForeignKey('block.id'))
-    order = db.Column(db.Integer)
+    question_schema = db.Column(db.JSON, nullable=False)
+
+    answers = db.relationship('Answer', backref='answer')
 
 
 class Block(db.Model):
     __tablename__ = 'block'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300))
     id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    name = db.Column(db.String(300))
     order = db.Column(db.Integer, nullable=False)
 
     questions = db.relationship('Question', backref='question')

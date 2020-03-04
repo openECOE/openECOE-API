@@ -15,34 +15,40 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields
-from flask_potion.routes import Relation, ItemRoute
-from app.model.Question import Question, QType
+from flask_potion.routes import Relation
+from app.model.Question import Block, Question
 from .user import PrincipalResource
 
+station_permissions = {
+            'read': 'read:station',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:station'
+        }
 
 class QuestionResource(PrincipalResource):
-    options = Relation('options')
-
-    @ItemRoute.GET('/points')
-    def points(self, question) -> fields.Integer():
-        return question.points
+    answers = Relation('answers')
+    blocks = Relation('blocks')
 
     class Meta:
         name = 'questions'
         model = Question
 
-        permissions = {
-            'read': 'read:area',
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': 'manage:area'
-        }
+        permissions = station_permissions
 
     class Schema:
         area = fields.ToOne('areas')
-        question_type = fields.String(enum=QType)
-        options = fields.ToMany('options')
-        qblocks = fields.ToMany('qblocks')
+        station = fields.ToOne('stations')
 
-# TODO: Comprobar al crear una pregunta que el area y el grupo introducido pertenecen a la misma ECOE
+
+class BlockResource(PrincipalResource):
+
+    class Meta:
+        name = 'blocks'
+        model = Block
+
+        permissions = station_permissions
+
+    class Schema:
+        station = fields.ToOne('stations')

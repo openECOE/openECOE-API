@@ -23,7 +23,8 @@ from .ecoe import EcoePrincipalResource
 
 class StationResource(EcoePrincipalResource):
     schedules = Relation('schedules')
-    qblocks = Relation('qblocks')
+    blocks = Relation('blocks')
+    questions = Relation('questions')
 
     class Meta:
         name = 'stations'

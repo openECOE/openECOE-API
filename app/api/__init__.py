@@ -21,15 +21,13 @@ from flask_cors import CORS
 from .area import AreaResource
 from .ecoe import EcoeResource
 from .event import EventResource
-from .option import OptionResource
 from .organization import OrganizationResource
-from .qblock import QblockResource
-from .question import QuestionResource
+from .question import QuestionResource, BlockResource
 from .schedule import ScheduleResource
 from .shift import ShiftResource
 from .stage import StageResource
 from .station import StationResource
-from .student import StudentResource
+from .student import AnswerResource, StudentResource
 from .planner import PlannerResource
 from .round import RoundResource
 from .user import UserResource, RoleResource, PermissionResource
@@ -48,9 +46,9 @@ api.add_resource(ScheduleResource)
 api.add_resource(StageResource)
 api.add_resource(RoleResource)
 api.add_resource(PermissionResource)
-api.add_resource(OptionResource)
+api.add_resource(AnswerResource)
+api.add_resource(BlockResource)
 api.add_resource(QuestionResource)
-api.add_resource(QblockResource)
 api.add_resource(AreaResource)
 api.add_resource(StudentResource)
 api.add_resource(PlannerResource)
