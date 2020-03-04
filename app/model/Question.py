@@ -20,33 +20,21 @@ import enum
 from sqlalchemy.ext.hybrid import hybrid_property
 
 
-class QType(str, enum.Enum):
-    RADIO_BUTTON = 'RB'
-    CHECK_BOX = 'CH'
-    RANGE_SELECT = 'RS'
-
-
 class Question(db.Model):
     __tablename__ = 'question'
 
     id = db.Column(db.Integer, primary_key=True)
-    reference = db.Column(db.String(100))
-    description = db.Column(db.String(500))
     id_area = db.Column(db.Integer, db.ForeignKey('area.id'), nullable=False)
-    question_type = db.Column(db.Enum(QType), nullable=False)
-
+    id_block = db.Column(db.Integer, db.ForeignKey('block.id'))
     order = db.Column(db.Integer)
 
-    options = db.relationship('Option', backref='question')
-    qblocks = db.relationship('QBlock', secondary=qblocks_questions, lazy=True, back_populates='questions')
 
-    @hybrid_property
-    def points(self):
+class Block(db.Model):
+    __tablename__ = 'block'
 
-        if self.question_type in (QType.RADIO_BUTTON, QType.RANGE_SELECT):
-            return max([opt.points for opt in self.options])
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(300))
+    id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
+    order = db.Column(db.Integer, nullable=False)
 
-        if self.question_type == QType.CHECK_BOX:
-            return sum([opt.points for opt in self.options])
-
-
+    questions = db.relationship('Question', backref='question')

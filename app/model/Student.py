@@ -35,3 +35,17 @@ class Student(db.Model):
     __table_args__ = (
         db.UniqueConstraint(name, surnames, id_ecoe, name='student_name_ecoe_uk'),
     )
+
+
+class Answer(db.Model):
+    __tablename__ = 'answer'
+
+    id = db.Column(db.Integer, primary_key=True)
+    id_student = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
+    id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
+    answer = db.Column(db.JSON)
+    points = db.Column(db.Integer)
+
+    __table_args__ = (
+        db.UniqueConstraint(id_student, id_question, name='answer_student_question_uk'),
+    )
