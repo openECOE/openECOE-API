@@ -43,7 +43,7 @@ class Answer(db.Model):
     id_student = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
     answer_schema = db.Column(db.JSON)
-    points = db.Column(db.Integer)
+    points = db.Numeric(10,2)
 
     __table_args__ = (
         db.UniqueConstraint(id_student, id_question, name='answer_student_question_uk'),
