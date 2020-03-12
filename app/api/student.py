@@ -19,6 +19,7 @@ from flask_potion.routes import Relation, ItemRoute
 
 from app.model.Student import Answer, Student
 from app.api.ecoe import EcoePrincipalResource
+from app.api.user import PrincipalResource
 
 
 class StudentResource(EcoePrincipalResource):
@@ -37,17 +38,25 @@ class StudentResource(EcoePrincipalResource):
     def get_all_answers(self, student) -> fields.List(fields.Inline(Answer)):
         return student.answers.all()
 
-class AnswerResource(EcoePrincipalResource):
+
+class AnswerResource(PrincipalResource):
 
     class Meta:
         name = 'answers'
         model = Answer
         natural_key = ('id_student', 'id_question')
 
-    # class Schema:
-    #     question = fields.ToOne('questions')
-    #     student = fields.ToOne('student')
+        permissions = {
+            'read': 'read:question',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:question'
+        }
 
+    class Schema:
+        question = fields.ToOne('questions')
+        student = fields.ToOne('students')
 
 
 @signals.before_update.connect_via(StudentResource)

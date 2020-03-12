@@ -15,7 +15,7 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import Blueprint
-from app import api_app as api
+from app import openecoe_api as api
 from flask_cors import CORS
 
 from .area import AreaResource
@@ -47,8 +47,8 @@ api.add_resource(StageResource)
 api.add_resource(RoleResource)
 api.add_resource(PermissionResource)
 api.add_resource(AnswerResource)
-api.add_resource(BlockResource)
 api.add_resource(QuestionResource)
+api.add_resource(BlockResource)
 api.add_resource(AreaResource)
 api.add_resource(StudentResource)
 api.add_resource(PlannerResource)

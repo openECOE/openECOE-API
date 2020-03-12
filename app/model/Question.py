@@ -15,6 +15,7 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app import db
+from sqlalchemy.dialects import mysql
 
 
 class Question(db.Model):
@@ -25,9 +26,9 @@ class Question(db.Model):
     id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
     order = db.Column(db.Integer, nullable=False)
     id_block = db.Column(db.Integer, db.ForeignKey('block.id'))
-    question_schema = db.Column(db.JSON, nullable=False)
+    question_schema = db.Column(mysql.LONGTEXT(), nullable=False)
 
-    answers = db.relationship('Answer', backref='answer')
+    answers = db.relationship('Answer', backref='question')
 
 
 class Block(db.Model):
@@ -38,4 +39,4 @@ class Block(db.Model):
     name = db.Column(db.String(300))
     order = db.Column(db.Integer, nullable=False)
 
-    questions = db.relationship('Question', backref='question')
+    questions = db.relationship('Question', backref='block')

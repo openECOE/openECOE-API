@@ -15,6 +15,7 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app import db
+from sqlalchemy.dialects import mysql
 
 
 class Student(db.Model):
@@ -29,7 +30,7 @@ class Student(db.Model):
 
     planner_order = db.Column(db.Integer)
 
-    answers = db.relationship('Answer', backref='answers')
+    answers = db.relationship('Answer', backref='student')
 
     __table_args__ = (
         db.UniqueConstraint(name, surnames, id_ecoe, name='student_name_ecoe_uk'),
@@ -42,8 +43,8 @@ class Answer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     id_student = db.Column(db.Integer, db.ForeignKey('student.id'), nullable=False)
     id_question = db.Column(db.Integer, db.ForeignKey('question.id'), nullable=False)
-    answer_schema = db.Column(db.JSON)
-    points = db.Numeric(10,2)
+    answer_schema = db.Column(mysql.LONGTEXT())
+    points = db.Column(db.Numeric(10,2))
 
     __table_args__ = (
         db.UniqueConstraint(id_student, id_question, name='answer_student_question_uk'),

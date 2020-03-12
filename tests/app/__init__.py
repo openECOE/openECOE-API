@@ -1,4 +1,4 @@
-#  Copyright (c) 2019 Miguel Hernandez University of Elche
+#  Copyright (c) 2020 Miguel Hernandez University of Elche
 #  This file is part of openECOE-API.
 #
 #      openECOE-API is free software: you can redistribute it and/or modify
@@ -13,7 +13,3 @@
 #
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
-
-from app import create_app
-
-app = create_app()

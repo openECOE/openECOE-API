@@ -16,7 +16,6 @@
 
 import os
 from ast import literal_eval
-basedir = os.path.abspath(os.path.dirname(__file__))
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -34,3 +33,8 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CHRONO_ROUTE = os.environ.get('CHRONO_ROUTE')
     CORS_EXPOSE_HEADERS = 'x-total-count'
+
+class TestConfig(BaseConfig):
+    """Test configuration"""
+    TESTING = True
+    DEBUG = True
