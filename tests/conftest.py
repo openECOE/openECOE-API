@@ -92,9 +92,6 @@ def make_organization():
         org = Organization()
         org.name = 'Test Organization'
 
-        db.session.add(org)
-        db.session.commit()
-
         return org
 
     return _make

@@ -16,47 +16,6 @@
 import pytest
 
 
-@pytest.mark.usefixtures('client_class')
-class Test_Create_User:
-    organization = None
-    organization_name = None
-
-    def test_create_user_with_org_id(self):
-        self.create_user(email='user_org_id@openecoe.es', organization=self.organization)
-
-    def test_create_user_with_org_name(self):
-        self.create_user(email='user_org_name@openecoe.es', organization_name=self.organization_name)
-
-    def test_create_user_admin(self):
-        self.create_user(email='admin@openecoe.es', admin=True)
-
-    def __init__(self, app, make_organization):
-        self.org = make_organization()
-        self.runner = app.test_cli_runner()
-
-        self.password = '1234'
-        self.name = 'User'
-        self.surname = 'Test'
-        self.organization = self.org.id
-        self.organization_name = self.org.name
-
-    def create_user(self, email, admin=False, organization=None, organization_name=None):
-        params = ['--email', email, '--password', self.password, '--name', self.name, '--surname', self.surname]
-
-        if organization:
-            params += ['--organization', organization]
-        elif organization_name:
-            params += ['--organization_name', organization_name]
-        else:
-            params += ['--organization', self.organization]
-
-        params += ['--admin'] if admin else []
-
-        args_ = ['create_user'] + params
-        result = self.runner.invoke(args=args_)
-        assert 'User {} created in organization {}'.format(email, self.organization) in result.output
-
-
 def test_create_orga(app):
     runner = app.test_cli_runner()
     name = 'Testing Orga'
@@ -64,3 +23,37 @@ def test_create_orga(app):
     # invoke the command directly
     result = runner.invoke(args=['create_orga', '--name', name])
     assert 'Organization {} created'.format(name) in result.output
+
+
+@pytest.mark.usefixtures('client_class')
+class TestCreateUser:
+    @pytest.fixture(autouse=True)
+    def _init_user_test(self, app, make_organization):
+        self.org = make_organization()
+        self.org.name = 'Org Create User'
+        self.runner = app.test_cli_runner()
+
+        self.email = 'user@openecoe.es'
+        self.password = '1234'
+        self.name = 'User'
+        self.surname = 'Test'
+
+    @pytest.mark.parametrize("admin", [True, False])
+    @pytest.mark.parametrize("with_org_name", [True, False])
+    def test_create_user(self, db_session, admin, with_org_name):
+        db_session.add(self.org)
+        db_session.commit()
+
+        params = ['--email', self.email, '--password', self.password, '--name', self.name, '--surname', self.surname]
+
+        if with_org_name:
+            params += ['--organization_name', self.org.name]
+        else:
+            params += ['--organization', self.org.id]
+
+        params += ['--admin'] if admin else []
+
+        args_ = ['create_user'] + params
+        result = self.runner.invoke(args=args_)
+        assert 'User {} created in organization {}'.format(self.email, self.org.id) in result.output
+

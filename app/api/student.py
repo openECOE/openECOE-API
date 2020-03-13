@@ -22,29 +22,11 @@ from app.api.ecoe import EcoePrincipalResource
 from app.api.user import PrincipalResource
 
 
-class StudentResource(EcoePrincipalResource):
-    answers = Relation('answers')
-
-    class Meta:
-        name = 'students'
-        model = Student
-        natural_key = ('name', 'surnames')
-
-    class Schema:
-        ecoe = fields.ToOne('ecoes')
-        planner = fields.ToOne('planners', nullable=True)
-
-    @ItemRoute.GET('/answers/all')
-    def get_all_answers(self, student) -> fields.List(fields.Inline(Answer)):
-        return student.answers.all()
-
-
 class AnswerResource(PrincipalResource):
 
     class Meta:
         name = 'answers'
         model = Answer
-        natural_key = ('id_student', 'id_question')
 
         permissions = {
             'read': 'read:question',
@@ -57,6 +39,22 @@ class AnswerResource(PrincipalResource):
     class Schema:
         question = fields.ToOne('questions')
         student = fields.ToOne('students')
+
+
+class StudentResource(EcoePrincipalResource):
+    answers = Relation('answers')
+
+    class Meta:
+        name = 'students'
+        model = Student
+
+    class Schema:
+        ecoe = fields.ToOne('ecoes')
+        planner = fields.ToOne('planners', nullable=True)
+
+    @ItemRoute.GET('/answers/all')
+    def get_all_answers(self, student) -> fields.List(fields.Inline(AnswerResource)):
+        return student.answers.all()
 
 
 @signals.before_update.connect_via(StudentResource)

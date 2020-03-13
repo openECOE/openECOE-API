@@ -48,10 +48,12 @@ def create_app(config_class=BaseConfig):
         openecoe_api.decorators.append(login_required)
 
     from app.auth import bp as auth_bp
-    flask_app.register_blueprint(auth_bp, url_prefix='/auth')
+    auth_bp.url_prefix = '/auth'
+    flask_app.register_blueprint(auth_bp)
 
     from app.api import bp as api_bp
-    flask_app.register_blueprint(api_bp, url_prefix='/api')
+    api_bp.url_prefix = '/api'
+    flask_app.register_blueprint(api_bp)
 
     return flask_app
 

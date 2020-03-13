@@ -27,6 +27,7 @@ station_permissions = {
             'manage': 'manage:station'
         }
 
+
 class QuestionResource(PrincipalResource):
     answers = Relation('answers')
 
@@ -40,6 +41,7 @@ class QuestionResource(PrincipalResource):
         area = fields.ToOne('areas')
         station = fields.ToOne('stations')
         block = fields.ToOne('blocks')
+
 
 class BlockResource(PrincipalResource):
     questions = Relation('questions')

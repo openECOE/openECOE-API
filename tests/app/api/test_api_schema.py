@@ -19,14 +19,15 @@ from app.api import api
 
 
 @pytest.mark.usefixtures('client_class')
-class Test_Student_Class:
-    def test_api_get(self, app):
-        response = self.client.get(api.prefix+"/students")
-        assert response.status_code == 200
+class Test_API:
+    def test_schema(self, app):
+        response = self.client.get(api.prefix + "/schema#")
+        print("Test API schema works")
+        assert response.status_code == 200, "API schema works"
+        print("key properties is present")
+        assert 'properties' in response.json.keys(), "key properties is present"
 
-
-@pytest.mark.usefixtures('client_class')
-class Test_Answer_Class:
-    def test_api_get(self):
-        response = self.client.get(api.prefix+"/answers")
-        assert response.status_code == 200
+        for key, item in response.json['properties'].items():
+            resp = self.client.get(item['$ref'])
+            print("Test %s Schema works" % key)
+            assert resp.status_code == 200
