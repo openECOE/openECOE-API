@@ -175,6 +175,10 @@ class EcoeResource(PrincipalResource):
         item = self.manager.read(id, source=Location.ARCHIVE_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
+    @ItemRoute.GET('/export', rel='exportECOEData')
+    def export_ecoe(self, ecoe):
+        return ecoe.export_data()
+
 
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)

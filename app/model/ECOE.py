@@ -23,6 +23,8 @@ from app import db
 from enum import Enum
 import base64
 import requests
+import flask_excel as excel
+
 
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
@@ -34,10 +36,12 @@ class ChronoNotFound(PageNotFound):
         dct.update(self.data)
         return dct
 
+
 class ECOEstatus(str, Enum):
     DRAFT = 'draft'
     PUBLISHED = 'published'
     ARCHIVED = 'archived'
+
 
 class ECOE(db.Model):
     __tablename__ = 'ecoe'
@@ -73,7 +77,8 @@ class ECOE(db.Model):
                     "t": ev.time,
                     "message": ev.text,
                     "sound": ev.sound,
-                    "stations": [0] + [station.id for station in self.stations] if sch.station is None else [sch.station.id],
+                    "stations": [0] + [station.id for station in self.stations] if sch.station is None else [
+                        sch.station.id],
                     "is_countdown": ev.is_countdown
                 })
 
@@ -92,12 +97,13 @@ class ECOE(db.Model):
             pass
 
         config = {
-            "ecoe": {"id":self.id,"name":self.name,"time_start":time_start.__str__()},
+            "ecoe": {"id": self.id, "name": self.name, "time_start": time_start.__str__()},
             "rounds": [{'id': r.id, 'name': r.description} for r in self.rounds],
             "rounds_id": [r.id for r in self.rounds],
             "reruns": len(self.stations) + (1 if exists_dependant else 0),
             "schedules": [
-                {'name': st.name, 'duration': st.duration, 'order': st.order, 'events': stage_events[st.id]} for st in stages
+                {'name': st.name, 'duration': st.duration, 'order': st.order, 'events': stage_events[st.id]} for st in
+                stages
             ],
             "tfc": self.chrono_token
         }
@@ -119,7 +125,8 @@ class ECOE(db.Model):
             return self.configuration
         else:
             raise BackendConflict(
-                err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text, "config": config})
+                err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text,
+                            "config": config})
 
     def delete_config(self):
         endpoint = '%s/%d' % (current_app.config['CHRONO_ROUTE'], self.id)
@@ -131,26 +138,27 @@ class ECOE(db.Model):
         if r.status_code == 200:
             self.chrono_token = None
         else:
-            raise BackendConflict(err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
+            raise BackendConflict(
+                err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
 
     def start(self):
         endpoint = 'start/%d' % self.id
         return self.__call_chrono(endpoint)
 
     def play(self, round_id=None):
-        endpoint = 'play/%d'%self.id
+        endpoint = 'play/%d' % self.id
         if round_id is not None:
             endpoint += '/' + str(round_id)
         return self.__call_chrono(endpoint)
 
     def pause(self, round_id=None):
-        endpoint = 'pause/%d'%self.id
+        endpoint = 'pause/%d' % self.id
         if round_id is not None:
             endpoint += '/' + str(round_id)
         return self.__call_chrono(endpoint)
 
     def abort(self):
-        endpoint = 'abort/%d'%self.id
+        endpoint = 'abort/%d' % self.id
         return self.__call_chrono(endpoint)
 
     def __call_chrono(self, endpoint):
@@ -168,3 +176,5 @@ class ECOE(db.Model):
         else:
             return {"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text}
 
+    def export_data(self):
+        return excel.make_response_from_tables(db.session, [ECOE], "xls", file_name="ECOE_%d" % self.id)
