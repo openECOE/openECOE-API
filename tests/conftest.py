@@ -35,11 +35,10 @@ from config import TestConfig
 from alembic.command import upgrade
 from alembic.config import Config
 
-
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 ALEMBIC_CONFIG = os.path.join(basedir, '..', 'migrations', 'alembic.ini')
 pytest_plugins = ['pytest-flask-sqlalchemy']
+
 
 def apply_migrations():
     """Applies all alembic migrations."""
@@ -184,6 +183,7 @@ def app(request):
 def _db(app, request):
     # flask_app.db.app = app
     flask_app.db.drop_all()
+    # apply_migrations()
     flask_app.db.create_all()
 
     load_data(flask_app.db)

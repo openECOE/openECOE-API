@@ -84,6 +84,7 @@ class EcoeResource(OpenECOEResource):
     students = Relation('students')
     rounds = Relation('rounds')
     shifts = Relation('shifts')
+    stages = Relation('stages')
 
     class Meta:
         manager = ArchiveManager

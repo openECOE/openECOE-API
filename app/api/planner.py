@@ -27,6 +27,14 @@ class PlannerResource(OpenECOEResource):
         name = 'planners'
         model = Planner
 
+        permissions = {
+            'read': ['read:shift', 'read:round'],
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': ['manage:shift', 'manage:round']
+        }
+
     class Schema:
         shift = fields.ToOne('shifts')
         round = fields.ToOne('rounds')

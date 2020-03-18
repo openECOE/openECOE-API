@@ -14,24 +14,18 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Stage import Stage
-from app.api._mainresource import OpenECOEResource
+from app.api.ecoe import EcoeChildResource
 
 
-class StageResource(OpenECOEResource):
-    schedules = Relation('schedules')
-
+class StageResource(EcoeChildResource):
     class Meta:
         name = 'stages'
         model = Stage
 
-        permissions = {
-            'read': 'read:schedule',
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': 'manage:schedule'
-        }
+    class Schema:
+        ecoe = fields.ToOne('ecoes')
 
 

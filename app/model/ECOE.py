@@ -59,6 +59,7 @@ class ECOE(db.Model):
     students = db.relationship('Student', backref='ecoe')
     rounds = db.relationship('Round', backref='ecoe')
     shifts = db.relationship('Shift', backref='ecoe', order_by="Shift.time_start")
+    stages = db.relationship('Stage', backref='ecoe')
 
     @property
     def configuration(self):
