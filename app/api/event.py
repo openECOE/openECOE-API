@@ -16,13 +16,21 @@
 
 from flask_potion import fields
 from app.model.Event import Event
-from app.api.user import PrincipalResource
+from app.api._mainresource import OpenECOEResource
 
 
-class EventResource(PrincipalResource):
+class EventResource(OpenECOEResource):
     class Meta:
         name = 'events'
         model = Event
+
+        permissions = {
+            'read': 'read:schedule',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:schedule'
+        }
 
     class Schema:
         schedule = fields.ToOne('schedules')

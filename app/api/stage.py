@@ -16,13 +16,22 @@
 
 from flask_potion.routes import Relation
 from app.model.Stage import Stage
-from app.api.user import PrincipalResource
+from app.api._mainresource import OpenECOEResource
 
-class StageResource(PrincipalResource):
+
+class StageResource(OpenECOEResource):
     schedules = Relation('schedules')
 
     class Meta:
         name = 'stages'
         model = Stage
+
+        permissions = {
+            'read': 'read:schedule',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:schedule'
+        }
 
 

@@ -21,12 +21,15 @@ from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
-from .user import PrincipalResource, RoleType, MainManager
+from app.api.user import RoleType
+from app.api._mainresource import OpenECOEResource, MainManager
+
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
     BOTH = 3
+
 
 class ArchiveManager(MainManager):
     def _query(self, source=Location.INSTANCES_ONLY, **kwargs):
@@ -61,8 +64,9 @@ class ArchiveManager(MainManager):
             raise ItemNotFound(self.resource, id=id)
         return self._query_filter_by_id(query, id)
 
+
 # Permissions to ECOE childs resources
-class EcoePrincipalResource(PrincipalResource):
+class EcoeChildResource(OpenECOEResource):
     class Meta:
         permissions = {
             'read': 'read:ecoe',
@@ -73,7 +77,7 @@ class EcoePrincipalResource(PrincipalResource):
         }
 
 
-class EcoeResource(PrincipalResource):
+class EcoeResource(OpenECOEResource):
     areas = Relation('areas')
     stations = Relation('stations')
     schedules = Relation('schedules')

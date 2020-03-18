@@ -17,10 +17,10 @@
 from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Schedule import Schedule
-from app.api.ecoe import EcoePrincipalResource
+from app.api.ecoe import EcoeChildResource
 
 
-class ScheduleResource(EcoePrincipalResource):
+class ScheduleResource(EcoeChildResource):
     events = Relation('events')
 
     class Meta:

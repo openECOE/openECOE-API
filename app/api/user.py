@@ -14,73 +14,17 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-
 from flask_potion import fields, signals, exceptions
 from flask_potion.routes import Route, Relation, ItemRoute
 from flask_potion.fields import Inline
-from flask import request, send_file
-from pyexcel import exceptions as pyexcel_exc
+
 from werkzeug.exceptions import Forbidden
 from datetime import datetime
 from flask_login import current_user
-from app.api import excel
+from app.api._mainresource import OpenECOEResource
+
 
 from app.model.User import User, Role, Permission, RoleType, PermissionType
-
-from flask_potion import ModelResource
-from flask_potion.contrib.alchemy import SQLAlchemyManager
-from flask_potion.contrib.principals import principals
-
-MainManager = principals(SQLAlchemyManager)
-
-
-class PrincipalResource(ModelResource):
-    @ItemRoute.GET('/permissions')
-    def item_permissions(self, item) -> fields.String():
-        object_permissions = self.manager.get_permissions_for_item(item)
-        return object_permissions
-
-    @Route.GET('/permissions')
-    def object_permissions(self) -> fields.String():
-        object_permissions = self.manager.get_permissions_for_item(self)
-        return object_permissions
-
-    _export_schema = {
-        "type":"object",
-        "properties": {
-            "file_type": {
-                "default" : "xls",
-                "type": ["string", "null"],
-                "anyOf": ['csv','tsv','csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']
-            }
-        }
-    }
-
-    @Route.GET('/export',
-               rel="exportData",
-               description="export data to file")
-    def export(self):
-        _file_type = "xls"
-        if "file_type" in request.args:
-            _file_type = request.args.get("file_type")
-
-        _query = self.manager.instances().all()
-
-        _columns = self.Meta.model.__table__.columns.keys()
-        _filename = _sheet_name = self.Meta.name
-        try:
-            _file = excel.make_response_from_query_sets(query_sets=_query, column_names=_columns,
-                                                        sheet_name=_sheet_name,
-                                                        file_name=_filename, file_type=_file_type)
-        except pyexcel_exc.FileTypeNotSupported as e:
-            raise exceptions.BadRequest(
-                description="%s File types supported ['csv','tsv','csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']" % str(e))
-        return _file
-
-    class Meta:
-        manager = MainManager
-
 
 class ForbiddenSuperadmin(Forbidden):
     description = (
@@ -89,7 +33,7 @@ class ForbiddenSuperadmin(Forbidden):
     )
 
 
-class RoleResource(PrincipalResource):
+class RoleResource(OpenECOEResource):
     @Route.GET('/types')
     def roletypes(self) -> fields.String():
         roles = []
@@ -115,7 +59,7 @@ class RoleResource(PrincipalResource):
         name = fields.String(enum=RoleType)
 
 
-class PermissionResource(PrincipalResource):
+class PermissionResource(OpenECOEResource):
     @Route.GET('/types')
     def permissiontypes(self) -> fields.String():
         permissions = []
@@ -141,7 +85,7 @@ class PermissionResource(PrincipalResource):
         name = fields.String(enum=PermissionType)
 
 
-class UserResource(PrincipalResource):
+class UserResource(OpenECOEResource):
     roles = Relation(RoleResource)
     permissions = Relation(PermissionResource)
 

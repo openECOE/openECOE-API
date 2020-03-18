@@ -19,8 +19,18 @@ from app.api import api
 
 
 @pytest.mark.usefixtures('client_class')
-class TestAPISchema:
+class TestAPI:
     def test_schema(self, app, endpoint, test_with_admin_user):
         endpoint += '/schema#'
         resp = self.client.get(endpoint)
         assert resp.status_code == 200
+
+    def test_get(self, app, endpoint, test_with_admin_user):
+        resp = self.client.get(endpoint)
+        assert resp.status_code == 200
+
+
+class TestResources:
+    def test_resource_permissions_defined(self, app, resource):
+        assert hasattr(resource.meta, "permissions"), "attribute 'permissions' in resource.meta"
+        assert 'manage' in resource.meta.permissions.keys(), "'manage' not in the permissions dict"

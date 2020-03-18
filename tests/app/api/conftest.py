@@ -16,14 +16,18 @@
 import pytest
 
 
-def endpoints():
+def resources():
     from app.api import api
-    _endpoints = []
+    return [item for key, item in api.resources.items()]
 
-    for key, item in api.resources.items():
-        _endpoints.append("api%s"%item.route_prefix)
 
-    return _endpoints
+@pytest.fixture(params=resources())
+def resource(request):
+    return request.param
+
+
+def endpoints():
+    return ["api%s"%item.route_prefix for item in resources()]
 
 
 @pytest.fixture(params=endpoints())

@@ -17,10 +17,10 @@
 from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Planner import Planner
-from app.api.user import PrincipalResource
+from app.api._mainresource import OpenECOEResource
 
 
-class PlannerResource(PrincipalResource):
+class PlannerResource(OpenECOEResource):
     students = Relation('students')
 
     class Meta:

@@ -17,10 +17,10 @@
 from flask_potion import fields
 from flask_potion.routes import Relation, ItemRoute
 from app.model.Round import Round
-from app.api.ecoe import EcoePrincipalResource
+from app.api.ecoe import EcoeChildResource
 
 
-class RoundResource(EcoePrincipalResource):
+class RoundResource(EcoeChildResource):
     planners = Relation('planners')
 
     class Meta:

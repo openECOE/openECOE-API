@@ -24,6 +24,7 @@ from enum import Enum
 import base64
 import requests
 
+
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
         self.data = kwargs
