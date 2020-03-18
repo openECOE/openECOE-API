@@ -33,7 +33,6 @@ principals = Principal()
 openecoe_api = Api()
 flask_app = Flask(__name__)
 
-
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
 

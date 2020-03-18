@@ -23,8 +23,6 @@ from app import db
 from enum import Enum
 import base64
 import requests
-import flask_excel as excel
-
 
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
@@ -175,6 +173,3 @@ class ECOE(db.Model):
                 err_chrono={"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text})
         else:
             return {"url": r.url, "status_code": r.status_code, "reason": r.reason, "text": r.text}
-
-    def export_data(self):
-        return excel.make_response_from_tables(db.session, [ECOE], "xls", file_name="ECOE_%d" % self.id)

@@ -38,3 +38,5 @@ class TestConfig(BaseConfig):
     """Test configuration"""
     TESTING = True
     DEBUG = True
+    API_AUTH = True
+    SQLALCHEMY_DATABASE_URI = "%s_test"%os.environ.get('SQLALCHEMY_DATABASE_URI')

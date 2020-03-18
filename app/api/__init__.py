@@ -17,6 +17,7 @@
 from flask import Blueprint
 from app import openecoe_api as api
 from flask_cors import CORS
+import flask_excel as excel
 
 from .area import AreaResource
 from .ecoe import EcoeResource
@@ -35,6 +36,7 @@ from .user import UserResource, RoleResource, PermissionResource
 
 bp = Blueprint('api', __name__)
 CORS(bp, expose_headers='Content-Length, X-Total-Count')
+excel.init_excel(bp)
 
 version = 'v1'
 

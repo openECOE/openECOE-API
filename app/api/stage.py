@@ -14,11 +14,11 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import ModelResource
 from flask_potion.routes import Relation
 from app.model.Stage import Stage
+from app.api.user import PrincipalResource
 
-class StageResource(ModelResource):
+class StageResource(PrincipalResource):
     schedules = Relation('schedules')
 
     class Meta:

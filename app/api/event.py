@@ -14,11 +14,12 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from app.model.Event import Event
+from app.api.user import PrincipalResource
 
 
-class EventResource(ModelResource):
+class EventResource(PrincipalResource):
     class Meta:
         name = 'events'
         model = Event

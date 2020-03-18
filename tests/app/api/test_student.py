@@ -19,14 +19,14 @@ from app.api import api
 
 
 @pytest.mark.usefixtures('client_class')
-class Test_Student_Class:
+class TestStudentClass:
     def test_api_get(self, app):
         response = self.client.get(api.prefix+"/students")
         assert response.status_code == 200
 
 
 @pytest.mark.usefixtures('client_class')
-class Test_Answer_Class:
+class TestAnswerClass:
     def test_api_get(self):
         response = self.client.get(api.prefix+"/answers")
         assert response.status_code == 200
