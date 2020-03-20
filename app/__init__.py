@@ -33,6 +33,7 @@ principals = Principal()
 openecoe_api = Api()
 flask_app = Flask(__name__)
 
+
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
 
@@ -82,7 +83,7 @@ def create_orga(name):
 @click.password_option('--password', prompt='Type password', help='User password')
 @click.option('--name', help='User name')
 @click.option('--surname', help='User suername')
-@click.option('--admin',  is_flag=True,
+@click.option('--admin', is_flag=True,
               help='Flag to indicate user is admin', )
 @click.option('--organization_name', default=None, help='Organization name, if not exists, create new organization')
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
@@ -123,7 +124,6 @@ def create_user(email, password, name, surname, admin, organization, organizatio
             user.surname = surname
 
             db.session.add(user)
-
 
             db.session.commit()
 

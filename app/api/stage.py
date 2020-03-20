@@ -15,7 +15,6 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields
-from flask_potion.routes import Relation
 from app.model.Stage import Stage
 from app.api.ecoe import EcoeChildResource
 

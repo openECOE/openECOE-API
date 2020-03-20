@@ -15,12 +15,15 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 
+from flask import request
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.exceptions import ItemNotFound, BackendConflict
+from flask_potion.exceptions import ItemNotFound, BackendConflict, BadRequest
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
+from pyexcel.exceptions import FileTypeNotSupported
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
+from app.api import excel
 from app.api.user import RoleType
 from app.api._mainresource import OpenECOEResource, MainManager
 
@@ -107,7 +110,36 @@ class EcoeResource(OpenECOEResource):
         user = fields.ToOne('users', nullable=True)
         status = fields.String(enum=ECOEstatus, io="r")
 
+    @staticmethod
+    def get_ecoe_dict(ecoe):
+        _dict_ecoe = {
+            "ecoe": [ecoe],
+            "areas": ecoe.areas,
+            "stations": ecoe.stations,
+            "schedules": ecoe.schedules
+        }
 
+        return _dict_ecoe
+
+    @ItemRoute.GET('/export',
+                   rel="exportItem",
+                   description="export all ECOE data to file")
+    def export_ecoe(self, ecoe):
+        return EcoeResource.export_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
+
+    @Route.GET('/export',
+               rel="exportEcoes",
+               description="export all ECOE data to file")
+    def export_ecoes(self):
+        _ecoes = self.manager.instances().all()
+
+        _dict = {}
+
+        for _ecoe in _ecoes:
+            _dict_ecoe = {"%s-%s"%(key, _ecoe.name):item for key, item in self.get_ecoe_dict(_ecoe).items()}
+            _dict = {**_dict, **_dict_ecoe}
+
+        return EcoeResource.export_dict(_dict, filename="All_ECOE")
 
     @ItemRoute.GET('/configuration', rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
@@ -190,6 +222,7 @@ def before_create_ecoe(sender, item):
     if not item.user:
         item.user = current_user
 
+
 # Update ECOE
 @signals.before_update.connect_via(EcoeResource)
 def before_update_ecoe(sender, item, changes):
@@ -199,7 +232,7 @@ def before_update_ecoe(sender, item, changes):
                 item.load_config()
             except ChronoNotFound:
                 pass
-        elif changes['status']  in (ECOEstatus.DRAFT, ECOEstatus.ARCHIVED):
+        elif changes['status'] in (ECOEstatus.DRAFT, ECOEstatus.ARCHIVED):
             try:
                 if item.chrono_token:
                     item.delete_config()
