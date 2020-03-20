@@ -15,15 +15,12 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 
-from flask import request
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.exceptions import ItemNotFound, BackendConflict, BadRequest
+from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
-from pyexcel.exceptions import FileTypeNotSupported
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
-from app.api import excel
 from app.api.user import RoleType
 from app.api._mainresource import OpenECOEResource, MainManager
 
@@ -116,8 +113,17 @@ class EcoeResource(OpenECOEResource):
             "ecoe": [ecoe],
             "areas": ecoe.areas,
             "stations": ecoe.stations,
-            "schedules": ecoe.schedules
+            "shifts": ecoe.shifts,
+            "rounds": ecoe.rounds,
+            "students": ecoe.students,
+            "schedules": ecoe.schedules,
+            "blocks": {}
         }
+
+        for station in ecoe.stations:
+            _dict_ecoe['blocks'] = [block for block in station.blocks]
+            _station_questions = {"questions_%s" % station.name: station.questions}
+            _dict_ecoe = {**_dict_ecoe, **_station_questions}
 
         return _dict_ecoe
 
@@ -128,7 +134,7 @@ class EcoeResource(OpenECOEResource):
         return EcoeResource.export_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
 
     @Route.GET('/export',
-               rel="exportEcoes",
+               rel="export",
                description="export all ECOE data to file")
     def export_ecoes(self):
         _ecoes = self.manager.instances().all()
@@ -136,7 +142,7 @@ class EcoeResource(OpenECOEResource):
         _dict = {}
 
         for _ecoe in _ecoes:
-            _dict_ecoe = {"%s-%s"%(key, _ecoe.name):item for key, item in self.get_ecoe_dict(_ecoe).items()}
+            _dict_ecoe = {"%s-%s" % (key, _ecoe.name): item for key, item in self.get_ecoe_dict(_ecoe).items()}
             _dict = {**_dict, **_dict_ecoe}
 
         return EcoeResource.export_dict(_dict, filename="All_ECOE")

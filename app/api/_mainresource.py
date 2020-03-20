@@ -86,15 +86,14 @@ class OpenECOEResource(ModelResource):
         return object_permissions
 
     @ItemRoute.GET('/export',
-                   rel="export",
+                   rel="exportItem",
                    description="export data to file")
     def item_export(self, item):
-        _query = [item]
-
-        _columns = self.Meta.model.__table__.columns.keys()
         _filename = self.Meta.name
 
-        return self.export_query(_query, _columns, _filename)
+        _dict = {_filename: [item]}
+
+        return self.export_dict(_dict, _filename)
 
     @Route.GET('/export',
                rel="export",
@@ -108,7 +107,6 @@ class OpenECOEResource(ModelResource):
         _dict = {_filename: _query}
 
         return self.export_dict(_dict, _filename)
-        # return self.export_query(_query, _columns, _filename)
 
     class Meta:
         manager = MainManager
