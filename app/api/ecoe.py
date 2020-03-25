@@ -15,12 +15,16 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 
+from datetime import datetime
+from flask import json
 from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
+from werkzeug.exceptions import Forbidden
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
+from app.model.Student import Answer
 from app.api.user import RoleType
 from app.api._mainresource import OpenECOEResource, MainManager
 
@@ -93,7 +97,7 @@ class EcoeResource(OpenECOEResource):
         natural_key = 'name'
 
         permissions = {
-            'read': ['manage', 'read'],
+            'read': ['manage', 'read', RoleType.EVAL],
             'create': 'update',
             'update': [RoleType.ADMIN, 'manage'],
             'delete': 'manage',
@@ -111,19 +115,32 @@ class EcoeResource(OpenECOEResource):
     def get_ecoe_dict(ecoe):
         _dict_ecoe = {
             "ecoe": [ecoe],
-            "areas": ecoe.areas,
-            "stations": ecoe.stations,
-            "shifts": ecoe.shifts,
-            "rounds": ecoe.rounds,
-            "students": ecoe.students,
-            "schedules": ecoe.schedules,
-            "blocks": {}
+            "area": ecoe.areas,
+            "station": ecoe.stations,
+            "shift": ecoe.shifts,
+            "round": ecoe.rounds,
+            "student": ecoe.students,
+            "schedule": ecoe.schedules,
+            "stages": ecoe.stages
         }
 
+        _blocks = []
         for station in ecoe.stations:
-            _dict_ecoe['blocks'] = [block for block in station.blocks]
-            _station_questions = {"questions_%s" % station.name: station.questions}
+            _blocks += station.blocks
+            _station_questions = {"station_%s-question" % station.order: station.questions}
             _dict_ecoe = {**_dict_ecoe, **_station_questions}
+
+        _dict_ecoe["block"] = _blocks
+
+        for schedule in ecoe.schedules:
+            _schedule_events = {"schedule_%s-event" % schedule.id: schedule.events}
+            _dict_ecoe = {**_dict_ecoe, **_schedule_events}
+
+        _student_answers = []
+        for student in ecoe.students:
+            _student_answers += student.answers
+
+        _dict_ecoe["answers"] = _student_answers
 
         return _dict_ecoe
 
@@ -131,21 +148,80 @@ class EcoeResource(OpenECOEResource):
                    rel="exportItem",
                    description="export all ECOE data to file")
     def export_ecoe(self, ecoe):
-        return EcoeResource.export_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
+        # Only can export if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        return EcoeResource.export_book_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
 
     @Route.GET('/export',
                rel="export",
                description="export all ECOE data to file")
     def export_ecoes(self):
+        # Only can export if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(self)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
         _ecoes = self.manager.instances().all()
 
         _dict = {}
 
         for _ecoe in _ecoes:
-            _dict_ecoe = {"%s-%s" % (key, _ecoe.name): item for key, item in self.get_ecoe_dict(_ecoe).items()}
+            _dict_ecoe = {"ecoe_%s-%s" % (_ecoe.id, key): item for key, item in self.get_ecoe_dict(_ecoe).items()}
             _dict = {**_dict, **_dict_ecoe}
 
-        return EcoeResource.export_dict(_dict, filename="All_ECOE")
+        return EcoeResource.export_book_dict(_dict, filename="ECOE")
+
+    @ItemRoute.GET('/data', rel='data')
+    def export_data(self, ecoe):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        dummy_answer = Answer(points='', answer_schema='{}')
+
+        _data = []
+
+        for student in ecoe.students:
+            _tuple = {'ecoe_name': ecoe.name,
+                      'shift_time_start': student.planner.shift.time_start,
+                      'round_description': student.planner.round.description,
+                      'student_order': student.planner_order,
+                      'student_dni': student.dni,
+                      'student_name': '%s, %s' % (student.surnames, student.name),
+                      'shift_code': student.planner.shift.shift_code,
+                      'round_code': student.planner.round.round_code}
+
+            for station in ecoe.stations:
+                _tuple = {**_tuple,
+                          'station_order': station.order,
+                          'station_name': station.name}
+
+                for question in station.questions:
+                    _tuple = {**_tuple,
+                              'question_order': question.order,
+                              'question_schema': json.loads(question.question_schema),
+                              'question_max_points': str(question.max_points),
+                              'area_code': question.area.code,
+                              'area_name': question.area.name}
+
+                    _answers = set(student.answers).intersection(question.answers)
+
+                    if len(_answers) == 0:
+                        _answers = [dummy_answer]
+
+                    for answer in _answers:
+                        _tuple = {**_tuple,
+                                  'answer_schema': json.loads(answer.answer_schema),
+                                  'answer_points': str(answer.points)}
+                        _data.append(_tuple)
+
+        return self.export_records(records=_data,
+                                   filename='opendata_%s_%s' % (ecoe.name, datetime.now().timestamp()),
+                                   filetype='csv')
 
     @ItemRoute.GET('/configuration', rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
