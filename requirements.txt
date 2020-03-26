@@ -52,3 +52,4 @@ pyexcel-xls==0.5.8
 pyexcel-xlsx==0.5.8
 pyexcel-ods==0.5.6
 pyexcel-handsontable==0.0.2
+Flask-RQ2==18.3

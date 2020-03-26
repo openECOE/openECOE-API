@@ -15,10 +15,13 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+import inspect
 
 from flask import current_app
 from app import db, bcrypt
 from flask_login import UserMixin
+
+from app.model.Job import Job
 
 import base64
 import enum
@@ -41,6 +44,7 @@ class User(UserMixin, db.Model):
     permissions = db.relationship('Permission', backref='user')
     ecoeCoordinators = db.relationship('ECOE', backref='user')
     stationManagers = db.relationship('Station', backref='user')
+    jobs = db.relationship('Job', backref='user', lazy='dynamic')
 
     def encode_password(self, password):
         self.password = bcrypt.generate_password_hash(
@@ -83,6 +87,12 @@ class User(UserMixin, db.Model):
         else:
             return None
 
+    def launch_job(self, func, description, *args, **kwargs):
+        _rq_job = func.queue(*args, **kwargs)
+        _job = Job(id=_rq_job.get_id(), name=func.__name__, description=description, user_id=self.id)
+        db.session.add(_job)
+        db.session.commit()
+        return _job
 
 class RoleType(str, enum.Enum):
     SUPERADMIN = 'superadmin'

@@ -105,7 +105,7 @@ class UserResource(OpenECOEResource):
     class Schema:
         organization = fields.ToOne('organizations')
 
-    @Route.GET
+    @Route.GET('/me')
     def me(self):
         if not current_user.is_authenticated:
             return None, 401

@@ -22,6 +22,7 @@ from flask_login import LoginManager, login_required
 from flask_principal import Principal
 from flask_potion import Api
 from flask_cors import CORS
+from flask_rq2 import RQ
 from config import BaseConfig
 import click
 
@@ -31,6 +32,7 @@ login_manager = LoginManager()
 bcrypt = Bcrypt()
 principals = Principal()
 openecoe_api = Api()
+rq = RQ()
 flask_app = Flask(__name__)
 
 
@@ -42,6 +44,7 @@ def create_app(config_class=BaseConfig):
     login_manager.init_app(flask_app)
     bcrypt.init_app(flask_app)
     principals.init_app(flask_app)
+    rq.init_app(flask_app)
     CORS(flask_app)
 
     if flask_app.config.get('API_AUTH'):
@@ -140,3 +143,10 @@ def create_user(email, password, name, surname, admin, organization, organizatio
 @flask_app.shell_context_processor
 def make_shell_context():
     return {'db': db}
+
+
+@flask_app.cli.command('run_worker')
+def run_worker():
+    # Creates a worker that handle jobs in ``default`` queue.
+    default_worker = rq.get_worker()
+    default_worker.work(burst=True)

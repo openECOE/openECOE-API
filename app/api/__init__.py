@@ -33,6 +33,8 @@ from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource, RoleResource, PermissionResource
 
+from app.api import export
+
 
 bp = Blueprint('api', __name__)
 CORS(bp, expose_headers='Content-Length, X-Total-Count')

@@ -27,3 +27,4 @@ from app.model.Student import Answer, Student
 from app.model.User import User
 from app.model.Round import Round
 from app.model.Planner import Planner
+from app.model.Job import Job

@@ -35,6 +35,7 @@ class BaseConfig:
     CORS_EXPOSE_HEADERS = 'x-total-count'
     EXPORT_FILE_TYPES = ['csv', 'tsv', 'csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']
     DEFAULT_EXPORT_FILE_TYPE = 'csv'
+    DEFAULT_ARCHIVE_ROUTE = 'archive'
 
 
 class TestConfig(BaseConfig):
