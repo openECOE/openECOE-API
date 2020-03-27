@@ -181,7 +181,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
 
         _job = current_user.launch_job(func=jobs_ecoe.export_data,
-                                       description='Export opendata - %s' % ecoe.name,
+                                       description='Export %s opendata' % ecoe.name,
                                        id_ecoe=ecoe.id)
 
         return "ok", 200

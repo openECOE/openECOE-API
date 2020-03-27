@@ -15,8 +15,18 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import Blueprint
+from flask_login import LoginManager
+from flask_principal import Principal
+
+from app import flask_app
+
+login_manager = LoginManager()
+principals = Principal()
 
 bp = Blueprint('auth', __name__)
+
+login_manager.init_app(flask_app)
+principals.init_app(flask_app)
 
 from . import auth
 from . import tokens

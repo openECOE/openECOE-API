@@ -37,6 +37,10 @@ class BaseConfig:
     DEFAULT_EXPORT_FILE_TYPE = 'csv'
     DEFAULT_ARCHIVE_ROUTE = 'archive'
 
+    """Redis configuration"""
+    RQ_DEFAULT_QUEUE = 'openecoe_jobs'
+    RQ_QUEUES = ['openecoe_jobs']
+
 
 class TestConfig(BaseConfig):
     """Test configuration"""

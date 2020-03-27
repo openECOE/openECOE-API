@@ -14,7 +14,7 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import db
+from app.model import db
 
 
 class Schedule(db.Model):

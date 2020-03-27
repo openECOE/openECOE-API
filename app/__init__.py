@@ -15,40 +15,17 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import Flask, current_app
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager, login_required
-from flask_principal import Principal
-from flask_potion import Api
 from flask_cors import CORS
-from flask_rq2 import RQ
 from config import BaseConfig
 import click
 
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-bcrypt = Bcrypt()
-principals = Principal()
-openecoe_api = Api()
-rq = RQ()
 flask_app = Flask(__name__)
+flask_app.config.from_object(BaseConfig)
 
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
-
-    db.init_app(flask_app)
-    migrate.init_app(flask_app, db)
-    login_manager.init_app(flask_app)
-    bcrypt.init_app(flask_app)
-    principals.init_app(flask_app)
-    rq.init_app(flask_app)
     CORS(flask_app)
-
-    if flask_app.config.get('API_AUTH'):
-        openecoe_api.decorators.append(login_required)
 
     from app.auth import bp as auth_bp
     auth_bp.url_prefix = '/auth'
@@ -66,6 +43,7 @@ def create_app(config_class=BaseConfig):
 def create_orga(name):
     with current_app.app_context():
         from app.api.organization import Organization
+        from app.model import db
 
         if Organization.query.filter_by(name=name).first():
             click.echo('Organization {} not created because exists'.format(name))
@@ -92,6 +70,8 @@ def create_orga(name):
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
 def create_user(email, password, name, surname, admin, organization, organization_name):
     with flask_app.app_context():
+        from app.model import db
+
         from app.api.user import User, Role, RoleType
         from app.api.organization import Organization
         from datetime import datetime
@@ -140,13 +120,6 @@ def create_user(email, password, name, surname, admin, organization, organizatio
             click.echo('User {} created in organization {}'.format(email, organization))
 
 
-@flask_app.shell_context_processor
-def make_shell_context():
-    return {'db': db}
-
-
-@flask_app.cli.command('run_worker')
-def run_worker():
-    # Creates a worker that handle jobs in ``default`` queue.
-    default_worker = rq.get_worker()
-    default_worker.work(burst=True)
+# @flask_app.shell_context_processor
+# def make_shell_context():
+#     return {'db': db}

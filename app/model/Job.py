@@ -14,15 +14,19 @@
 #       You should have received a copy of the GNU General Public License
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import db, rq
+from app.model import db
+from app.jobs import rq
+from sqlalchemy.sql import func
 
 
 class Job(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     complete = db.Column(db.Boolean, default=False)
+    created = db.Column(db.DateTime, server_default=func.now())
+    finished = db.Column(db.DateTime, nullable=True)
 
     def get_rq_job(self):
         try:

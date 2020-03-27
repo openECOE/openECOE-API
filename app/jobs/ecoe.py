@@ -16,12 +16,10 @@
 
 # Creates a worker that handle jobs in ``default`` queue.
 from flask import current_app, json
-
-from app import rq
-from app.jobs._job import set_job_progress
+from app.jobs import rq
 
 
-@rq.job
+@rq.job(ttl=300)
 def export_data(id_ecoe):
     from zipfile import ZipFile, ZIP_DEFLATED
     import datetime
@@ -40,9 +38,9 @@ def export_data(id_ecoe):
     _count_questions = sum([len(station.questions) for station in _ecoe.stations])
 
     _count_total = _count_students * _count_questions
-
     _count = 0
-    set_job_progress(0)
+
+    rq.set_task_progress(0)
     for student in _ecoe.students:
         _tuple = {'ecoe_name': _ecoe.name,
                   'shift_time_start': student.planner.shift.time_start,
@@ -78,22 +76,24 @@ def export_data(id_ecoe):
                     _data.append(_tuple)
 
                     _count += 1
-                    set_job_progress(100* _count // _count_total)
+                    rq.set_task_progress(round(100 * _count // _count_total))
 
     _filename = 'opendata_%s_%s' % (_ecoe.name, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
     _filetype = 'csv'
 
-    _saveroute = current_app.config.get("DEFAULT_ARCHIVE_ROUTE")
-
     _file = export.records(_records=_data,
                            filename=_filename,
-                           filetype='csv')
+                           filetype=_filetype)
 
-    with open('%s.%s' % (_filename, _filetype), 'wb') as f:
+    _saveroute = os.path.join(os.path.dirname(current_app.instance_path),
+                              current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
+                              _filename)
+
+    with open('%s.%s' % (_saveroute, _filetype), 'wb') as f:
         f.write(_file.data)
         f.flush()
 
-        with ZipFile('%s/%s.zip' % (_saveroute, _filename), "w") as zf:
+        with ZipFile('%s.zip' % _saveroute, "w") as zf:
             zf.write(f.name, compress_type=ZIP_DEFLATED, )
             zf.close()
         f.close()

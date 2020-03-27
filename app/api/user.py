@@ -26,6 +26,7 @@ from app.api._mainresource import OpenECOEResource
 
 from app.model.User import User, Role, Permission, RoleType, PermissionType
 
+
 class ForbiddenSuperadmin(Forbidden):
     description = (
         'You don\'t have the permission to change superadmin permissions. '

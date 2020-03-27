@@ -18,7 +18,7 @@ import os
 
 from flask import current_app
 from flask_potion.exceptions import BackendConflict, PageNotFound
-from app import db
+from app.model import db
 
 from enum import Enum
 import base64

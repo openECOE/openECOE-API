@@ -15,10 +15,9 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import inspect
 
 from flask import current_app
-from app import db, bcrypt
+from app.model import db, bcrypt
 from flask_login import UserMixin
 
 from app.model.Job import Job
@@ -93,6 +92,7 @@ class User(UserMixin, db.Model):
         db.session.add(_job)
         db.session.commit()
         return _job
+
 
 class RoleType(str, enum.Enum):
     SUPERADMIN = 'superadmin'
