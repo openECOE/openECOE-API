@@ -84,11 +84,11 @@ def upgrade():
         type_ = question_type_dict[r['question_type']]
 
         if type_ == 'radio':
-            option_selected = {'id_option': r['id_opt']}
+            option_selected = {'id_option': int(r['id_opt'])}
         elif type_ == 'range':
-            option_selected = r['opt_order']
+            option_selected = int(r['opt_order'])
         else:
-            option_selected = [{'id_option': o}
+            option_selected = [{'id_option': int(o)}
                                for o in r['id_opt'].split(',')]
 
         answer_schema_ = {"type": type_,
@@ -275,7 +275,7 @@ def downgrade():
 
         if question_schema_["type"] == 'range':
             for v in range(1, question_schema_["range"] + 1):
-                points_ = (round(float(question_schema_["points"]), 2) / question_schema_["range"]) * v
+                points_ = (round(float(question_schema_["max_points"]), 2) / question_schema_["range"]) * v
                 options_range_.append({"points": points_, "label": str(v), "id_question": id_question_, "order": v})
         else:
             for o in question_schema_["options"]:

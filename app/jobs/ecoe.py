@@ -28,7 +28,18 @@ def export_data(id_ecoe):
     from app.model.ECOE import ECOE
     import app.api.export as export
 
-    dummy_answer = Answer(points='', answer_schema='{}')
+    def clean_html(text):
+        """Remove html tags from a string"""
+        import re
+        """First replace <br> with spaces"""
+
+        br_space = re.compile('<?br.*?>')
+        clean = re.compile('<.*?>')
+
+        text = re.sub(br_space, ' ', text)
+        return re.sub(clean, '', text)
+
+    dummy_answer = Answer(points='0.00', answer_schema='{}')
 
     _ecoe = ECOE.query.get(id_ecoe)
 
@@ -47,7 +58,8 @@ def export_data(id_ecoe):
                   'round_description': student.planner.round.description,
                   'student_order': student.planner_order,
                   'student_dni': student.dni,
-                  'student_name': '%s, %s' % (student.surnames, student.name),
+                  'student_name': student.name,
+                  'student_surnames': student.surnames,
                   'shift_code': student.planner.shift.shift_code,
                   'round_code': student.planner.round.round_code}
 
@@ -57,12 +69,20 @@ def export_data(id_ecoe):
                       'station_name': station.name}
 
             for question in station.questions:
+                _question = json.loads(question.question_schema)
+
                 _tuple = {**_tuple,
                           'question_order': question.order,
-                          'question_schema': json.loads(question.question_schema),
+                          'question_type': _question['type'],
+                          'question_description': clean_html(_question['description']),
+                          'question_reference': clean_html(_question['reference']),
                           'question_max_points': str(question.max_points),
                           'area_code': question.area.code,
                           'area_name': question.area.name}
+
+                # for idx, option in  _question['options'].items():
+                #     _tuple = {**_tuple,
+                #               'question_option_%d_' % idx: }
 
                 _answers = set(student.answers).intersection(question.answers)
 
@@ -70,9 +90,30 @@ def export_data(id_ecoe):
                     _answers = [dummy_answer]
 
                 for answer in _answers:
+                    def search_in_options(list_options, id_option):
+                        for option in list_options:
+                            if str(option['id_option']) == str(id_option):
+                                return clean_html(option['label'])
+                        return ''
+
+                    _answer = json.loads(answer.answer_schema)
+                    _answers_list = []
+
+                    if 'selected' in _answer:
+                        if isinstance(_answer['selected'], list):
+                            for option_selected in _answer['selected']:
+                                _answers_list.append(search_in_options(_question['options'],
+                                                                       option_selected['id_option']))
+                        elif isinstance(_answer['selected'], dict):
+                            _answers_list.append(search_in_options(_question['options'],
+                                                                   _answer['selected']['id_option']))
+                        elif isinstance(_answer['selected'], int):
+                            _answers_list.append(str(_answer['selected']))
+
                     _tuple = {**_tuple,
-                              'answer_schema': json.loads(answer.answer_schema),
-                              'answer_points': str(answer.points)}
+                              'answer_points': str(answer.points),
+                              'answer_selected': " # ".join(_answers_list)}
+
                     _data.append(_tuple)
 
                     _count += 1
@@ -85,16 +126,16 @@ def export_data(id_ecoe):
                            filename=_filename,
                            filetype=_filetype)
 
-    _saveroute = os.path.join(os.path.dirname(current_app.instance_path),
-                              current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
-                              _filename)
+    _archiveroute = os.path.join(os.path.dirname(current_app.instance_path),
+                                 current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
+                                 _filename)
 
-    with open('%s.%s' % (_saveroute, _filetype), 'wb') as f:
+    with open('%s.%s' % (_archiveroute, _filetype), 'wb') as f:
         f.write(_file.data)
         f.flush()
 
-        with ZipFile('%s.zip' % _saveroute, "w") as zf:
-            zf.write(f.name, compress_type=ZIP_DEFLATED, )
+        with ZipFile('%s.zip' % _archiveroute, "w") as zf:
+            zf.write(f.name, arcname='%s.%s' % (_filename, _filetype), compress_type=ZIP_DEFLATED)
             zf.close()
         f.close()
         os.remove(f.name)

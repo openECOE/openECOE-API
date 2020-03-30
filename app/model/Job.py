@@ -28,7 +28,7 @@ class Job(db.Model):
     created = db.Column(db.DateTime, server_default=func.now())
     finished = db.Column(db.DateTime, nullable=True)
 
-    def get_rq_job(self):
+    def rq_job(self):
         try:
             _q = rq.get_queue()
             _rq_job = _q.fetch_job(self.id)
@@ -36,6 +36,13 @@ class Job(db.Model):
             return None
         return _rq_job
 
-    def get_progress(self):
-        job = self.get_rq_job()
-        return job.meta.get('progress', 0) if job is not None else 100
+    @property
+    def progress(self):
+        _job = self.rq_job()
+
+        if _job is not None:
+            _progress = _job.meta.get('progress', 0)
+        else:
+            _progress = 100
+
+        return _progress

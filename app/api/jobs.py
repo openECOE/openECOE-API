@@ -13,23 +13,28 @@
 #
 #       You should have received a copy of the GNU General Public License
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
-import pytest
+
+from app.api._mainresource import OpenECOEResource
+from app.model.Job import Job
+from app.model.User import RoleType
+
+from flask_potion import fields
 
 
-def resources():
-    from app.api import api
-    return [item for key, item in api.resources.items()]
+class JobResource(OpenECOEResource):
+    class Meta:
+        name = 'jobs'
+        model = Job
+        id_field_class = fields.String
 
+        permissions = {
+            'read': 'manage',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': ['manage', RoleType.ADMIN, 'user:user']
+        }
 
-@pytest.fixture(params=resources())
-def resource(request):
-    return request.param
-
-
-def endpoints():
-    return ["api%s" % item.route_prefix for item in resources()]
-
-
-@pytest.fixture(params=endpoints())
-def endpoint(request):
-    return request.param
+    class Schema:
+        user = fields.ToOne('users')
+        progress = fields.Number()

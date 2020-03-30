@@ -34,6 +34,7 @@ from app.api.student import AnswerResource, StudentResource
 from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource, RoleResource, PermissionResource
+from app.api.jobs import JobResource
 
 from app.api import export
 
@@ -67,6 +68,7 @@ api.add_resource(RoundResource)
 api.add_resource(ShiftResource)
 api.add_resource(StationResource)
 api.add_resource(EcoeResource)
+api.add_resource(JobResource)
 api.add_resource(UserResource)
 api.add_resource(OrganizationResource)
 

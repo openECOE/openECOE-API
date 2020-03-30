@@ -89,6 +89,7 @@ class PermissionResource(OpenECOEResource):
 class UserResource(OpenECOEResource):
     roles = Relation(RoleResource)
     permissions = Relation(PermissionResource)
+    jobs = Relation('jobs')
 
     class Meta:
         name = 'users'
