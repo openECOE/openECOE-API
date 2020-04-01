@@ -24,6 +24,7 @@ from flask_potion.routes import Relation, ItemRoute, Route
 from werkzeug.exceptions import Forbidden
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
 from app.api.user import RoleType
+from app.api.jobs import JobResource
 from app.api._mainresource import OpenECOEResource, MainManager
 from app.api import export
 
@@ -173,8 +174,17 @@ class EcoeResource(OpenECOEResource):
 
         return export.book_dict(_dict, filename="ECOE")
 
-    @ItemRoute.GET('/data', rel='data')
-    def get_data(self, ecoe):
+    @ItemRoute.GET('/opendata', rel='getOpenDataJobs')
+    def get_opendata(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        return current_user.jobs.filter_by(name='app.jobs.ecoe.export_data(id_ecoe=%s)' % ecoe.id)
+
+    @ItemRoute.POST('/opendata', rel='generateOpenData')
+    def gen_opendata(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if 'manage' in object_permissions and object_permissions['manage'] is not True:
@@ -184,7 +194,7 @@ class EcoeResource(OpenECOEResource):
                                        description='Export %s opendata' % ecoe.name,
                                        id_ecoe=ecoe.id)
 
-        return "ok", 200
+        return _job
 
     @ItemRoute.GET('/configuration', rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

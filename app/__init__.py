@@ -14,6 +14,9 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 from flask import Flask, current_app
 from flask_cors import CORS
 from config import BaseConfig
@@ -34,6 +37,25 @@ def create_app(config_class=BaseConfig):
     from app.api import bp as api_bp
     api_bp.url_prefix = '/api'
     flask_app.register_blueprint(api_bp)
+
+    if not flask_app.debug and not flask_app.testing:
+        if flask_app.config['LOG_TO_STDOUT']:
+            stream_handler = logging.StreamHandler()
+            stream_handler.setLevel(logging.INFO)
+            flask_app.logger.addHandler(stream_handler)
+        else:
+            if not os.path.exists('logs'):
+                os.mkdir('logs')
+            file_handler = RotatingFileHandler('logs/openecoe-api.log',
+                                               maxBytes=10240, backupCount=10)
+            file_handler.setFormatter(logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s '
+                '[in %(pathname)s:%(lineno)d]'))
+            file_handler.setLevel(logging.INFO)
+            flask_app.logger.addHandler(file_handler)
+
+        flask_app.logger.setLevel(logging.INFO)
+        flask_app.logger.info('openECOE-API startup')
 
     return flask_app
 
@@ -118,8 +140,3 @@ def create_user(email, password, name, surname, admin, organization, organizatio
                 db.session.commit()
 
             click.echo('User {} created in organization {}'.format(email, organization))
-
-
-# @flask_app.shell_context_processor
-# def make_shell_context():
-#     return {'db': db}

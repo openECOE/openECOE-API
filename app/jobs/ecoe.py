@@ -15,29 +15,33 @@
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 # Creates a worker that handle jobs in ``default`` queue.
-from flask import current_app, json
+import sys
+import datetime
+import os
+
+from flask import current_app, json, url_for
 from app.jobs import rq
 
 
-@rq.job(ttl=300)
+def clean_html(text):
+    """Remove html tags from a string"""
+    import re
+    """First replace <br> with spaces"""
+
+    br_space = re.compile('<?br.*?>')
+    clean = re.compile('<.*?>')
+
+    text = re.sub(br_space, ' ', text)
+    return re.sub(clean, '', text)
+
+
+@rq.job(timeout=300)
 def export_data(id_ecoe):
     from zipfile import ZipFile, ZIP_DEFLATED
-    import datetime
-    import os
     from app.model.Student import Answer
     from app.model.ECOE import ECOE
     import app.api.export as export
 
-    def clean_html(text):
-        """Remove html tags from a string"""
-        import re
-        """First replace <br> with spaces"""
-
-        br_space = re.compile('<?br.*?>')
-        clean = re.compile('<.*?>')
-
-        text = re.sub(br_space, ' ', text)
-        return re.sub(clean, '', text)
 
     dummy_answer = Answer(points='0.00', answer_schema='{}')
 
@@ -80,10 +84,6 @@ def export_data(id_ecoe):
                           'area_code': question.area.code,
                           'area_name': question.area.name}
 
-                # for idx, option in  _question['options'].items():
-                #     _tuple = {**_tuple,
-                #               'question_option_%d_' % idx: }
-
                 _answers = set(student.answers).intersection(question.answers)
 
                 if len(_answers) == 0:
@@ -117,7 +117,7 @@ def export_data(id_ecoe):
                     _data.append(_tuple)
 
                     _count += 1
-                    rq.set_task_progress(round(100 * _count // _count_total))
+                    rq.set_task_progress(round(99 * _count // _count_total))
 
     _filename = 'opendata_%s_%s' % (_ecoe.name, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
     _filetype = 'csv'
@@ -139,5 +139,5 @@ def export_data(id_ecoe):
             zf.close()
         f.close()
         os.remove(f.name)
+        rq.finish_job(file='%s.zip' % _filename)
 
-    return _file

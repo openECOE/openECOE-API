@@ -38,31 +38,26 @@ class OpenECOEQueue(RQ):
 
     @staticmethod
     def set_task_progress(progress):
-        from app.model import Job
-        from app.model import db
         _task = get_current_job()
         if _task:
             _task.meta['progress'] = progress
             _task.save_meta()
             # task.user.add_notification('task_progress', {'task_id': job.get_id(),
             #                                              'progress': progress})
-            if progress >= 100:
-                task = Job.query.get(_task.get_id())
-                if task:
-                    task.complete = True
-                    task.finished = datetime.now()
-                    db.session.commit()
 
-    # @staticmethod
-    # def enqueue(fx, *argv, **kwargs):
-    #     job = execute.queue(fx, *argv, **kwargs)
-    #     log.info("job %s enqueued in default RedisQueue" % job.id)
-    #     return job
-    #
-    # def later(self, fx, *argv, **kwargs):
-    #     job = execute.schedule(HEAVY_TASK_RETRY_DELAY, fx, *argv, **kwargs)
-    #     log.info("job %s scheduled in default RedisQueue" % job.id)
-    #     return job
+    @staticmethod
+    def finish_job(file=None):
+        from app.model import Job
+        from app.model import db
+        OpenECOEQueue.set_task_progress(100)
+        _task = get_current_job()
+        task = Job.query.get(_task.get_id())
+        if task:
+            task.complete = True
+            task.finished = datetime.now()
+            if file:
+                task.file = file
+            db.session.commit()
 
 
 rq = OpenECOEQueue(flask_app)
@@ -79,13 +74,13 @@ def failed_job(job, *exc_info):
         job.meta[rq.TASK_RETRY] = fail_count
         job.save_meta()
         job.requeue()
-        log.info("failed job %s scheduled for retry %d/%d" % (job.id, fail_count, rq.TASK_MAX_TRIES))
+        flask_app.logger.info("failed job %s scheduled for retry %d/%d" % (job.id, fail_count, rq.TASK_MAX_TRIES))
 
     else:
 
         job.meta[rq.TASK_RETRY] = 0
         job.save_meta()
-        log.error("job %s failed permanently" % job.id)
+        flask_app.logger.error("job %s failed permanently" % job.id)
 
 
 if __name__ == '__main__':

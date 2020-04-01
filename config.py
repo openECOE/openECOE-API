@@ -28,6 +28,7 @@ class BaseConfig:
     BCRYPT_LOG_ROUNDS = literal_eval(os.environ.get('BCRYPT_LOG_ROUNDS'))
     DEBUG = literal_eval(os.environ.get('DEBUG'))
     TESTING = literal_eval(os.environ.get('TESTING'))
+    LOG_TO_STDOUT = literal_eval(os.environ.get('LOG_TO_STDOUT'))
     SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'))
     API_AUTH = literal_eval(os.environ.get('API_AUTH'))
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')

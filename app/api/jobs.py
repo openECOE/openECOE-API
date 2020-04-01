@@ -13,12 +13,17 @@
 #
 #       You should have received a copy of the GNU General Public License
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
+import os
+
+from flask import send_from_directory, current_app
 
 from app.api._mainresource import OpenECOEResource
 from app.model.Job import Job
 from app.model.User import RoleType
 
-from flask_potion import fields
+from flask_potion import fields, signals
+from flask_potion.routes import ItemRoute
+from flask_potion.exceptions import NotFound
 
 
 class JobResource(OpenECOEResource):
@@ -35,6 +40,25 @@ class JobResource(OpenECOEResource):
             'manage': ['manage', RoleType.ADMIN, 'user:user']
         }
 
+        read_only_fields = ['name', 'file', 'created', 'finished', 'complete']
+
     class Schema:
         user = fields.ToOne('users')
         progress = fields.Number()
+
+    @ItemRoute.GET('/download')
+    def get_file(self, job):
+        if not job.file:
+            raise NotFound(description='Not file for this job yet')
+
+        _archiveroute = os.path.join(os.path.dirname(current_app.instance_path),
+                                     current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+
+        return send_from_directory(directory=_archiveroute,
+                                   filename=job.file,
+                                   as_attachment=True)
+
+
+@signals.after_delete.connect_via(JobResource)
+def after_delete_job(sender, item):
+    item.del_job_file()
