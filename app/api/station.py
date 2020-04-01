@@ -18,10 +18,10 @@ from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.model.Station import Station
-from .ecoe import EcoePrincipalResource
+from .ecoe import EcoeChildResource
 
 
-class StationResource(EcoePrincipalResource):
+class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
     blocks = Relation('blocks')
     questions = Relation('questions')

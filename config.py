@@ -33,8 +33,13 @@ class BaseConfig:
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CHRONO_ROUTE = os.environ.get('CHRONO_ROUTE')
     CORS_EXPOSE_HEADERS = 'x-total-count'
+    EXPORT_FILE_TYPES = ['csv', 'tsv', 'csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']
+    DEFAULT_EXPORT_FILE_TYPE = 'csv'
+
 
 class TestConfig(BaseConfig):
     """Test configuration"""
     TESTING = True
     DEBUG = True
+    API_AUTH = True
+    SQLALCHEMY_DATABASE_URI = "%s_test"%os.environ.get('SQLALCHEMY_DATABASE_URI')

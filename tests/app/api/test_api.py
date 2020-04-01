@@ -19,15 +19,18 @@ from app.api import api
 
 
 @pytest.mark.usefixtures('client_class')
-class Test_API:
-    def test_schema(self, app):
-        response = self.client.get(api.prefix + "/schema#")
-        print("Test API schema works")
-        assert response.status_code == 200, "API schema works"
-        print("key properties is present")
-        assert 'properties' in response.json.keys(), "key properties is present"
+class TestAPI:
+    def test_schema(self, app, endpoint, test_with_admin_user):
+        endpoint += '/schema#'
+        resp = self.client.get(endpoint)
+        assert resp.status_code == 200
 
-        for key, item in response.json['properties'].items():
-            resp = self.client.get(item['$ref'])
-            print("Test %s Schema works" % key)
-            assert resp.status_code == 200
+    def test_get(self, app, endpoint, test_with_admin_user):
+        resp = self.client.get(endpoint)
+        assert resp.status_code == 200
+
+
+class TestResources:
+    def test_resource_permissions_defined(self, app, resource):
+        assert hasattr(resource.meta, "permissions"), "attribute 'permissions' in resource.meta"
+        assert 'manage' in resource.meta.permissions.keys(), "'manage' not in the permissions dict"

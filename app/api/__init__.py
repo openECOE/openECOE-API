@@ -17,24 +17,26 @@
 from flask import Blueprint
 from app import openecoe_api as api
 from flask_cors import CORS
+import flask_excel as excel
 
-from .area import AreaResource
-from .ecoe import EcoeResource
-from .event import EventResource
-from .organization import OrganizationResource
-from .question import QuestionResource, BlockResource
-from .schedule import ScheduleResource
-from .shift import ShiftResource
-from .stage import StageResource
-from .station import StationResource
-from .student import AnswerResource, StudentResource
-from .planner import PlannerResource
-from .round import RoundResource
-from .user import UserResource, RoleResource, PermissionResource
+from app.api.area import AreaResource
+from app.api.ecoe import EcoeResource
+from app.api.event import EventResource
+from app.api.organization import OrganizationResource
+from app.api.question import QuestionResource, BlockResource
+from app.api.schedule import ScheduleResource
+from app.api.shift import ShiftResource
+from app.api.stage import StageResource
+from app.api.station import StationResource
+from app.api.student import AnswerResource, StudentResource
+from app.api.planner import PlannerResource
+from app.api.round import RoundResource
+from app.api.user import UserResource, RoleResource, PermissionResource
 
 
 bp = Blueprint('api', __name__)
 CORS(bp, expose_headers='Content-Length, X-Total-Count')
+excel.init_excel(bp)
 
 version = 'v1'
 

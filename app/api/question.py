@@ -17,7 +17,7 @@
 from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Question import Block, Question
-from .user import PrincipalResource
+from app.api._mainresource import OpenECOEResource
 
 station_permissions = {
             'read': 'read:station',
@@ -28,7 +28,7 @@ station_permissions = {
         }
 
 
-class QuestionResource(PrincipalResource):
+class QuestionResource(OpenECOEResource):
     answers = Relation('answers')
 
     class Meta:
@@ -43,7 +43,7 @@ class QuestionResource(PrincipalResource):
         block = fields.ToOne('blocks')
 
 
-class BlockResource(PrincipalResource):
+class BlockResource(OpenECOEResource):
     questions = Relation('questions')
 
     class Meta:

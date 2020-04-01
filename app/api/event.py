@@ -14,14 +14,23 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from app.model.Event import Event
+from app.api._mainresource import OpenECOEResource
 
 
-class EventResource(ModelResource):
+class EventResource(OpenECOEResource):
     class Meta:
         name = 'events'
         model = Event
+
+        permissions = {
+            'read': 'read:schedule',
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': 'manage:schedule'
+        }
 
     class Schema:
         schedule = fields.ToOne('schedules')

@@ -14,13 +14,13 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Area import Area
-from .ecoe import EcoePrincipalResource
+from .ecoe import EcoeChildResource
 
 
-class AreaResource(EcoePrincipalResource):
+class AreaResource(EcoeChildResource):
     questions = Relation('questions')
 
     class Meta:

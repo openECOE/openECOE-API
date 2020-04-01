@@ -18,11 +18,11 @@ from flask_potion import fields, signals
 from flask_potion.routes import Relation, ItemRoute
 
 from app.model.Student import Answer, Student
-from app.api.ecoe import EcoePrincipalResource
-from app.api.user import PrincipalResource
+from app.api.ecoe import EcoeChildResource
+from app.api._mainresource import OpenECOEResource
 
 
-class AnswerResource(PrincipalResource):
+class AnswerResource(OpenECOEResource):
 
     class Meta:
         name = 'answers'
@@ -41,7 +41,7 @@ class AnswerResource(PrincipalResource):
         student = fields.ToOne('students')
 
 
-class StudentResource(EcoePrincipalResource):
+class StudentResource(EcoeChildResource):
     answers = Relation('answers')
 
     class Meta:

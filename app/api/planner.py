@@ -14,17 +14,26 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import ModelResource, fields
+from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Planner import Planner
+from app.api._mainresource import OpenECOEResource
 
 
-class PlannerResource(ModelResource):
+class PlannerResource(OpenECOEResource):
     students = Relation('students')
 
     class Meta:
         name = 'planners'
         model = Planner
+
+        permissions = {
+            'read': ['read:shift', 'read:round'],
+            'create': 'manage',
+            'update': 'manage',
+            'delete': 'manage',
+            'manage': ['manage:shift', 'manage:round']
+        }
 
     class Schema:
         shift = fields.ToOne('shifts')

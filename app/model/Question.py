@@ -27,6 +27,7 @@ class Question(db.Model):
     order = db.Column(db.Integer, nullable=False)
     id_block = db.Column(db.Integer, db.ForeignKey('block.id'))
     question_schema = db.Column(mysql.LONGTEXT(), nullable=False)
+    max_points = db.Column(db.DECIMAL(precision=10, scale=2), nullable=False)
 
     answers = db.relationship('Answer', backref='question')
 
