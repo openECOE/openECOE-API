@@ -197,7 +197,7 @@ def _db(app, request):
 
 @pytest.fixture()
 def test_with_admin_user(app):
-    from app import login_manager
+    from app.auth import login_manager
     from app.model.User import User
 
     @login_manager.request_loader
@@ -208,7 +208,7 @@ def test_with_admin_user(app):
 @pytest.fixture
 def make_organization():
     from app.model.Organization import Organization
-    from app import db
+    from app.model import db
 
     def _make():
         org = Organization()

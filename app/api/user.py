@@ -25,6 +25,8 @@ from app.api._mainresource import OpenECOEResource
 
 
 from app.model.User import User, Role, Permission, RoleType, PermissionType
+from app.api.jobs import JobResource
+
 
 class ForbiddenSuperadmin(Forbidden):
     description = (
@@ -88,6 +90,7 @@ class PermissionResource(OpenECOEResource):
 class UserResource(OpenECOEResource):
     roles = Relation(RoleResource)
     permissions = Relation(PermissionResource)
+    jobs = Relation('jobs')
 
     class Meta:
         name = 'users'
@@ -105,15 +108,12 @@ class UserResource(OpenECOEResource):
     class Schema:
         organization = fields.ToOne('organizations')
 
-    @Route.GET
-    def me(self):
+    @Route.GET('/me')
+    def me(self) -> fields.Inline('self'):
         if not current_user.is_authenticated:
             return None, 401
 
         return self.manager.read(current_user.id)
-
-    me.request_schema = None
-    me.response_schema = Inline('self')
 
 
 @signals.before_create.connect_via(UserResource)

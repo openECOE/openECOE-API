@@ -14,38 +14,21 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+import logging
+import os
+from logging.handlers import RotatingFileHandler
 from flask import Flask, current_app
-from flask_bcrypt import Bcrypt
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_login import LoginManager, login_required
-from flask_principal import Principal
-from flask_potion import Api
 from flask_cors import CORS
 from config import BaseConfig
 import click
 
-db = SQLAlchemy()
-migrate = Migrate()
-login_manager = LoginManager()
-bcrypt = Bcrypt()
-principals = Principal()
-openecoe_api = Api()
 flask_app = Flask(__name__)
+flask_app.config.from_object(BaseConfig)
 
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
-
-    db.init_app(flask_app)
-    migrate.init_app(flask_app, db)
-    login_manager.init_app(flask_app)
-    bcrypt.init_app(flask_app)
-    principals.init_app(flask_app)
     CORS(flask_app)
-
-    if flask_app.config.get('API_AUTH'):
-        openecoe_api.decorators.append(login_required)
 
     from app.auth import bp as auth_bp
     auth_bp.url_prefix = '/auth'
@@ -55,6 +38,25 @@ def create_app(config_class=BaseConfig):
     api_bp.url_prefix = '/api'
     flask_app.register_blueprint(api_bp)
 
+    if not flask_app.debug and not flask_app.testing:
+        if flask_app.config['LOG_TO_STDOUT']:
+            stream_handler = logging.StreamHandler()
+            stream_handler.setLevel(logging.INFO)
+            flask_app.logger.addHandler(stream_handler)
+        else:
+            if not os.path.exists('logs'):
+                os.mkdir('logs')
+            file_handler = RotatingFileHandler('logs/openecoe-api.log',
+                                               maxBytes=10240, backupCount=10)
+            file_handler.setFormatter(logging.Formatter(
+                '%(asctime)s %(levelname)s: %(message)s '
+                '[in %(pathname)s:%(lineno)d]'))
+            file_handler.setLevel(logging.INFO)
+            flask_app.logger.addHandler(file_handler)
+
+        flask_app.logger.setLevel(logging.INFO)
+        flask_app.logger.info('openECOE-API startup')
+
     return flask_app
 
 
@@ -63,6 +65,7 @@ def create_app(config_class=BaseConfig):
 def create_orga(name):
     with current_app.app_context():
         from app.api.organization import Organization
+        from app.model import db
 
         if Organization.query.filter_by(name=name).first():
             click.echo('Organization {} not created because exists'.format(name))
@@ -89,6 +92,8 @@ def create_orga(name):
 @click.option('--organization', default=1, help='Organization to associate user (Default: 1)')
 def create_user(email, password, name, surname, admin, organization, organization_name):
     with flask_app.app_context():
+        from app.model import db
+
         from app.api.user import User, Role, RoleType
         from app.api.organization import Organization
         from datetime import datetime
@@ -135,8 +140,3 @@ def create_user(email, password, name, surname, admin, organization, organizatio
                 db.session.commit()
 
             click.echo('User {} created in organization {}'.format(email, organization))
-
-
-@flask_app.shell_context_processor
-def make_shell_context():
-    return {'db': db}

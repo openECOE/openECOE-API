@@ -28,6 +28,7 @@ class BaseConfig:
     BCRYPT_LOG_ROUNDS = literal_eval(os.environ.get('BCRYPT_LOG_ROUNDS'))
     DEBUG = literal_eval(os.environ.get('DEBUG'))
     TESTING = literal_eval(os.environ.get('TESTING'))
+    LOG_TO_STDOUT = literal_eval(os.environ.get('LOG_TO_STDOUT'))
     SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'))
     API_AUTH = literal_eval(os.environ.get('API_AUTH'))
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
@@ -35,6 +36,11 @@ class BaseConfig:
     CORS_EXPOSE_HEADERS = 'x-total-count'
     EXPORT_FILE_TYPES = ['csv', 'tsv', 'csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']
     DEFAULT_EXPORT_FILE_TYPE = 'csv'
+    DEFAULT_ARCHIVE_ROUTE = 'archive'
+
+    """Redis configuration"""
+    RQ_DEFAULT_QUEUE = 'openecoe_jobs'
+    RQ_QUEUES = ['openecoe_jobs']
 
 
 class TestConfig(BaseConfig):

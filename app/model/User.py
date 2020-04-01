@@ -17,8 +17,10 @@
 import os
 
 from flask import current_app
-from app import db, bcrypt
+from app.model import db, bcrypt
 from flask_login import UserMixin
+
+from app.model.Job import Job
 
 import base64
 import enum
@@ -41,6 +43,7 @@ class User(UserMixin, db.Model):
     permissions = db.relationship('Permission', backref='user')
     ecoeCoordinators = db.relationship('ECOE', backref='user')
     stationManagers = db.relationship('Station', backref='user')
+    jobs = db.relationship('Job', backref='user', lazy='dynamic')
 
     def encode_password(self, password):
         self.password = bcrypt.generate_password_hash(
@@ -82,6 +85,18 @@ class User(UserMixin, db.Model):
             return user
         else:
             return None
+
+    def launch_job(self, func, description, *args, **kwargs):
+        _rq_job = func.queue(*args, **kwargs)
+
+        _args = [str(arg) for arg in args]
+        _args += ['%s=%s' % (key, arg) for key, arg in kwargs.items()]
+        _list_args = ', '.join(_args)
+
+        _job = Job(id=_rq_job.get_id(), name='%s(%s)' % (_rq_job.func_name, _list_args), description=description, user_id=self.id)
+        db.session.add(_job)
+        db.session.commit()
+        return _job
 
 
 class RoleType(str, enum.Enum):

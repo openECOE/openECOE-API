@@ -27,7 +27,7 @@ def resource(request):
 
 
 def endpoints():
-    return ["api%s"%item.route_prefix for item in resources()]
+    return ["api%s" % item.route_prefix for item in resources()]
 
 
 @pytest.fixture(params=endpoints())

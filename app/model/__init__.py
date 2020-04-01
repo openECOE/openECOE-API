@@ -14,6 +14,21 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+from app import flask_app
+
+from flask_migrate import Migrate
+from flask_bcrypt import Bcrypt
+from flask_sqlalchemy import SQLAlchemy
+
+db = SQLAlchemy()
+migrate = Migrate()
+bcrypt = Bcrypt()
+
+db.init_app(flask_app)
+migrate.init_app(flask_app, db)
+bcrypt.init_app(flask_app)
+
+
 from app.model.Area import Area
 from app.model.ECOE import ECOE
 from app.model.Event import Event
@@ -27,3 +42,4 @@ from app.model.Student import Answer, Student
 from app.model.User import User
 from app.model.Round import Round
 from app.model.Planner import Planner
+from app.model.Job import Job
