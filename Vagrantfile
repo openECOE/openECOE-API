@@ -21,8 +21,8 @@ Vagrant.configure("2") do |config|
         ansible.limit = "api"
         ansible.provisioning_path = "/tmp/deploy"
         ansible.inventory_path = "inventory/develop"
-        ansible.playbook = "setup.yml"
-        ansible.extra_vars = {domain: LOCAL_DOMAIN}
+        ansible.playbook = "setup.api.yml"
+        ansible.extra_vars = "@./configurations/template.conf"
     end
 
 
