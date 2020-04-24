@@ -25,6 +25,7 @@ class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
     blocks = Relation('blocks')
     questions = Relation('questions')
+    answers = Relation('answers')
 
     class Meta:
         name = 'stations'

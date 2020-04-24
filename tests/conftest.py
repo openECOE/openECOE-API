@@ -181,18 +181,18 @@ def app(request):
 
 @pytest.fixture(scope='session')
 def _db(app, request):
-    # flask_app.db.app = app
-    flask_app.db.drop_all()
+    from app.model import db
+    db.drop_all()
     # apply_migrations()
-    flask_app.db.create_all()
+    db.create_all()
 
-    load_data(flask_app.db)
+    load_data(db)
 
     # @request.addfinalizer
     # def teardown():
     #     flask_app.db.drop_all()
 
-    return flask_app.db
+    return db
 
 
 @pytest.fixture()

@@ -30,6 +30,7 @@ class Station(db.Model):
     schedules = db.relationship('Schedule', backref='station')
     blocks = db.relationship('Block', backref='station')
     questions = db.relationship('Question', backref='station')
+    answers = db.relationship('Answer', backref='station')
 
     # adjacency list pattern
     children_stations = db.relationship('Station', backref=db.backref('parent_station', remote_side=[id]))

@@ -30,7 +30,7 @@ class TestExport:
     def test_export_to_file(self, app, test_with_admin_user, endpoint, file_type):
         from pyexcel_webio import FILE_TYPE_MIME_TABLE
 
-        endpoint += "/export?file_type=%s" % file_type
+        endpoint += "/export?filetype=%s" % file_type
         resp = self.client.get(endpoint)
         assert resp.status_code == 200
         assert resp.content_type == FILE_TYPE_MIME_TABLE[file_type]
