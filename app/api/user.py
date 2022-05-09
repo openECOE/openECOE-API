@@ -114,9 +114,9 @@ class UserResource(PrincipalResource):
         read_only_fields = ['registered_on', 'token_expiration']
         write_only_fields = ['password', 'token']
         permissions = {
-            'read': ['update','read'],
+            'read': 'manage',
             'create': 'manage',
-            'update': ['manage','user:user'],
+            'update': 'manage',
             'delete': 'manage',
             'manage': ['manage', RoleType.ADMIN]
         }
