@@ -21,7 +21,7 @@ from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
-from .user import PrincipalResource, RoleType, MainManager
+from app.api.user import PrincipalResource, RoleType, MainManager, PermissionType
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -65,11 +65,12 @@ class ArchiveManager(MainManager):
 class EcoePrincipalResource(PrincipalResource):
     class Meta:
         permissions = {
-            'read': 'read:ecoe',
+            'read': ['read:ecoe', 'evaluate'],
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': 'manage:ecoe'
+            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE],
+            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE]
         }
 
 
@@ -86,13 +87,15 @@ class EcoeResource(PrincipalResource):
         name = 'ecoes'
         model = ECOE
         natural_key = 'name'
+        write_only_fields = ['user']
 
         permissions = {
-            'read': ['manage', 'read'],
+            'read': ['manage', 'read', 'evaluate'],
             'create': 'update',
             'update': [RoleType.ADMIN, 'manage'],
             'delete': 'manage',
-            'manage': ['manage', RoleType.SUPERADMIN, 'user:user']
+            'manage': [PermissionType.MANAGE, RoleType.SUPERADMIN, 'user:user'],
+            'evaluate' : [PermissionType.EVALUATE, PermissionType.MANAGE]
         }
 
         exclude_routes = ['destroy']  # we're using rel="archive" instead.

@@ -17,7 +17,9 @@
 from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation
+from app.api.user import PermissionResource
 from app.model.Station import Station
+from app.model.User import PermissionType
 from .ecoe import EcoePrincipalResource
 
 
@@ -29,14 +31,17 @@ class StationResource(EcoePrincipalResource):
         name = 'stations'
         model = Station
         natural_key = ('ecoe', 'name')
-
+        write_only_fields = ['user']
+        
         permissions = {
-            'read': 'manage',
+            'read': ['manage', 'evaluate'],
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage:ecoe', 'manage', 'user:user']
+            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE],
+            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE]
         }
+        
 
     class Schema:
         ecoe = fields.ToOne('ecoes')
@@ -82,3 +87,16 @@ def before_create_station(sender, item):
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
     order_station(item, 'del')
+    
+    
+@signals.before_create.connect_via(PermissionResource)
+def on_before_create_permission(sender, item):
+    
+    if item.name == 'evaluate' and item.object == 'stations':
+        station = StationResource.manager.read(item.id_object)
+        sender.manager.create({
+             'user': item.user,
+             'id_object': station.id_ecoe,
+             'name': 'read',
+             'object': 'ecoes'})
+

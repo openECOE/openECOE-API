@@ -107,6 +107,7 @@ class Role(db.Model):
 class PermissionType(str, enum.Enum):
     MANAGE = 'manage'
     READ = 'read'
+    EVALUATE = 'evaluate'
 
 
 class Permission(db.Model):
