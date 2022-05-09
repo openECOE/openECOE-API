@@ -56,10 +56,23 @@ class StudentResource(EcoePrincipalResource):
         item = student.answers.filter_by(id = option_id).first()
 
         # return item
-        if item:
-            return item
-        else:
+        if item is None:
             raise ItemNotFound(OptionResource, id=option_id)
+        else:        
+            return item
+        
+    @ItemRoute.DELETE('/answers/<int:option_id>')
+    def del_option(self, student, option_id) -> fields.Inline(OptionResource):
+        item = student.answers.filter_by(id = option_id).first()
+        
+        if item is None:
+            raise ItemNotFound(OptionResource, id=option_id)
+        else:
+            student.answers.remove(item)
+            db.session.commit()
+            return None, 204
+            
+        
 
     @ItemRoute.GET('/answers/all')
     def get_all_answers(self, student) -> fields.List(fields.Inline(OptionResource)):
