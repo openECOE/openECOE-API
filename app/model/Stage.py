@@ -14,13 +14,14 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import db
+from app.model import db
 
 
 class Stage(db.Model):
     __tablename__ = 'stage'
 
     id = db.Column(db.Integer, primary_key=True)
+    id_ecoe = db.Column(db.Integer, db.ForeignKey('ecoe.id'), nullable=False)
     duration = db.Column(db.Integer, nullable=False)  # in seconds
     order = db.Column(db.Integer, nullable=False)
     name = db.Column(db.String(100), nullable=False)

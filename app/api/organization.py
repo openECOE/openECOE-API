@@ -16,11 +16,12 @@
 
 from flask_potion.routes import Relation
 
-from .user import PrincipalResource, RoleType, PermissionType
+from app.api.user import RoleType, PermissionType
+from app.api._mainresource import OpenECOEResource
 from app.model.Organization import Organization
 
 
-class OrganizationResource(PrincipalResource):
+class OrganizationResource(OpenECOEResource):
     users = Relation('users')
     ecoes = Relation('ecoes')
 

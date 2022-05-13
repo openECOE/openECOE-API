@@ -20,12 +20,14 @@ from flask_potion.routes import Relation
 from app.api.user import PermissionResource
 from app.model.Station import Station
 from app.model.User import PermissionType
-from .ecoe import EcoePrincipalResource
+from .ecoe import EcoeChildResource
 
 
-class StationResource(EcoePrincipalResource):
+class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
-    qblocks = Relation('qblocks')
+    blocks = Relation('blocks')
+    questions = Relation('questions')
+    answers = Relation('answers')
 
     class Meta:
         name = 'stations'

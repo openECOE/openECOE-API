@@ -17,10 +17,10 @@
 from flask_potion import fields
 from flask_potion.routes import Relation
 from app.model.Area import Area
-from .ecoe import EcoePrincipalResource
+from .ecoe import EcoeChildResource
 
 
-class AreaResource(EcoePrincipalResource):
+class AreaResource(EcoeChildResource):
     questions = Relation('questions')
 
     class Meta:

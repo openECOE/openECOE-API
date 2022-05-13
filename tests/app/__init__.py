@@ -1,4 +1,4 @@
-#  Copyright (c) 2019 Miguel Hernandez University of Elche
+#  Copyright (c) 2020 Miguel Hernandez University of Elche
 #  This file is part of openECOE-API.
 #
 #      openECOE-API is free software: you can redistribute it and/or modify
@@ -13,17 +13,3 @@
 #
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
-
-from app import db
-from .many_to_many_tables import qblocks_questions
-
-
-class QBlock(db.Model):
-    __tablename__ = 'qblock'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(300))
-    id_station = db.Column(db.Integer, db.ForeignKey('station.id'), nullable=False)
-    order = db.Column(db.Integer, nullable=False)
-
-    questions = db.relationship('Question', secondary=qblocks_questions, lazy=True, back_populates='qblocks')

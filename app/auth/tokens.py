@@ -14,9 +14,9 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask import jsonify, g
+from flask import jsonify
 from flask_login import login_required, current_user
-from app import db
+from app.model import db
 from app.auth import bp
 
 

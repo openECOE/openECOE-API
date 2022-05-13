@@ -14,29 +14,39 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+from app import flask_app
 from flask import Blueprint
-from app import api_app as api
 from flask_cors import CORS
+import flask_excel as excel
+from flask_potion import Api
+from flask_login import login_required
 
-from .area import AreaResource
-from .ecoe import EcoeResource
-from .event import EventResource
-from .option import OptionResource
-from .organization import OrganizationResource
-from .qblock import QblockResource
-from .question import QuestionResource
-from .schedule import ScheduleResource
-from .shift import ShiftResource
-from .stage import StageResource
-from .station import StationResource
-from .student import StudentResource
-from .planner import PlannerResource
-from .round import RoundResource
-from .user import UserResource, RoleResource, PermissionResource
+from app.api.area import AreaResource
+from app.api.ecoe import EcoeResource
+from app.api.event import EventResource
+from app.api.organization import OrganizationResource
+from app.api.question import QuestionResource, BlockResource
+from app.api.schedule import ScheduleResource
+from app.api.shift import ShiftResource
+from app.api.stage import StageResource
+from app.api.station import StationResource
+from app.api.student import AnswerResource, StudentResource
+from app.api.planner import PlannerResource
+from app.api.round import RoundResource
+from app.api.user import UserResource, RoleResource, PermissionResource
+from app.api.jobs import JobResource
 
+from app.api import export
 
 bp = Blueprint('api', __name__)
+api = Api()
+
+if flask_app.config.get('API_AUTH'):
+    api.decorators.append(login_required)
+
 CORS(bp, expose_headers='Content-Length, X-Total-Count')
+
+excel.init_excel(bp)
 
 version = 'v1'
 
@@ -48,9 +58,9 @@ api.add_resource(ScheduleResource)
 api.add_resource(StageResource)
 api.add_resource(RoleResource)
 api.add_resource(PermissionResource)
-api.add_resource(OptionResource)
+api.add_resource(AnswerResource)
 api.add_resource(QuestionResource)
-api.add_resource(QblockResource)
+api.add_resource(BlockResource)
 api.add_resource(AreaResource)
 api.add_resource(StudentResource)
 api.add_resource(PlannerResource)
@@ -58,6 +68,7 @@ api.add_resource(RoundResource)
 api.add_resource(ShiftResource)
 api.add_resource(StationResource)
 api.add_resource(EcoeResource)
+api.add_resource(JobResource)
 api.add_resource(UserResource)
 api.add_resource(OrganizationResource)
 

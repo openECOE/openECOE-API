@@ -14,7 +14,7 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import db
+from app.model import db
 
 class Station(db.Model):
     __tablename__ = 'station'
@@ -28,7 +28,9 @@ class Station(db.Model):
     id_manager = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     schedules = db.relationship('Schedule', backref='station')
-    qblocks = db.relationship('QBlock', backref='station')
+    blocks = db.relationship('Block', backref='station')
+    questions = db.relationship('Question', backref='station')
+    answers = db.relationship('Answer', backref='station')
 
     # adjacency list pattern
     children_stations = db.relationship('Station', backref=db.backref('parent_station', remote_side=[id]))

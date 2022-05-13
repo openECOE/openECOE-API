@@ -20,7 +20,7 @@ from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, ide
 from flask_httpauth import HTTPTokenAuth
 from werkzeug.exceptions import abort
 
-from app import login_manager, principals
+from app.auth import login_manager, principals
 from app.model.User import User, RoleType, PermissionType
 
 token_auth = HTTPTokenAuth()

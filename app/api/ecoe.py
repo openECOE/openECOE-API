@@ -15,18 +15,26 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 from enum import Enum
 
+from app.jobs import ecoe as jobs_ecoe
 from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.exceptions import ItemNotFound, BackendConflict
 from flask_potion.instances import Instances
 from flask_potion.routes import Relation, ItemRoute, Route
+from werkzeug.exceptions import Forbidden
 from app.model.ECOE import ECOE, ECOEstatus, ChronoNotFound
-from app.api.user import PrincipalResource, RoleType, MainManager, PermissionType
+from app.api.user import RoleType
+from app.api.jobs import JobResource
+from app.api._mainresource import OpenECOEResource, MainManager
+from app.api import export
+from app.model.User import PermissionType
+
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
     BOTH = 3
+
 
 class ArchiveManager(MainManager):
     def _query(self, source=Location.INSTANCES_ONLY, **kwargs):
@@ -61,8 +69,9 @@ class ArchiveManager(MainManager):
             raise ItemNotFound(self.resource, id=id)
         return self._query_filter_by_id(query, id)
 
+
 # Permissions to ECOE childs resources
-class EcoePrincipalResource(PrincipalResource):
+class EcoeChildResource(OpenECOEResource):
     class Meta:
         permissions = {
             'read': ['read:ecoe', 'evaluate'],
@@ -74,13 +83,14 @@ class EcoePrincipalResource(PrincipalResource):
         }
 
 
-class EcoeResource(PrincipalResource):
+class EcoeResource(OpenECOEResource):
     areas = Relation('areas')
     stations = Relation('stations')
     schedules = Relation('schedules')
     students = Relation('students')
     rounds = Relation('rounds')
     shifts = Relation('shifts')
+    stages = Relation('stages')
 
     class Meta:
         manager = ArchiveManager
@@ -90,7 +100,7 @@ class EcoeResource(PrincipalResource):
         write_only_fields = ['user']
 
         permissions = {
-            'read': ['manage', 'read', 'evaluate'],
+            'read': ['manage', 'read', RoleType.EVAL],
             'create': 'update',
             'update': [RoleType.ADMIN, 'manage'],
             'delete': 'manage',
@@ -105,7 +115,90 @@ class EcoeResource(PrincipalResource):
         user = fields.ToOne('users', nullable=True)
         status = fields.String(enum=ECOEstatus, io="r")
 
+    @staticmethod
+    def get_ecoe_dict(ecoe):
+        _dict_ecoe = {
+            "ecoe": [ecoe],
+            "area": ecoe.areas,
+            "station": ecoe.stations,
+            "shift": ecoe.shifts,
+            "round": ecoe.rounds,
+            "student": ecoe.students,
+            "schedule": ecoe.schedules,
+            "stages": ecoe.stages
+        }
 
+        _blocks = []
+        for station in ecoe.stations:
+            _blocks += station.blocks
+            _station_questions = {"station_%s-question" % station.order: station.questions}
+            _dict_ecoe = {**_dict_ecoe, **_station_questions}
+
+        _dict_ecoe["block"] = _blocks
+
+        for schedule in ecoe.schedules:
+            _schedule_events = {"schedule_%s-event" % schedule.id: schedule.events}
+            _dict_ecoe = {**_dict_ecoe, **_schedule_events}
+
+        _student_answers = []
+        for student in ecoe.students:
+            _student_answers += student.answers
+
+        _dict_ecoe["answers"] = _student_answers
+
+        return _dict_ecoe
+
+    @ItemRoute.GET('/export',
+                   rel="exportItem",
+                   description="export all ECOE data to file")
+    def export_ecoe(self, ecoe):
+        # Only can export if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        return export.book_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
+
+    @Route.GET('/export',
+               rel="export",
+               description="export all ECOE data to file")
+    def export_ecoes(self):
+        # Only can export if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(self)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        _ecoes = self.manager.instances().all()
+
+        _dict = {}
+
+        for _ecoe in _ecoes:
+            _dict_ecoe = {"ecoe_%s-%s" % (_ecoe.id, key): item for key, item in self.get_ecoe_dict(_ecoe).items()}
+            _dict = {**_dict, **_dict_ecoe}
+
+        return export.book_dict(_dict, filename="ECOE")
+
+    @ItemRoute.GET('/opendata', rel='getOpenDataJobs')
+    def get_opendata(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        return current_user.jobs.filter_by(name='app.jobs.ecoe.export_data(id_ecoe=%s)' % ecoe.id)
+
+    @ItemRoute.POST('/opendata', rel='generateOpenData')
+    def gen_opendata(self, ecoe) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if 'manage' in object_permissions and object_permissions['manage'] is not True:
+            raise Forbidden
+
+        _job = current_user.launch_job(func=jobs_ecoe.export_data,
+                                       description='Export %s opendata' % ecoe.name,
+                                       id_ecoe=ecoe.id)
+
+        return _job
 
     @ItemRoute.GET('/configuration', rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
@@ -188,6 +281,7 @@ def before_create_ecoe(sender, item):
     if not item.user:
         item.user = current_user
 
+
 # Update ECOE
 @signals.before_update.connect_via(EcoeResource)
 def before_update_ecoe(sender, item, changes):
@@ -197,7 +291,7 @@ def before_update_ecoe(sender, item, changes):
                 item.load_config()
             except ChronoNotFound:
                 pass
-        elif changes['status']  in (ECOEstatus.DRAFT, ECOEstatus.ARCHIVED):
+        elif changes['status'] in (ECOEstatus.DRAFT, ECOEstatus.ARCHIVED):
             try:
                 if item.chrono_token:
                     item.delete_config()

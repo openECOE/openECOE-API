@@ -14,34 +14,18 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import fields, signals
+from flask_potion import fields, signals, exceptions
 from flask_potion.routes import Route, Relation, ItemRoute
 from flask_potion.fields import Inline
+
 from werkzeug.exceptions import Forbidden
 from datetime import datetime
 from flask_login import current_user
+from app.api._mainresource import OpenECOEResource
+
 
 from app.model.User import User, Role, Permission, RoleType, PermissionType
-
-from flask_potion import ModelResource
-from flask_potion.contrib.alchemy import SQLAlchemyManager
-from flask_potion.contrib.principals import principals
-
-MainManager = principals(SQLAlchemyManager)
-
-class PrincipalResource(ModelResource):
-    @ItemRoute.GET('/permissions')
-    def item_permissions(self, item) -> fields.String():
-        object_permissions = self.manager.get_permissions_for_item(item)
-        return object_permissions
-
-    @Route.GET('/permissions')
-    def object_permissions(self) -> fields.String():
-        object_permissions = self.manager.get_permissions_for_item(self)
-        return object_permissions
-
-    class Meta:
-        manager = MainManager
+from app.api.jobs import JobResource
 
 
 class ForbiddenSuperadmin(Forbidden):
@@ -51,7 +35,7 @@ class ForbiddenSuperadmin(Forbidden):
     )
 
 
-class RoleResource(PrincipalResource):
+class RoleResource(OpenECOEResource):
     @Route.GET('/types')
     def roletypes(self) -> fields.String():
         roles = []
@@ -69,7 +53,7 @@ class RoleResource(PrincipalResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': ['manage',  RoleType.ADMIN]
+            'manage': ['manage', RoleType.ADMIN]
         }
 
     class Schema:
@@ -77,7 +61,7 @@ class RoleResource(PrincipalResource):
         name = fields.String(enum=RoleType)
 
 
-class PermissionResource(PrincipalResource):
+class PermissionResource(OpenECOEResource):
     @Route.GET('/types')
     def permissiontypes(self) -> fields.String():
         permissions = []
@@ -103,10 +87,10 @@ class PermissionResource(PrincipalResource):
         name = fields.String(enum=PermissionType)
 
 
-
-class UserResource(PrincipalResource):
+class UserResource(OpenECOEResource):
     roles = Relation(RoleResource)
     permissions = Relation(PermissionResource)
+    jobs = Relation('jobs')
 
     class Meta:
         name = 'users'
@@ -124,15 +108,12 @@ class UserResource(PrincipalResource):
     class Schema:
         organization = fields.ToOne('organizations')
 
-    @Route.GET
-    def me(self):
+    @Route.GET('/me')
+    def me(self) -> fields.Inline('self'):
         if not current_user.is_authenticated:
             return None, 401
 
         return self.manager.read(current_user.id)
-
-    me.request_schema = None
-    me.response_schema = Inline('self')
 
 
 @signals.before_create.connect_via(UserResource)
