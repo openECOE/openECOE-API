@@ -8,6 +8,7 @@
       "name": "Launch openECOE API",
       "type": "python",
       "request": "launch",
+      "preLaunchTask": "Compose Up",
       "module": "flask",
       "env": { 
         "FLASK_APP": "openECOE-API.py", 
@@ -19,6 +20,20 @@
       "justMyCode": true,
       "envFile": "${workspaceFolder}/environments/dev.env",
       "autoReload": {"enable": false}
-    }
+    },
+    {"name": "Upgrade DB",
+      "type": "python",
+      "request": "launch",
+      "module": "flask",
+      "env": { 
+        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "0",
+      },
+      "args": ["db", "upgrade"],
+      "jinja": false,
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "autoReload": {"enable": false}}
   ]
 }
