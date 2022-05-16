@@ -71,12 +71,12 @@ def upgrade():
 
     # ### migrate data from student_options to answer
     results = conn.execute("select so.student_id, q.id, q.question_type, \
-                            GROUP_CONCAT(o.order) as opt_order, GROUP_CONCAT(o.id) as id_opt, sum(o.points) as points \
+                            GROUP_CONCAT(o.order) as opt_order, GROUP_CONCAT(o.id) as id_opt, SUM(o.points) as points \
                             from question q, `option` o, students_options so \
                             where q.id = o.id_question \
                             and so.option_id = o.id \
                             group by so.student_id, q.id, q.question_type \
-                            order by so.student_id, q.id, o.order;").fetchall()
+                            order by so.student_id, id_opt, opt_order;").fetchall()
 
     students_options = []
 
@@ -97,7 +97,9 @@ def upgrade():
         students_options.append(
             {'id_student': r['student_id'], 'id_question': r['id'], 'answer_schema': json.dumps(answer_schema_),
              'points': r['points']})
-
+        
+        answer_schema_ = {}
+        
     op.bulk_insert(answer, students_options)
 
     op.alter_column('ecoe', 'status',
@@ -105,7 +107,7 @@ def upgrade():
                     nullable=False)
     op.add_column('question', sa.Column('id_block', sa.Integer(), nullable=True))
     op.add_column('question', sa.Column('id_station', sa.Integer(), nullable=False))
-    op.add_column('question', sa.Column('question_schema', mysql.LONGTEXT(), nullable=False))
+    op.add_column('question', sa.Column('question_schema', mysql.LONGTEXT(), nullable=True))
     op.add_column('question', sa.Column('max_points', sa.DECIMAL(precision=10, scale=2), nullable=False))
     op.create_check_constraint(
         "ck_question_json",
