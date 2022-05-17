@@ -78,8 +78,8 @@ class EcoeChildResource(OpenECOEResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE],
-            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE]
+            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE, RoleType.ADMIN],
+            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE, 'manage']
         }
 
 
@@ -100,12 +100,12 @@ class EcoeResource(OpenECOEResource):
         write_only_fields = ['user']
 
         permissions = {
-            'read': ['manage', 'read', RoleType.EVAL],
+            'read': ['manage', 'read', 'evaluate'],
             'create': 'update',
             'update': [RoleType.ADMIN, 'manage'],
             'delete': 'manage',
             'manage': [PermissionType.MANAGE, RoleType.SUPERADMIN, 'user:user'],
-            'evaluate' : [PermissionType.EVALUATE, PermissionType.MANAGE]
+            'evaluate' : [PermissionType.EVALUATE, 'manage']
         }
 
         exclude_routes = ['destroy']  # we're using rel="archive" instead.

@@ -31,11 +31,12 @@ class AnswerResource(OpenECOEResource):
         model = Answer
 
         permissions = {
-            'read': 'read:question',
+            'read': 'read:station',
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': 'manage:question'
+            'manage': ['manage:station', 'evaluate'],
+            'evaluate': 'evaluate:station'
         }
 
     class Schema:

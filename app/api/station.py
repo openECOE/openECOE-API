@@ -19,7 +19,7 @@ from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.api.user import PermissionResource
 from app.model.Station import Station
-from app.model.User import PermissionType
+from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 
 
@@ -40,8 +40,8 @@ class StationResource(EcoeChildResource):
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
-            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE],
-            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE]
+            'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE, RoleType.ADMIN],
+            'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE, 'manage']
         }
         
 
