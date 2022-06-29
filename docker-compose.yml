@@ -4,10 +4,14 @@ services:
     image: mysql:latest
     ports:
       - 8083:3306
-    volumes:
-      - ./data:/docker-entrypoint-initdb.d
     environment:
       MYSQL_ROOT_PASSWORD: openecoe_1234
       MYSQL_DATABASE: openECOE_dev
       MYSQL_USER: openecoe
       MYSQL_PASSWORD: openecoe
+  api:
+    image: openecoe/api:2022-06-29
+    ports:
+      - 8082:1080
+    volumes:
+      - ./deploy/local.env:/app/api/.env
