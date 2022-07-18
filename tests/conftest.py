@@ -28,35 +28,38 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-import pytest
 
-import app as flask_app
-from config import TestConfig
+import pytest
 from alembic.command import upgrade
 from alembic.config import Config
 
+import app as flask_app
+from config import TestConfig
+
 basedir = os.path.abspath(os.path.dirname(__file__))
-ALEMBIC_CONFIG = os.path.join(basedir, '..', 'migrations', 'alembic.ini')
-pytest_plugins = ['pytest-flask-sqlalchemy']
+ALEMBIC_CONFIG = os.path.join(basedir, "..", "migrations", "alembic.ini")
+pytest_plugins = ["pytest-flask-sqlalchemy"]
 
 
 def apply_migrations():
     """Applies all alembic migrations."""
     config = Config(ALEMBIC_CONFIG)
-    upgrade(config, 'head')
+    upgrade(config, "head")
 
 
 def load_data(db):
-    """ Create data to test """
+    """Create data to test"""
     """ Organization """
     from app.model.Organization import Organization
+
     org = Organization()
     org.name = "Test Organization"
     db.session.add(org)
     db.session.flush()
 
     """ Users """
-    from app.model.User import User, RoleType, Role
+    from app.model.User import Role, RoleType, User
+
     user_admin = User()
     user_admin.id_organization = org.id
     user_admin.email = "admin@openecoe.es"
@@ -73,6 +76,7 @@ def load_data(db):
 
     """ ECOE """
     from app.model.ECOE import ECOE
+
     ecoe1 = ECOE()
     ecoe1.name = "Test ECOE 1"
     ecoe1.id_organization = org.id
@@ -96,20 +100,21 @@ def load_data(db):
 
     """ Area """
     from app.model.Area import Area
+
     area1 = Area()
     area1.id_ecoe = ecoe1.id
-    area1.name = 'Anamnesis'
-    area1.code = '1'
+    area1.name = "Anamnesis"
+    area1.code = "1"
 
     area2 = Area()
     area2.id_ecoe = ecoe1.id
-    area2.name = 'Exploración física'
-    area2.code = '2'
+    area2.name = "Exploración física"
+    area2.code = "2"
 
     area3 = Area()
     area3.id_ecoe = ecoe1.id
-    area3.name = 'Habilidades técnicas y procedimientos'
-    area3.code = '3'
+    area3.name = "Habilidades técnicas y procedimientos"
+    area3.code = "3"
 
     db.session.add(area1)
     db.session.add(area2)
@@ -117,6 +122,7 @@ def load_data(db):
 
     """ Stations """
     from app.model.Station import Station
+
     station1 = Station()
     station1.id_ecoe = ecoe1.id
     station1.name = "TEST_E1_I_Der"
@@ -157,31 +163,33 @@ def load_data(db):
     db.session.commit()
 
 
-# Automatically enable transactions for all tests, without importing any extra fixtures.
+# Automatically enable transactions for all tests,
+# without importing any extra fixtures.
 @pytest.fixture(autouse=True)
 def enable_transactional_tests(app, _db):
     pass
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def app(request):
     """Session-wide test `Flask` application."""
-    app = flask_app.create_app(TestConfig)
+    _app = flask_app.create_app(TestConfig)
 
     # Establish an application context before running the tests.
-    ctx = app.app_context()
+    ctx = _app.app_context()
     ctx.push()
 
     @request.addfinalizer
     def teardown():
         ctx.pop()
 
-    return app
+    return _app
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def _db(app, request):
     from app.model import db
+
     db.drop_all()
     # apply_migrations()
     db.create_all()
@@ -208,11 +216,10 @@ def test_with_admin_user(app):
 @pytest.fixture
 def make_organization():
     from app.model.Organization import Organization
-    from app.model import db
 
     def _make():
         org = Organization()
-        org.name = 'Test Organization'
+        org.name = "Test Organization"
 
         return org
 

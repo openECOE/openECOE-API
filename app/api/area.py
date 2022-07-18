@@ -16,19 +16,19 @@
 
 from flask_potion import fields
 from flask_potion.routes import Relation
+
 from app.model.Area import Area
+
 from .ecoe import EcoeChildResource
 
 
 class AreaResource(EcoeChildResource):
-    questions = Relation('questions')
+    questions = Relation("questions")
 
     class Meta:
-        name = 'areas'
+        name = "areas"
         model = Area
-        natural_key = 'name'
+        natural_key = "name"
 
     class Schema:
-        ecoe = fields.ToOne('ecoes')
-
-
+        ecoe = fields.ToOne("ecoes")

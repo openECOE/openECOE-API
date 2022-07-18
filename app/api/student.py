@@ -15,80 +15,85 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask_potion import fields, signals
-from flask_potion.routes import Relation, ItemRoute, Route
-from flask_potion.instances import RelationInstances
+from flask_potion.routes import ItemRoute, Relation, Route
 
-from app.model.Student import Answer, Student
-from app.model.Question import Question
-from app.api.ecoe import EcoeChildResource
 from app.api._mainresource import OpenECOEResource
+from app.api.ecoe import EcoeChildResource
+from app.model.Question import Question
+from app.model.Student import Answer, Student
 
 
 class AnswerResource(OpenECOEResource):
-
     class Meta:
-        name = 'answers'
+        name = "answers"
         model = Answer
 
         permissions = {
-            'read': 'read:station',
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': ['manage:station', 'evaluate'],
-            'evaluate': 'evaluate:station'
+            "read": "read:station",
+            "create": "manage",
+            "update": "manage",
+            "delete": "manage",
+            "manage": ["manage:station", "evaluate"],
+            "evaluate": "evaluate:station",
         }
 
     class Schema:
-        question = fields.ToOne('questions')
-        student = fields.ToOne('students')
-        station = fields.ToOne('stations')
+        question = fields.ToOne("questions")
+        student = fields.ToOne("students")
+        station = fields.ToOne("stations")
 
 
 class StudentResource(EcoeChildResource):
-    answers = Relation('answers', fields.Inline(AnswerResource))
+    answers = Relation("answers", fields.Inline(AnswerResource))
 
     class Meta:
-        name = 'students'
+        name = "students"
         model = Student
 
     class Schema:
-        ecoe = fields.ToOne('ecoes')
-        planner = fields.ToOne('planners', nullable=True)
+        ecoe = fields.ToOne("ecoes")
+        planner = fields.ToOne("planners", nullable=True)
 
-    @ItemRoute.GET('/answers/all', response_schema=AnswerResource.schema)
+    @ItemRoute.GET("/answers/all", response_schema=AnswerResource.schema)
     def get_all_answers(self, student) -> fields.ToMany(AnswerResource):
         _answers = student.answers
 
-        headers = {
-            'X-Total-Count': len(_answers)
-        }
+        headers = {"X-Total-Count": len(_answers)}
 
         return _answers, 200, headers
 
-    @Route.GET('/<int:student>/answers/station/<int:station>', response_schema=AnswerResource.schema)
-    def get_all_answers_station(self, student, station) -> fields.ToMany(AnswerResource):
-        _answers = Answer.query.join(Question).filter(Question.id_station == station).filter(
-            Answer.id_student == student).all()
+    @Route.GET(
+        "/<int:student>/answers/station/<int:station>",
+        response_schema=AnswerResource.schema,
+    )
+    def get_all_answers_station(
+        self, student, station
+    ) -> fields.ToMany(AnswerResource):
+        _answers = (
+            Answer.query.join(Question)
+            .filter(Question.id_station == station)
+            .filter(Answer.id_student == student)
+            .all()
+        )
 
-        headers = {
-            'X-Total-Count': len(_answers)
-        }
+        headers = {"X-Total-Count": len(_answers)}
 
         return _answers, 200, headers
 
 
 @signals.before_update.connect_via(StudentResource)
 def before_update_planner(sender, item, changes):
-    if 'planner' in changes.keys():
+    if "planner" in changes.keys():
         # Reorder students from old planner
         if item.planner and item.planner_order:
             # If the item has another planner reorder the old planner students
-            old_planner_students = Student.query \
-                .filter(Student.id_planner == item.planner.id) \
-                .filter(Student.id != item.id) \
-                .filter(Student.planner_order > item.planner_order) \
-                .order_by(Student.planner_order).all()
+            old_planner_students = (
+                Student.query.filter(Student.id_planner == item.planner.id)
+                .filter(Student.id != item.id)
+                .filter(Student.planner_order > item.planner_order)
+                .order_by(Student.planner_order)
+                .all()
+            )
 
             for order, student in enumerate(old_planner_students):
                 student.planner_order = order + item.planner_order

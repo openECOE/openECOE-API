@@ -15,11 +15,10 @@
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 # Creates a worker that handle jobs in ``default`` queue.
-import sys
 import datetime
 import os
 
-from flask import current_app, json, url_for
+from flask import current_app, json
 from app.jobs import rq
 
 
