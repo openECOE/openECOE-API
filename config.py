@@ -16,49 +16,54 @@
 
 import os
 from ast import literal_eval
+
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Default configuration
-os.environ.setdefault('SERVER_NAME', 'localhost')
-os.environ.setdefault('SECRET_KEY', '111111111111111111111')
-os.environ.setdefault('BCRYPT_LOG_ROUNDS', '4')
-os.environ.setdefault('DEBUG', 'True')
-os.environ.setdefault('TESTING', 'True')
-os.environ.setdefault('LOG_TO_STDOUT', 'False')
-os.environ.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', 'False')
-os.environ.setdefault('API_AUTH', 'False')
-os.environ.setdefault('SQLALCHEMY_DATABASE_URI', 'localhost:8083/openECOE_dev')
-os.environ.setdefault('CHRONO_ROUTE', 'localhost:6061')
+os.environ.setdefault("SERVER_NAME", "localhost")
+os.environ.setdefault("SECRET_KEY", "111111111111111111111")
+os.environ.setdefault("BCRYPT_LOG_ROUNDS", "4")
+os.environ.setdefault("DEBUG", "True")
+os.environ.setdefault("TESTING", "True")
+os.environ.setdefault("LOG_TO_STDOUT", "False")
+os.environ.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", "False")
+os.environ.setdefault("API_AUTH", "False")
+os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "localhost:8083/openECOE_dev")
+os.environ.setdefault("CHRONO_ROUTE", "localhost:6061")
 
-load_dotenv(os.path.join(basedir, '.env'))
+load_dotenv(os.path.join(basedir, ".env"))
 
 
 class BaseConfig:
     """Base configuration."""
-    SECRET_KEY = os.environ.get('SECRET_KEY')
-    BCRYPT_LOG_ROUNDS = literal_eval(os.environ.get('BCRYPT_LOG_ROUNDS'))
-    DEBUG = literal_eval(os.environ.get('DEBUG'))
-    TESTING = literal_eval(os.environ.get('TESTING'))
-    LOG_TO_STDOUT = literal_eval(os.environ.get('LOG_TO_STDOUT'))
-    SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(os.environ.get('SQLALCHEMY_TRACK_MODIFICATIONS'))
-    API_AUTH = literal_eval(os.environ.get('API_AUTH'))
-    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
-    CHRONO_ROUTE = os.environ.get('CHRONO_ROUTE')
-    CORS_EXPOSE_HEADERS = 'x-total-count'
-    EXPORT_FILE_TYPES = ['csv', 'tsv', 'csvz', 'tsvz', 'xls', 'xlsx', 'xlsm', 'ods']
-    DEFAULT_EXPORT_FILE_TYPE = 'csv'
-    DEFAULT_ARCHIVE_ROUTE = 'archive'
+
+    SECRET_KEY = os.environ.get("SECRET_KEY")
+    BCRYPT_LOG_ROUNDS = literal_eval(os.environ.get("BCRYPT_LOG_ROUNDS"))
+    DEBUG = literal_eval(os.environ.get("DEBUG"))
+    TESTING = literal_eval(os.environ.get("TESTING"))
+    LOG_TO_STDOUT = literal_eval(os.environ.get("LOG_TO_STDOUT"))
+    SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(
+        os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
+    )
+    API_AUTH = literal_eval(os.environ.get("API_AUTH"))
+    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    CHRONO_ROUTE = os.environ.get("CHRONO_ROUTE")
+    CORS_EXPOSE_HEADERS = "x-total-count"
+    EXPORT_FILE_TYPES = ["csv", "tsv", "csvz", "tsvz", "xls", "xlsx", "xlsm", "ods"]
+    DEFAULT_EXPORT_FILE_TYPE = "csv"
+    DEFAULT_ARCHIVE_ROUTE = "archive"
 
     """Redis configuration"""
-    RQ_DEFAULT_QUEUE = 'openecoe_jobs'
-    RQ_QUEUES = ['openecoe_jobs']
+    RQ_DEFAULT_QUEUE = "openecoe_jobs"
+    RQ_QUEUES = ["openecoe_jobs"]
 
 
 class TestConfig(BaseConfig):
     """Test configuration"""
+
     TESTING = True
     DEBUG = True
     API_AUTH = True
-    SQLALCHEMY_DATABASE_URI = "%s_test"%os.environ.get('SQLALCHEMY_DATABASE_URI')
+    SQLALCHEMY_DATABASE_URI = "%s_test" % os.environ.get("SQLALCHEMY_DATABASE_URI")

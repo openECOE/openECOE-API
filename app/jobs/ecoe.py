@@ -19,30 +19,32 @@ import datetime
 import os
 
 from flask import current_app, json
+
 from app.jobs import rq
 
 
 def clean_html(text):
     """Remove html tags from a string"""
     import re
+
     """First replace <br> with spaces"""
 
-    br_space = re.compile('<?br.*?>')
-    clean = re.compile('<.*?>')
+    br_space = re.compile("<?br.*?>")
+    clean = re.compile("<.*?>")
 
-    text = re.sub(br_space, ' ', text)
-    return re.sub(clean, '', text)
+    text = re.sub(br_space, " ", text)
+    return re.sub(clean, "", text)
 
 
 @rq.job(timeout=300)
 def export_data(id_ecoe):
-    from zipfile import ZipFile, ZIP_DEFLATED
-    from app.model.Student import Answer
-    from app.model.ECOE import ECOE
+    from zipfile import ZIP_DEFLATED, ZipFile
+
     import app.api.export as export
+    from app.model.ECOE import ECOE
+    from app.model.Student import Answer
 
-
-    dummy_answer = Answer(points='0.00', answer_schema='{}')
+    dummy_answer = Answer(points="0.00", answer_schema="{}")
 
     _ecoe = ECOE.query.get(id_ecoe)
 
@@ -56,32 +58,38 @@ def export_data(id_ecoe):
 
     rq.set_task_progress(0)
     for student in _ecoe.students:
-        _tuple = {'ecoe_name': _ecoe.name,
-                  'shift_time_start': student.planner.shift.time_start,
-                  'round_description': student.planner.round.description,
-                  'student_order': student.planner_order,
-                  'student_dni': student.dni,
-                  'student_name': student.name,
-                  'student_surnames': student.surnames,
-                  'shift_code': student.planner.shift.shift_code,
-                  'round_code': student.planner.round.round_code}
+        _tuple = {
+            "ecoe_name": _ecoe.name,
+            "shift_time_start": student.planner.shift.time_start,
+            "round_description": student.planner.round.description,
+            "student_order": student.planner_order,
+            "student_dni": student.dni,
+            "student_name": student.name,
+            "student_surnames": student.surnames,
+            "shift_code": student.planner.shift.shift_code,
+            "round_code": student.planner.round.round_code,
+        }
 
         for station in _ecoe.stations:
-            _tuple = {**_tuple,
-                      'station_order': station.order,
-                      'station_name': station.name}
+            _tuple = {
+                **_tuple,
+                "station_order": station.order,
+                "station_name": station.name,
+            }
 
             for question in station.questions:
                 _question = json.loads(question.question_schema)
 
-                _tuple = {**_tuple,
-                          'question_order': question.order,
-                          'question_type': _question['type'],
-                          'question_description': clean_html(_question['description']),
-                          'question_reference': clean_html(_question['reference']),
-                          'question_max_points': str(question.max_points),
-                          'area_code': question.area.code,
-                          'area_name': question.area.name}
+                _tuple = {
+                    **_tuple,
+                    "question_order": question.order,
+                    "question_type": _question["type"],
+                    "question_description": clean_html(_question["description"]),
+                    "question_reference": clean_html(_question["reference"]),
+                    "question_max_points": str(question.max_points),
+                    "area_code": question.area.code,
+                    "area_name": question.area.name,
+                }
 
                 _answers = set(student.answers).intersection(question.answers)
 
@@ -89,54 +97,71 @@ def export_data(id_ecoe):
                     _answers = [dummy_answer]
 
                 for answer in _answers:
+
                     def search_in_options(list_options, id_option):
                         for option in list_options:
-                            if str(option['id_option']) == str(id_option):
-                                return clean_html(option['label'])
-                        return ''
+                            if str(option["id_option"]) == str(id_option):
+                                return clean_html(option["label"])
+                        return ""
 
                     _answer = json.loads(answer.answer_schema)
                     _answers_list = []
 
-                    if 'selected' in _answer:
-                        if isinstance(_answer['selected'], list):
-                            for option_selected in _answer['selected']:
-                                _answers_list.append(search_in_options(_question['options'],
-                                                                       option_selected['id_option']))
-                        elif isinstance(_answer['selected'], dict):
-                            _answers_list.append(search_in_options(_question['options'],
-                                                                   _answer['selected']['id_option']))
-                        elif isinstance(_answer['selected'], int):
-                            _answers_list.append(str(_answer['selected']))
+                    if "selected" in _answer:
+                        if isinstance(_answer["selected"], list):
+                            for option_selected in _answer["selected"]:
+                                _answers_list.append(
+                                    search_in_options(
+                                        _question["options"],
+                                        option_selected["id_option"],
+                                    )
+                                )
+                        elif isinstance(_answer["selected"], dict):
+                            _answers_list.append(
+                                search_in_options(
+                                    _question["options"],
+                                    _answer["selected"]["id_option"],
+                                )
+                            )
+                        elif isinstance(_answer["selected"], int):
+                            _answers_list.append(str(_answer["selected"]))
 
-                    _tuple = {**_tuple,
-                              'answer_points': str(answer.points),
-                              'answer_selected': " # ".join(_answers_list)}
+                    _tuple = {
+                        **_tuple,
+                        "answer_points": str(answer.points),
+                        "answer_selected": " # ".join(_answers_list),
+                    }
 
                     _data.append(_tuple)
 
                     _count += 1
                     rq.set_task_progress(round(99 * _count // _count_total))
 
-    _filename = 'opendata_%s_%s' % (_ecoe.name, datetime.datetime.now().strftime('%Y%m%d%H%M%S'))
-    _filetype = 'csv'
+    _filename = "opendata_%s_%s" % (
+        _ecoe.name,
+        datetime.datetime.now().strftime("%Y%m%d%H%M%S"),
+    )
+    _filetype = "csv"
 
-    _file = export.records(_records=_data,
-                           filename=_filename,
-                           filetype=_filetype)
+    _file = export.records(_records=_data, filename=_filename, filetype=_filetype)
 
-    _archiveroute = os.path.join(os.path.dirname(current_app.instance_path),
-                                 current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
-                                 _filename)
+    _archiveroute = os.path.join(
+        os.path.dirname(current_app.instance_path),
+        current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
+        _filename,
+    )
 
-    with open('%s.%s' % (_archiveroute, _filetype), 'wb') as f:
+    with open("%s.%s" % (_archiveroute, _filetype), "wb") as f:
         f.write(_file.data)
         f.flush()
 
-        with ZipFile('%s.zip' % _archiveroute, "w") as zf:
-            zf.write(f.name, arcname='%s.%s' % (_filename, _filetype), compress_type=ZIP_DEFLATED)
+        with ZipFile("%s.zip" % _archiveroute, "w") as zf:
+            zf.write(
+                f.name,
+                arcname="%s.%s" % (_filename, _filetype),
+                compress_type=ZIP_DEFLATED,
+            )
             zf.close()
         f.close()
         os.remove(f.name)
-        rq.finish_job(file='%s.zip' % _filename)
-
+        rq.finish_job(file="%s.zip" % _filename)
