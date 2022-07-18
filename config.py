@@ -19,6 +19,19 @@ from ast import literal_eval
 from dotenv import load_dotenv
 
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# Default configuration
+os.environ.setdefault('SERVER_NAME', 'localhost')
+os.environ.setdefault('SECRET_KEY', '111111111111111111111')
+os.environ.setdefault('BCRYPT_LOG_ROUNDS', '4')
+os.environ.setdefault('DEBUG', 'True')
+os.environ.setdefault('TESTING', 'True')
+os.environ.setdefault('LOG_TO_STDOUT', 'False')
+os.environ.setdefault('SQLALCHEMY_TRACK_MODIFICATIONS', 'False')
+os.environ.setdefault('API_AUTH', 'False')
+os.environ.setdefault('SQLALCHEMY_DATABASE_URI', 'localhost:8083/openECOE_dev')
+os.environ.setdefault('CHRONO_ROUTE', 'localhost:6061')
+
 load_dotenv(os.path.join(basedir, '.env'))
 
 
