@@ -157,14 +157,15 @@ def load_data(db):
     db.session.commit()
 
 
-# Automatically enable transactions for all tests, without importing any extra fixtures.
+# Automatically enable transactions for all tests,
+# without importing any extra fixtures.
 @pytest.fixture(autouse=True)
 def enable_transactional_tests(app, _db):
     pass
 
 
 @pytest.fixture(scope='session')
-def app(request):
+def testapp(request):
     """Session-wide test `Flask` application."""
     app = flask_app.create_app(TestConfig)
 
@@ -208,7 +209,6 @@ def test_with_admin_user(app):
 @pytest.fixture
 def make_organization():
     from app.model.Organization import Organization
-    from app.model import db
 
     def _make():
         org = Organization()

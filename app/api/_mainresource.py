@@ -61,7 +61,6 @@ class OpenECOEResource(ModelResource):
 
         _query = self.manager.instances().all()
 
-        _columns = self.Meta.model.__table__.columns.keys()
         _filename = self.Meta.name
 
         _dict = {_filename: _query}

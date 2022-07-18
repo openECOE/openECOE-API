@@ -97,7 +97,7 @@ class ECOE(db.Model):
 
         try:
             time_start = self.shifts[0].time_start
-        except:
+        except IndexError:
             pass
 
         config = {

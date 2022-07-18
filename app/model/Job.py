@@ -35,7 +35,7 @@ class Job(db.Model):
         try:
             _q = rq.get_queue()
             _rq_job = _q.fetch_job(self.id)
-        except:
+        except Exception:
             return None
         return _rq_job
 

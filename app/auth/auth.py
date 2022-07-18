@@ -16,7 +16,7 @@
 
 from flask import g
 from flask_login import current_user
-from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed, TypeNeed
+from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed
 from flask_httpauth import HTTPTokenAuth
 from werkzeug.exceptions import abort
 
