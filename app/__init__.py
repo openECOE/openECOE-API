@@ -32,6 +32,10 @@ def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
     CORS(flask_app)
 
+    from app.status import bp as status_bp
+    status_bp.url_prefix = "/status"
+    flask_app.register_blueprint(status_bp)
+
     from app.auth import bp as auth_bp
 
     auth_bp.url_prefix = "/auth"
