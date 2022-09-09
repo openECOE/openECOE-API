@@ -14,12 +14,9 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from base64 import encode
-from bz2 import compress
-from flask import Blueprint, send_file
-import app
+
+from flask import Blueprint, send_from_directory, current_app
 import os
-import numpy as np
 import pandas as pd
 from app.model import db
 import json
@@ -203,27 +200,16 @@ def generar_csv(organization="",ecoe=""):
         else:
             filename = filenamebase + cadena_parametros + filenameextension
             filenamezip = filenamebase + cadena_parametros + ".zip"
-
-        absolutefilepath = os.path.join(app.flask_app.root_path, 'statistics', 'files', filenamezip)
-        relativefilepath = os.path.join('statistics', 'files',  filenamezip)
+            
+        _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        absolutefilepath = os.path.join(_archiveroute, filenamezip)
         #Funcion de Pandas, referente a la carpeta raiz del directorio, en este caso "OPENECOE-API"
         compression_options = dict(method='zip',archive_name=filename)
         df_answer.to_csv(absolutefilepath,index=False,encoding='utf-8',compression=compression_options)
         #Funcion de flask, referente a la carpeta raiz "app"
-        return relativefilepath
-        #Comprobado que devuelve el archivo con el nombre que toca en Postman
+
+        return filenamezip
         
-        #Esto es un intento de hacer que el archivo se cree como temporal, pero no está teniendo exito
-        """
-        import tempfile
-        f = tempfile.NamedTemporaryFile()
-        with f as fichero:
-            cadena = df_answer.to_csv(index=False,encoding='utf-8')
-            fichero.write(bytes(cadena,'utf8'))
-            fichero.seek(0)
-            return send_file(fichero.file, attachment_filename=fichero.name, as_attachment=True, mimetype='text/csv')
-        return send_file(f.file, attachment_filename=f.name, as_attachment=True, mimetype='text/csv')
-        """
     except Exception as err:
         for arg in err.args:
             error = ""
@@ -233,16 +219,24 @@ def generar_csv(organization="",ecoe=""):
 #http://127.0.0.1:5000/statistics para acceder a esta ruta
 @bp.route("/", methods=['GET', 'POST'])
 def send_CSV():
-    relativefilepath = generar_csv()
-    #Funcion de flask, referente a la carpeta raiz "app"
-    return send_file(relativefilepath, as_attachment=True)
+    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+    file_name = generar_csv()
+    return send_from_directory(directory=file_path,
+                                   filename=file_name,
+                                   as_attachment=True)
 
 @bp.route("/ecoe/<id_ecoe>", methods=['GET', 'POST'])
 def send_CSV_ecoe(id_ecoe):
-    relativefilepath = generar_csv(ecoe=id_ecoe)
-    return send_file(relativefilepath, as_attachment=True)
+    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+    file_name = generar_csv(ecoe=id_ecoe)
+    return send_from_directory(directory=file_path,
+                                   filename=file_name,
+                                   as_attachment=True)
 
 @bp.route("/organization/<id_organization>", methods=['GET', 'POST'])
 def send_CSV_organization(id_organization):
-    relativefilepath = generar_csv(organization=id_organization)
-    return send_file(relativefilepath, as_attachment=True)
+    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+    file_name = generar_csv(organization=id_organization)
+    return send_from_directory(directory=file_path,
+                                   filename=file_name,
+                                   as_attachment=True)
