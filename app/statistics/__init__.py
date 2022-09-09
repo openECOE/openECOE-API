@@ -21,6 +21,7 @@ import pandas as pd
 from app.model import db
 import json
 from app.auth import auth
+import datetime
 #Esto está para hacer pruebas, mostrando los resultados por pantalla
 import io
 import time
@@ -192,14 +193,16 @@ def generar_csv(organization="",ecoe=""):
         filenamebase = "opendata"
         filenameextension = ".csv"
 
+        fecha_creacion ="_" + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         identidad = auth.read_identity_from_flask_login().id
         if identidad:
-            user = "_" + auth.current_user.name + "_" + auth.current_user.surname + "_" + str(auth.current_user.id)
-            filename = filenamebase + cadena_parametros + user + filenameextension
-            filenamezip = filenamebase + cadena_parametros + user + ".zip"
+            #user = "_" + auth.current_user.name + "_" + auth.current_user.surname + "_" + str(auth.current_user.id)
+            user = "_" + str(auth.current_user.id)
+            filename = filenamebase + cadena_parametros + user + fecha_creacion + filenameextension
+            filenamezip = filenamebase + cadena_parametros + user + fecha_creacion + ".zip"
         else:
-            filename = filenamebase + cadena_parametros + filenameextension
-            filenamezip = filenamebase + cadena_parametros + ".zip"
+            filename = filenamebase + cadena_parametros + fecha_creacion + filenameextension
+            filenamezip = filenamebase + cadena_parametros + fecha_creacion + ".zip"
             
         _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
         absolutefilepath = os.path.join(_archiveroute, filenamezip)
