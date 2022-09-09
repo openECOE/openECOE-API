@@ -14,8 +14,19 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app.model import Organization
+from base64 import encode
+from bz2 import compress
 from flask import Blueprint, send_file
+import app
+import os
+import numpy as np
+import pandas as pd
+from app.model import db
+import json
+from app.auth import auth
+#Esto está para hacer pruebas, mostrando los resultados por pantalla
+import io
+import time
 
 bp = Blueprint('statistics', __name__)
 
@@ -27,32 +38,31 @@ def introducir_key_id(list_of_dictionary,serie_id, key):
         i = i + 1
     return list_of_dictionary
 
-#Esta función convierte diccionarios con clave "selected" en listas de diccionarios, haciendo que los datos queden juntos
-def convert(dictionary):
-    for key in dictionary:
-        if key == "selected" and isinstance(dictionary[key], list)==False:
-            dictionary[key] = [dictionary[key]]
-    return dictionary
-
-#http://127.0.0.1:5000/statistics para acceder a esta ruta
-@bp.route("/", methods=['GET', 'POST'])
-def statistics():
+def generar_csv(organization="",ecoe=""):
     try:
-        import numpy as np
-        import pandas as pd
-        from app.model import db
-        import json
+        #Medimos el tiempo de ejecucion
+        #inicio = time.time()
+
         #conexion = db.engine.connect().connection
         conexion = db.engine
-        #Medimos el tiempo de ejecucion
-        import time
-        inicio = time.time()
-
         #df_organization = pd.read_sql("SELECT * FROM shift", organization)
         #df_ecoe = pd.read_sql("SELECT * FROM shift", ecoe)
-        df_ecoe_organization = pd.merge(left=pd.read_sql_table("ecoe", conexion).rename(columns = {'id':'id_ecoe','name':'ecoe_name',
-        'status':'ecoe_status','chrono_token':'ecoe_chrono_token'}),
-        right=pd.read_sql_table("organization", conexion).rename(columns = {'id':'id_organization',
+        cadena_parametros = ""
+        if organization != "":
+            cadena_parametros = "_org_" + organization
+            df_organization = pd.read_sql_query("SELECT * FROM organization WHERE id = " + organization, conexion)
+        else:
+            df_organization = pd.read_sql_table("organization", conexion)
+        if ecoe != "":
+            cadena_parametros = "_ecoe_" + ecoe
+            #TODO quitar el crhono_token
+            df_ecoe_original = pd.read_sql("SELECT id, name, id_organization, id_coordinator, status FROM ecoe WHERE id = " + ecoe, conexion)
+        else:
+            df_ecoe_original = pd.read_sql_table("ecoe", conexion)
+
+        df_ecoe_organization = pd.merge(left=df_ecoe_original.rename(columns = {'id':'id_ecoe','name':'ecoe_name',
+        'status':'ecoe_status'}),
+        right=df_organization.rename(columns = {'id':'id_organization',
         'name':'organization_name'}), on=['id_organization'])
         df_ecoe = pd.merge(left=df_ecoe_organization,
         right=pd.read_sql_table("user", conexion).loc[:,['id','name','surname','email']].rename(columns = {
@@ -71,9 +81,7 @@ def statistics():
         columns = {'id':'id_student','name':'student_name','surnames':'student_surnames','dni':'student_dni','planner_order':'student_planner_order'}),
          on=['id_planner','id_ecoe'])
         
-        
         #df_question = pd.read_sql("SELECT * FROM question", conexion)
-        #Vamos a intentar normalizar por partes
         #df_question_original = pd.read_sql("SELECT * FROM question", conexion)   
         df_question_original = pd.read_sql_table("question", conexion)  
         #Quita las comillas excesivas que envolvian cada diccionario sin causar errores
@@ -109,9 +117,8 @@ def statistics():
         df_question = pd.merge(left=df_question_area_station, right=pd.read_sql_table("block", conexion).loc[:,['id','name','order']].rename(
         columns={'id':'id_block','name':'block_name','order':'block_order'}), on=['id_block'])
         
-        #df_answer = pd.read_sql("SELECT * FROM answer", conexion)
-        #Esto lo podemos poner al final, mete el tipo de pregunta como una columna más a la tabla, pero hace que tarde mucho mas
-        
+        #df_answer = pd.read_sql("SELECT * FROM answer", conexion)   
+        """
         df_answer_original = pd.read_sql_table("answer", conexion)
         listadict2 = df_answer_original.loc[:,"answer_schema"].values.tolist()
         listadict2 = list(map(json.loads, listadict2))
@@ -126,25 +133,23 @@ def statistics():
         """
         df_answer_student = pd.merge(left=pd.read_sql_table("answer", conexion).rename(columns = {'points':'answer_points'}),
         right=df_student, on='id_student')
-        """
+        
         df_answer_student_question = pd.merge(left=df_answer_student,
         right=df_question, on=['id_question','id_station','id_ecoe']).rename(columns = {'id':'id_answer'})
-        
         
         df_answer = pd.merge(left=df_answer_student_question,
         right=df_ecoe, on=['id_ecoe']).rename(columns = {'id':'id_answer'})
         
         #Formateo para que los datos sean mas legibles
-        #TODO Seguir cambiando estos indices para dejarlos de la forma mas legible y luego pasar a CSV
         df_answer = df_answer.reindex(columns=['organization_name',
-        'ecoe_name', 'ecoe_status', 'ecoe_chrono_token',
+        'ecoe_name', 'ecoe_status',
         'round_code', 'round_description',
         'shift_code', 'shift_time_start',
 
         'block_name', 'block_order',
         'question_order', 'question_reference', 'question_description',
         'area_name', 'area_code',
-        'answer_schema','answer_type',
+        'answer_schema',#'answer_type',
         'answer_points','question_max_points',
         
         'student_name','student_surnames', 'student_dni', 'student_planner_order',
@@ -161,8 +166,8 @@ def statistics():
         #cadena = df.to_string(index=False)
         #cadena = df.to_html(index=False)
         
-        cadena = "Dimensiones de df_answer (filas, columnas) = (" + str(df_answer.shape[0]) + "," + str(df_answer.shape[1]) +")\n"
-        cadena = cadena + "<p>df_answer</p>" + df_answer.head().to_html(index=False)
+        #cadena = "Dimensiones de df_answer (filas, columnas) = (" + str(df_answer.shape[0]) + "," + str(df_answer.shape[1]) +")\n"
+        #cadena = cadena + "<p>df_answer</p>" + df_answer.head().to_html(index=False)
         #cadena = cadena + "Datos cadena:   " + str(df_question["question_schema"].describe())
         #Mostrar lista de diccionarios con la que hemos acabado la ejecución
         #cadena = cadena + "<p>listadict</p>" + str(listadict)
@@ -172,27 +177,72 @@ def statistics():
         #cadena = cadena + "<p>pddict  range</p>" + pddict.iloc[155:160,:].head().to_html(index=False)
         
         #Mostramos el tiempo de ejecucion
-        fin = time.time()
-        tejecucion = fin-inicio
-        cadena = cadena + "Tiempo de ejecución = " + str(tejecucion) + " segundos"
-
-        import io
-        buf = io.StringIO()
-        df_answer.info(buf=buf)
-        s = buf.getvalue()
-        s = s.replace("\n","<br>")
-        s = s.replace("         ","&emsp;")
-        cadena = cadena + s
-        df_answer.to_csv("app/ficheros/datos_estadistica.csv",index=False,encoding='utf-8')
-        return send_file("ficheros/datos_estadistica.csv", as_attachment=True)
+        #fin = time.time()
+        #tejecucion = fin-inicio
+        #cadena = cadena + "Tiempo de ejecución = " + str(tejecucion) + " segundos"
+        
+        #Formateo para HTML
+        #buf = io.StringIO()
+        #df_answer.info(buf=buf)
+        #s = buf.getvalue()
+        #s = s.replace("\n","<br>")
+        #s = s.replace("         ","&emsp;")
+        #cadena = cadena + s
         #return cadena
+        
+        #Nombre del archivo a guardar
+        #TODO Poner fecha e id
+        filenamebase = "opendata"
+        filenameextension = ".csv"
+
+        identidad = auth.read_identity_from_flask_login().id
+        if identidad:
+            user = "_" + auth.current_user.name + "_" + auth.current_user.surname + "_" + str(auth.current_user.id)
+            filename = filenamebase + cadena_parametros + user + filenameextension
+            filenamezip = filenamebase + cadena_parametros + user + ".zip"
+        else:
+            filename = filenamebase + cadena_parametros + filenameextension
+            filenamezip = filenamebase + cadena_parametros + ".zip"
+
+        absolutefilepath = os.path.join(app.flask_app.root_path, 'statistics', 'files', filenamezip)
+        relativefilepath = os.path.join('statistics', 'files',  filenamezip)
+        #Funcion de Pandas, referente a la carpeta raiz del directorio, en este caso "OPENECOE-API"
+        compression_options = dict(method='zip',archive_name=filename)
+        df_answer.to_csv(absolutefilepath,index=False,encoding='utf-8',compression=compression_options)
+        #Funcion de flask, referente a la carpeta raiz "app"
+        return relativefilepath
+        #Comprobado que devuelve el archivo con el nombre que toca en Postman
+        
+        #Esto es un intento de hacer que el archivo se cree como temporal, pero no está teniendo exito
+        """
+        import tempfile
+        f = tempfile.NamedTemporaryFile()
+        with f as fichero:
+            cadena = df_answer.to_csv(index=False,encoding='utf-8')
+            fichero.write(bytes(cadena,'utf8'))
+            fichero.seek(0)
+            return send_file(fichero.file, attachment_filename=fichero.name, as_attachment=True, mimetype='text/csv')
+        return send_file(f.file, attachment_filename=f.name, as_attachment=True, mimetype='text/csv')
+        """
     except Exception as err:
         for arg in err.args:
             error = ""
             error = error + arg
         return "ko - Error: " + error
 
-@bp.route("/download", methods=['GET', 'POST'])
-def download():
-        
-        return send_file("ficheros/datos_estadistica.csv", as_attachment=True)
+#http://127.0.0.1:5000/statistics para acceder a esta ruta
+@bp.route("/", methods=['GET', 'POST'])
+def send_CSV():
+    relativefilepath = generar_csv()
+    #Funcion de flask, referente a la carpeta raiz "app"
+    return send_file(relativefilepath, as_attachment=True)
+
+@bp.route("/ecoe/<id_ecoe>", methods=['GET', 'POST'])
+def send_CSV_ecoe(id_ecoe):
+    relativefilepath = generar_csv(ecoe=id_ecoe)
+    return send_file(relativefilepath, as_attachment=True)
+
+@bp.route("/organization/<id_organization>", methods=['GET', 'POST'])
+def send_CSV_organization(id_organization):
+    relativefilepath = generar_csv(organization=id_organization)
+    return send_file(relativefilepath, as_attachment=True)
