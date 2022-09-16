@@ -33,10 +33,12 @@ def create_app(config_class=BaseConfig):
     CORS(flask_app)
 
     from app.status import bp as status_bp
+
     status_bp.url_prefix = "/status"
     flask_app.register_blueprint(status_bp)
     
     from app.statistics import bp as statistics_bp
+    
     statistics_bp.url_prefix = "/statistics"
     flask_app.register_blueprint(statistics_bp)
 

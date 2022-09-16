@@ -43,17 +43,17 @@ def generar_csv(organization="",ecoe=""):
 
         #conexion = db.engine.connect().connection
         conexion = db.engine
+
         #df_organization = pd.read_sql("SELECT * FROM shift", organization)
-        #df_ecoe = pd.read_sql("SELECT * FROM shift", ecoe)
         cadena_parametros = ""
         if organization != "":
             cadena_parametros = "_org_" + organization
             df_organization = pd.read_sql_query("SELECT * FROM organization WHERE id = " + organization, conexion)
         else:
             df_organization = pd.read_sql_table("organization", conexion)
+        #df_ecoe = pd.read_sql("SELECT * FROM shift", ecoe)
         if ecoe != "":
             cadena_parametros = "_ecoe_" + ecoe
-            #TODO quitar el crhono_token
             df_ecoe_original = pd.read_sql("SELECT id, name, id_organization, id_coordinator, status FROM ecoe WHERE id = " + ecoe, conexion)
         else:
             df_ecoe_original = pd.read_sql_table("ecoe", conexion)
@@ -170,7 +170,6 @@ def generar_csv(organization="",ecoe=""):
         #Mostrar lista de diccionarios con la que hemos acabado la ejecución
         #cadena = cadena + "<p>listadict</p>" + str(listadict)
         #cadena = cadena + "<p>serie_ids</p>" + serie_ids.head().to_html()
-        #cadena = cadena + "<p>df_ecoe</p>" + df_ecoe.head().to_html(index=False)
         #cadena = cadena + "<p>pddict  _max_points</p>" + pddict.iloc[1812:,:].head().to_html(index=False)
         #cadena = cadena + "<p>pddict  range</p>" + pddict.iloc[155:160,:].head().to_html(index=False)
         
@@ -189,14 +188,12 @@ def generar_csv(organization="",ecoe=""):
         #return cadena
         
         #Nombre del archivo a guardar
-        #TODO Poner fecha e id
         filenamebase = "opendata"
         filenameextension = ".csv"
 
         fecha_creacion ="_" + str(datetime.datetime.now().strftime("%Y%m%d%H%M%S"))
         identidad = auth.read_identity_from_flask_login().id
         if identidad:
-            #user = "_" + auth.current_user.name + "_" + auth.current_user.surname + "_" + str(auth.current_user.id)
             user = "_" + str(auth.current_user.id)
             filename = filenamebase + cadena_parametros + user + fecha_creacion + filenameextension
             filenamezip = filenamebase + cadena_parametros + user + fecha_creacion + ".zip"
@@ -206,10 +203,9 @@ def generar_csv(organization="",ecoe=""):
             
         _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
         absolutefilepath = os.path.join(_archiveroute, filenamezip)
-        #Funcion de Pandas, referente a la carpeta raiz del directorio, en este caso "OPENECOE-API"
+        
         compression_options = dict(method='zip',archive_name=filename)
         df_answer.to_csv(absolutefilepath,index=False,encoding='utf-8',compression=compression_options)
-        #Funcion de flask, referente a la carpeta raiz "app"
 
         return filenamezip
         
@@ -228,18 +224,5 @@ def send_CSV():
                                    filename=file_name,
                                    as_attachment=True)
 
-@bp.route("/ecoe/<id_ecoe>", methods=['GET', 'POST'])
-def send_CSV_ecoe(id_ecoe):
-    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-    file_name = generar_csv(ecoe=id_ecoe)
-    return send_from_directory(directory=file_path,
-                                   filename=file_name,
-                                   as_attachment=True)
 
-@bp.route("/organization/<id_organization>", methods=['GET', 'POST'])
-def send_CSV_organization(id_organization):
-    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-    file_name = generar_csv(organization=id_organization)
-    return send_from_directory(directory=file_path,
-                                   filename=file_name,
-                                   as_attachment=True)
+

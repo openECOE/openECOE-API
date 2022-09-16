@@ -29,8 +29,9 @@ from app.api.user import RoleType
 from app.jobs import ecoe as jobs_ecoe
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
-
-
+import os
+from flask import send_from_directory, current_app
+from app.statistics import generar_csv
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -217,6 +218,18 @@ class EcoeResource(OpenECOEResource):
         )
 
         return _job
+    
+    @ItemRoute.GET("/csv", rel='getecoe')
+    def send_CSV_ecoe(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        
+        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        file_name = generar_csv(ecoe=str(ecoe.id))
+        return send_from_directory(directory=file_path,
+                                    filename=file_name,
+                                    as_attachment=True)
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
