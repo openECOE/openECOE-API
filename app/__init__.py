@@ -36,11 +36,6 @@ def create_app(config_class=BaseConfig):
 
     status_bp.url_prefix = "/status"
     flask_app.register_blueprint(status_bp)
-    
-    from app.statistics import bp as statistics_bp
-    
-    statistics_bp.url_prefix = "/statistics"
-    flask_app.register_blueprint(statistics_bp)
 
     from app.auth import bp as auth_bp
 

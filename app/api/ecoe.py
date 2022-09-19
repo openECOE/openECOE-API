@@ -295,12 +295,10 @@ class EcoeResource(OpenECOEResource):
     archive_instances.request_schema = archive_instances.response_schema = Instances()
 
     @Route.GET("/archive/<int:id>", rel="readArchived")
-    # trunk-ignore(flake8/F821)
     def read_archive(self, id) -> fields.Inline("self"):
         return self.manager.read(id, source=Location.ARCHIVE_ONLY)
 
     @Route.POST("/archive/<int:id>/restore", rel="restoreFromArchive")
-    # trunk-ignore(flake8/F821)
     def restore_from_archive(self, id) -> fields.Inline("self"):
         item = self.manager.read(id, source=Location.ARCHIVE_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})

@@ -26,8 +26,6 @@ import datetime
 import io
 import time
 
-bp = Blueprint('statistics', __name__)
-
 #Esta función introduce en una lista de diccionarios un par clave(=atributo "key")-valorid(=serie_id) 
 def introducir_key_id(list_of_dictionary,serie_id, key):
     i = 0
@@ -214,15 +212,6 @@ def generar_csv(organization="",ecoe=""):
             error = ""
             error = error + arg
         return "ko - Error: " + error
-
-#http://127.0.0.1:5000/statistics para acceder a esta ruta
-@bp.route("/", methods=['GET', 'POST'])
-def send_CSV():
-    file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-    file_name = generar_csv()
-    return send_from_directory(directory=file_path,
-                                   filename=file_name,
-                                   as_attachment=True)
 
 
 
