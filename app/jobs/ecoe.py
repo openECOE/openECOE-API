@@ -18,7 +18,7 @@
 import datetime
 import os
 
-from flask import current_app, json
+from flask import json
 
 from app.jobs import rq
 
@@ -146,8 +146,7 @@ def export_data(id_ecoe):
     _file = export.records(_records=_data, filename=_filename, filetype=_filetype)
 
     _archiveroute = os.path.join(
-        os.path.dirname(current_app.instance_path),
-        current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
+        rq.ARCHIVE_ROUTE,
         _filename,
     )
 
