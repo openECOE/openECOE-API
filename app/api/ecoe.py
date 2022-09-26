@@ -31,7 +31,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_from_directory, current_app
-from app.statistics import generar_csv
+from app.statistics import generar_csv, resultados_evaluativo_ecoe
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -77,6 +77,7 @@ class ArchiveManager(MainManager):
 # Permissions to ECOE childs resources
 class EcoeChildResource(OpenECOEResource):
     class Meta:
+        #Tupla permiso:cadena_que_otorga_permiso
         permissions = {
             "read": ["read:ecoe", "evaluate"],
             "create": "manage",
@@ -231,6 +232,13 @@ class EcoeResource(OpenECOEResource):
                                     filename=file_name,
                                     as_attachment=True)
 
+    @ItemRoute.GET("/evaluativo", rel='resultados_evaluativo_ecoe')
+    def send_evaluativo_ecoe(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
+        
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
@@ -255,20 +263,17 @@ class EcoeResource(OpenECOEResource):
     def chrono_load(self, ecoe) -> fields.String():
         return ecoe.load_config()
 
-    @ItemRoute.POST("/publish", rel="publish")
-    # trunk-ignore(flake8/F821)
+    @ItemRoute.POST("/publish", rel="publish")    
     def publish(self, ecoe) -> fields.Inline("self"):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.PUBLISHED})
 
     @ItemRoute.POST("/draft", rel="draft")
-    # trunk-ignore(flake8/F821)
     def draft(self, ecoe) -> fields.Inline("self"):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
     @Route.GET("/<int:id>", rel="self", attribute="instance")
-    # trunk-ignore(flake8/F821)
     def read(self, id) -> fields.Inline("self"):
         return self.manager.read(id, source=Location.BOTH)
 

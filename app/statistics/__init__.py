@@ -15,6 +15,7 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import csv
 from flask import Blueprint, send_from_directory, current_app
 import os
 import pandas as pd
@@ -26,6 +27,16 @@ import datetime
 import io
 import time
 
+
+
+def preguntas(id_ecoe):
+    conexion = db.engine
+    return pd.read_sql("SELECT q.* FROM question q, station s WHERE q.id_station = s.id AND s.id_ecoe =" + id_ecoe, conexion)
+
+def estudiantes(id_ecoe):
+    conexion = db.engine
+    return pd.read_sql("SELECT * FROM student WHERE id_ecoe = " + id_ecoe, conexion)
+
 #Esta función introduce en una lista de diccionarios un par clave(=atributo "key")-valorid(=serie_id) 
 def introducir_key_id(list_of_dictionary,serie_id, key):
     i = 0
@@ -34,12 +45,8 @@ def introducir_key_id(list_of_dictionary,serie_id, key):
         i = i + 1
     return list_of_dictionary
 
-def generar_csv(organization="",ecoe=""):
+def generar_csv(organization="",ecoe="") -> csv:
     try:
-        #Medimos el tiempo de ejecucion
-        #inicio = time.time()
-
-        #conexion = db.engine.connect().connection
         conexion = db.engine
 
         #df_organization = pd.read_sql("SELECT * FROM shift", organization)
@@ -60,6 +67,7 @@ def generar_csv(organization="",ecoe=""):
         'status':'ecoe_status'}),
         right=df_organization.rename(columns = {'id':'id_organization',
         'name':'organization_name'}), on=['id_organization'])
+
         df_ecoe = pd.merge(left=df_ecoe_organization,
         right=pd.read_sql_table("user", conexion).loc[:,['id','name','surname','email']].rename(columns = {
         'id':'id_coordinator', 'name':'coordinator_name','surname':'coordinator_surname','email':'coordinator_email'}),
@@ -114,22 +122,24 @@ def generar_csv(organization="",ecoe=""):
         columns={'id':'id_block','name':'block_name','order':'block_order'}), on=['id_block'])
         
         #df_answer = pd.read_sql("SELECT * FROM answer", conexion)   
-        """
+        
         df_answer_original = pd.read_sql_table("answer", conexion)
         listadict2 = df_answer_original.loc[:,"answer_schema"].values.tolist()
         listadict2 = list(map(json.loads, listadict2))
         serie_ids2 = df_answer_original.loc[:,["id"]]
         listadict2 = introducir_key_id(listadict2, serie_ids2, "id_answer")
         pddict2 = pd.json_normalize(listadict2, errors='ignore')
-        df_answer_normalizada = pd.merge(left=pd.read_sql_table("answer", conexion).rename(columns = {'id':'id_answer'}),
+
+        df_answer_normalizada = pd.merge(left=pd.read_sql_table("answer", conexion).rename(columns = {'id':'id_answer'}), 
         right=pddict2, on='id_answer')[['id_answer','id_student','id_question','answer_schema','points','id_station',
         'type']].rename(columns = {'type':'answer_type'})
+
         df_answer_student = pd.merge(left=df_answer_normalizada.rename(columns = {'points':'answer_points'}),
         right=df_student, on='id_student')
         """
         df_answer_student = pd.merge(left=pd.read_sql_table("answer", conexion).rename(columns = {'points':'answer_points'}),
         right=df_student, on='id_student')
-        
+        """
         df_answer_student_question = pd.merge(left=df_answer_student,
         right=df_question, on=['id_question','id_station','id_ecoe']).rename(columns = {'id':'id_answer'})
         
@@ -145,7 +155,7 @@ def generar_csv(organization="",ecoe=""):
         'block_name', 'block_order',
         'question_order', 'question_reference', 'question_description',
         'area_name', 'area_code',
-        'answer_schema',#'answer_type',
+        'answer_schema','answer_type',
         'answer_points','question_max_points',
         
         'student_name','student_surnames', 'student_dni', 'student_planner_order',
@@ -165,16 +175,9 @@ def generar_csv(organization="",ecoe=""):
         #cadena = "Dimensiones de df_answer (filas, columnas) = (" + str(df_answer.shape[0]) + "," + str(df_answer.shape[1]) +")\n"
         #cadena = cadena + "<p>df_answer</p>" + df_answer.head().to_html(index=False)
         #cadena = cadena + "Datos cadena:   " + str(df_question["question_schema"].describe())
-        #Mostrar lista de diccionarios con la que hemos acabado la ejecución
         #cadena = cadena + "<p>listadict</p>" + str(listadict)
         #cadena = cadena + "<p>serie_ids</p>" + serie_ids.head().to_html()
         #cadena = cadena + "<p>pddict  _max_points</p>" + pddict.iloc[1812:,:].head().to_html(index=False)
-        #cadena = cadena + "<p>pddict  range</p>" + pddict.iloc[155:160,:].head().to_html(index=False)
-        
-        #Mostramos el tiempo de ejecucion
-        #fin = time.time()
-        #tejecucion = fin-inicio
-        #cadena = cadena + "Tiempo de ejecución = " + str(tejecucion) + " segundos"
         
         #Formateo para HTML
         #buf = io.StringIO()
@@ -185,7 +188,6 @@ def generar_csv(organization="",ecoe=""):
         #cadena = cadena + s
         #return cadena
         
-        #Nombre del archivo a guardar
         filenamebase = "opendata"
         filenameextension = ".csv"
 
@@ -213,5 +215,36 @@ def generar_csv(organization="",ecoe=""):
             error = error + arg
         return "ko - Error: " + error
 
+def resultados_evaluativo_ecoe(ecoe="1") -> dict:
+    try:
+        conexion = db.engine
 
+        df_question = preguntas(ecoe) 
+        df_student = estudiantes(ecoe).loc[:,['id','name','surnames','dni']]
+        
+        df_answer = pd.merge(
+            left=df_student.rename(columns = {'id':'id_student'}),
+            right=pd.read_sql("SELECT a.* FROM answer a, station s WHERE a.id_station = s.id AND s.id_ecoe =" + ecoe, conexion).loc[:,['id','id_student','id_question','points']].rename(columns = {'id':'id_answer'}),
+            on=['id_student']).loc[:,['id_student','points']].groupby("id_student", as_index=False).sum()
+        
+        #NOTA ABSOLUTA, sumamos los puntos de las preguntas que hay en toda la ECOE
+        total_points = df_question.loc[:,['max_points']].sum()['max_points']
 
+        #NOTA RELATIVA, en función de la puntuación máxima sacada por un estudiante
+        max_points =df_answer['points'].max()
+
+        #Asignamos las notas relativas y absolutas usando de parámetro los calculado arriba
+        df_answer = df_answer.assign(Puntuacion_absoluta = df_answer['points']/total_points*10).round(decimals=2).assign(
+            Puntuacion_relativa = df_answer['points']/max_points*10).round(decimals=2).loc[:,['id_student','Puntuacion_absoluta','Puntuacion_relativa']]
+
+        df_final = pd.merge(left=df_student.rename(columns = {'id':'id_student'}),
+        right=df_answer,
+        on=['id_student']).set_index('id_student', drop=False)
+        cadena = df_final.transpose().to_dict()
+        
+        return cadena
+    except Exception as err:
+        for arg in err.args:
+            error = ""
+            error = error + arg
+        return "ko - Error: " + error
