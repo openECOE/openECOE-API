@@ -232,7 +232,7 @@ class EcoeResource(OpenECOEResource):
                                     filename=file_name,
                                     as_attachment=True)
 
-    @ItemRoute.GET("/evaluativo", rel='resultados_evaluativo_ecoe')
+    @ItemRoute.GET("/results", rel='resultados_evaluativo_ecoe')
     def send_evaluativo_ecoe(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
