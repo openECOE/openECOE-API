@@ -32,8 +32,8 @@ def resultados_evaluativo_ecoe(ecoe) -> dict:
         max_points =df_answer['points'].max()
 
         #Asignamos las notas relativas y absolutas usando de parámetro los calculado arriba
-        df_answer = df_answer.assign(Puntuacion_absoluta = df_answer['points']/total_points*10).round(decimals=2).assign(
-            Puntuacion_relativa = df_answer['points']/max_points*10).round(decimals=2).loc[:,['id_student','Puntuacion_absoluta','Puntuacion_relativa']]
+        df_answer = df_answer.assign(absolute_score = df_answer['points']/total_points*10).round(decimals=2).assign(
+            relative_score = df_answer['points']/max_points*10).round(decimals=2).loc[:,['id_student','absolute_score','relative_score']]
 
         df_final = pd.merge(left=df_student.rename(columns = {'id':'id_student'}),
         right=df_answer,
