@@ -14,43 +14,37 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion.routes import Relation
-
-from app.api.user import RoleType, PermissionType
-from app.api._mainresource import OpenECOEResource
-from app.model.Organization import Organization
-from flask_potion.routes import ItemRoute
-from werkzeug.exceptions import Forbidden
+from flask_potion import Resource, fields
+from flask_potion.contrib.alchemy import SQLAlchemyManager
+from flask_potion.routes import  Route#, ItemRoute
 import os
 from flask import send_from_directory, current_app
+from flask_potion.contrib.principals import principals
 from app.statistics import generar_csv
 
-class OrganizationResource(OpenECOEResource):
-    users = Relation('users')
-    ecoes = Relation('ecoes')
+MainManager = principals(SQLAlchemyManager)
+
+class StatisticsResource(Resource):
+
+    class Schema:
+        level = fields.String(enum=['info', 'warning', 'error'])
+        message = fields.String()
 
     class Meta:
-        name = 'organizations'
-        model = Organization
-        natural_key = 'name'
-
+        manager = MainManager
+        name = "statistics"
+        natural_key = "name"
+        
         permissions = {
-            'read': ['update', 'read'],
-            'create': 'delete',
-            'update': ['manage', 'delete'],
-            'delete': RoleType.SUPERADMIN,
-            'manage': [PermissionType.MANAGE, RoleType.SUPERADMIN]
+            "read": ["manage", "read", "evaluate"],
+            "manage": ["manage", "read", "evaluate"],
+            "evaluate": ["manage", "read", "evaluate"]
         }
 
-    @ItemRoute.GET("/csv", rel='getorganization')
-    def send_CSV_ecoe(self, organization):
-        object_permissions = self.manager.get_permissions_for_item(organization)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-        
+    @Route.GET("/csv", rel='getcsvcompleto')
+    def send_CSV_ecoe(self):
         file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        
-        file_name = generar_csv(organization=str(organization.id))
+        file_name = generar_csv()
         return send_from_directory(directory=file_path,
                                     filename=file_name,
                                     as_attachment=True)

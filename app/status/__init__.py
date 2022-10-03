@@ -22,8 +22,6 @@ bp = Blueprint('status', __name__)
 @bp.route("/")
 def status():
     try:
-    
-
         yo = Organization.query.first()
         if yo is not None:
             return "ok"

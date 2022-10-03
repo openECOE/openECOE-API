@@ -69,6 +69,7 @@ class OpenECOEQueue(RQ):
 
 
 rq = OpenECOEQueue(flask_app)
+#flask_app.config.get('RQ_DEFAULT_QUEUE') es 'openecoe_jobs'
 rq.default_queue = flask_app.config.get('RQ_DEFAULT_QUEUE')
 
 @rq.exception_handler
