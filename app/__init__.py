@@ -140,3 +140,14 @@ def create_user(email, password, name, surname, admin, organization, organizatio
                 db.session.commit()
 
             click.echo('User {} created in organization {}'.format(email, organization))
+
+@flask_app.cli.command()
+def virgin():
+    with current_app.app_context():
+        from app.api.organization import Organization
+        from app.model import db
+        import sys
+
+        count = db.session.query(Organization).count()
+        click.echo('Number of organizations: {}'.format(count))
+        sys.exit(count)
