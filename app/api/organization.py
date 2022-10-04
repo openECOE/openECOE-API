@@ -14,16 +14,23 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion.routes import Relation
+
 
 from app.api.user import RoleType, PermissionType
 from app.api._mainresource import OpenECOEResource
 from app.model.Organization import Organization
-from flask_potion.routes import ItemRoute
 from werkzeug.exceptions import Forbidden
 import os
 from flask import send_from_directory, current_app
 from app.statistics import generar_csv
+
+
+from flask_login import current_user
+from flask_potion import fields
+from flask_potion.routes import ItemRoute, Relation
+from app.api.jobs import JobResource
+from app.jobs import statistics as jobs_statistics
+from app.auth import auth
 
 class OrganizationResource(OpenECOEResource):
     users = Relation('users')
@@ -54,3 +61,35 @@ class OrganizationResource(OpenECOEResource):
         return send_from_directory(directory=file_path,
                                     filename=file_name,
                                     as_attachment=True)
+    
+    #Recoge los datos del trabajo
+    @ItemRoute.GET("/csv_asinc")
+    def get_csv_asinc_org(self, organization) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(organization)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        job = current_user.jobs.filter_by(
+            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
+            name="app.jobs.statistics.export_csv(organization=%s, identidad=%s)" % (organization.id, auth.current_user.id)
+        )
+        return job
+
+    #Genera el trabajo y lo lanza en segundo plano
+    @ItemRoute.POST("/csv_asinc")
+    def gen_csv_asinc_org(self, organization) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(organization)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        _identidad = str(auth.current_user.id)
+        _job = current_user.launch_job(
+            func=jobs_statistics.export_csv,
+            description="CSV_Asinc: Organization = %s" % organization.name,
+            organization=str(organization.id),
+            identidad=_identidad,
+        )
+
+        return _job    
