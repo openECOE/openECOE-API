@@ -17,7 +17,7 @@
 from flask_potion import Resource, fields
 from flask_potion.routes import  Route#, ItemRoute
 import os
-from flask import send_from_directory, current_app
+from flask import send_file, current_app
 from flask_potion.contrib.principals import principals
 from werkzeug.exceptions import Forbidden
 from flask_login import current_user
@@ -49,11 +49,24 @@ class StatisticsResource(Resource):
 
     @Route.GET("/csv", rel='getcsvcompleto')
     def send_CSV_ecoe(self):
+        import tempfile
         file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
         file_name = generar_csv()
-        return send_from_directory(directory=file_path,
-                                    filename=file_name,
-                                    as_attachment=True)
+        
+        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
+            fileContent = file.read(-1)
+
+        os.remove(os.path.join(file_path, file_name))
+         
+        ficherotemporal=tempfile.TemporaryFile()
+        
+        ficherotemporal.write(fileContent)
+        
+        ficherotemporal.seek(0)
+        
+        return send_file(filename_or_fp = ficherotemporal,
+                                attachment_filename=file_name,
+                                as_attachment=True)
 
     #Recoge los datos del trabajo
     @Route.GET("/csv_asinc")
