@@ -1,25 +1,13 @@
 from collections import defaultdict
 from math import ceil
 import pandas as pd
-from app.api import area
+
 from app.model import db
 
 
 def get_students(id_ecoe):
     conexion = db.engine
-    return pd.read_sql("SELECT s.id, s.name, s.surnames, s.dni  FROM student s WHERE s.id_ecoe = " + id_ecoe , conexion)
-
-def get_areas(id_ecoe):
-    conexion = db.engine
-    return pd.read_sql("SELECT a.id  FROM area a WHERE a.id_ecoe = " + id_ecoe , conexion)
-
-def preguntas(id_ecoe, id_area):
-    conexion = db.engine
-    return pd.read_sql("SELECT q.* FROM question q, station s WHERE q.id_station = s.id AND s.id_ecoe =" + id_ecoe + " AND q.id_area = " + id_area, conexion)
-
-def estudiantes(id_ecoe):
-    conexion = db.engine
-    return pd.read_sql("SELECT * FROM student WHERE id_ecoe = " + id_ecoe, conexion)
+    return pd.read_sql("SELECT s.id, s.name, s.surnames, s.dni  FROM student s WHERE s.id_ecoe = " + id_ecoe , conexion).rename(columns={'id':'id_student'})
 
 def get_total_points(id_area):
     conexion = db.engine
@@ -29,9 +17,12 @@ def get_answer(id_area):
     conexion = db.engine
     return pd.read_sql("SELECT a.* FROM answer a, question q WHERE a.id_question = q.id AND q.id_area  = " + id_area, conexion).loc[:,['id_student','points']].groupby("id_student", as_index=False).sum()
 
-def results_for_area(area) -> dict:
+
+def get_results_for_area(area) -> pd.DataFrame:
     try:
         total_points = get_total_points(area)
+        if total_points == 0:
+            return "ko - Error: total_points = 0"
         df_answer_area = get_answer(area).assign(total_points = total_points)
         
         #max_points =df_answer_area['points'].max()
@@ -53,10 +44,8 @@ def results_for_area(area) -> dict:
         #return df_answer_area.to_html()
 
         df_answer_area = df_answer_area.loc[:,['id_student','punt','pos','med','perc']]
-        
         dd = defaultdict(list)
         cadena = df_answer_area.to_dict('records',into=dd)
-        
         return cadena
     except Exception as err:
         for arg in err.args:
@@ -64,31 +53,50 @@ def results_for_area(area) -> dict:
             error = error + arg
         return "ko - Error: " + error
 
-def results_for_area_ecoe_students(ecoe) -> dict:
-    try:
-        df_students = get_students(ecoe)
-        
-        dd = defaultdict(list)
-        cadena = df_students.to_dict('records',into=dd)
-        
-        return cadena       
-    except Exception as err:
-        for arg in err.args:
-            error = ""
-            error = error + arg
-        return "ko - Error: " + error
-
-def results_for_area_ecoe_areas(ecoe) -> list:
+   
+#TODO:: Funciones para construir los resultados del informe internamente aqui en la API.
+'''
+def get_areas(id_ecoe):
+    conexion = db.engine
+    return pd.read_sql("SELECT a.id, a.name  FROM area a WHERE a.id_ecoe = " + id_ecoe , conexion)
+    
+def get_results_for_area_ecoe_areas(ecoe) -> list:
     try:
         df_areas = get_areas(ecoe)
         
        
         cadena = df_areas.values.tolist()
         
-        return cadena            
+        return cadena          
+    except Exception as err:
+        for arg in err.args:
+            error = ""
+            error = error + arg
+        return "ko - Error: " + error 
 
+def results_by_area(ecoe) -> list:
+    try:
+        areas = get_results_for_area_ecoe_areas(ecoe)
+        
+        lista_df =[]
+        
+        for id_area in areas:
+            aux = get_results_for_area(area=str(id_area[0]))
+            #Este if esta porque si una Area no tiene preguntas hace que crashee el proceso, por lo que si el area no tiene preguntas, lo ignoramos
+            if( isinstance(aux, pd.DataFrame) ):
+                lista_df.append( aux.rename(columns = {'punt':'punt_{}'.format(id_area[1]),'pos':'pos_{}'.format(id_area[1]),
+                'med':'med_{}'.format(id_area[1]),'perc':'perc_{}'.format(id_area[1])}) ) 
+        df_students = get_students(ecoe)
+        for df_parcial in lista_df:
+            df_students = pd.merge(left=df_students,
+        right=df_parcial,
+        on=['id_student'])
+        
+        #id_area = request.args.get('area')
+        return df_students.to_html()  
     except Exception as err:
         for arg in err.args:
             error = ""
             error = error + arg
         return "ko - Error: " + error
+'''

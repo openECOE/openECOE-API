@@ -31,8 +31,8 @@ from app.jobs import statistics as jobs_statistics
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
-from flask import send_file, send_from_directory, current_app
-from app.statistics import generar_csv, resultados_evaluativo_ecoe, results_for_area, results_for_area_ecoe_students,results_for_area_ecoe_areas
+from flask import send_file, send_from_directory, current_app, request
+from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area
 from app.auth import auth
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -268,14 +268,14 @@ class EcoeResource(OpenECOEResource):
 
         return _job      
 
-    @ItemRoute.GET("/results", rel='resultados_evaluativo_ecoe')
+    @ItemRoute.GET("/results", rel='results_evaluation_ecoe')
     def send_evaluativo_ecoe(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
  
-    @ItemRoute.GET("/results/csv", rel='resultados_evaluativo_ecoe_csv')
+    @ItemRoute.GET("/results/csv", rel='results_evaluation_ecoe_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
         import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -300,15 +300,14 @@ class EcoeResource(OpenECOEResource):
                                 attachment_filename=file_name,
                                 as_attachment=True)
         
-    @ItemRoute.GET("/resultsecoearea", rel='resultados_evaluativo_ecoe_area')
+    @ItemRoute.GET("/resultsarea", rel='results_by_area')
     def send_results_for_area(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-        from flask import request
-        areas = results_for_area_ecoe_areas( str(ecoe.id) )
-        id_area = request.args.get('area')
-        return results_for_area(area=id_area)   
+            
+        id_area = request.args['area']
+        return get_results_for_area(id_area)   
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
