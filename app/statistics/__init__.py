@@ -16,3 +16,4 @@
 
 from app.statistics.Resultados import resultados_evaluativo_ecoe
 from app.statistics.Csv import generar_csv
+from app.statistics.ResultsForArea import results_for_area, results_for_area_ecoe_students, results_for_area_ecoe_areas

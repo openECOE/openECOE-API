@@ -31,8 +31,8 @@ from app.jobs import statistics as jobs_statistics
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
-from flask import send_from_directory, current_app
-from app.statistics import generar_csv, resultados_evaluativo_ecoe
+from flask import send_file, send_from_directory, current_app
+from app.statistics import generar_csv, resultados_evaluativo_ecoe, results_for_area, results_for_area_ecoe_students,results_for_area_ecoe_areas
 from app.auth import auth
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -274,7 +274,42 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
+ 
+    @ItemRoute.GET("/results/csv", rel='resultados_evaluativo_ecoe_csv')
+    def send_evaluativo_ecoe_en_csv(self, ecoe):
+        import tempfile
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        file_name = resultados_evaluativo_ecoe(ecoe=str(ecoe.id),datatype="csv")
+
+        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
+            fileContent = file.read(-1)
+
+        os.remove(os.path.join(file_path, file_name))
+         
+        ficherotemporal=tempfile.TemporaryFile()
         
+        ficherotemporal.write(fileContent)
+        
+        ficherotemporal.seek(0)
+        
+        return send_file(filename_or_fp = ficherotemporal,
+                                attachment_filename=file_name,
+                                as_attachment=True)
+        
+    @ItemRoute.GET("/resultsecoearea", rel='resultados_evaluativo_ecoe_area')
+    def send_results_for_area(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        from flask import request
+        areas = results_for_area_ecoe_areas( str(ecoe.id) )
+        id_area = request.args.get('area')
+        return results_for_area(area=id_area)   
+
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
