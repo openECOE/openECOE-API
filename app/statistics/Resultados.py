@@ -1,7 +1,7 @@
 from collections import defaultdict
 import pandas as pd
 from app.model import db
-
+from math import ceil
 
 
 
@@ -22,8 +22,9 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
         
         df_answer = pd.merge(
             left=df_student.rename(columns = {'id':'id_student'}),
-            right=pd.read_sql("SELECT a.* FROM answer a, station s WHERE a.id_station = s.id AND s.id_ecoe =" + ecoe, conexion).loc[:,['id','id_student','id_question','points']].rename(columns = {'id':'id_answer'}),
-            on=['id_student']).loc[:,['id_student','points']].groupby("id_student", as_index=False).sum()
+            right=pd.read_sql("SELECT a.* FROM answer a, station s WHERE a.id_station = s.id AND s.id_ecoe =" + ecoe, conexion).loc[:,['id','id_student','id_question','points']].rename(
+                columns = {'id':'id_answer'}), how='left',
+            on=['id_student']).loc[:,['id_student','points']].fillna(0).groupby("id_student", as_index=False).sum()
         
         #NOTA ABSOLUTA, sumamos los puntos de las preguntas que hay en toda la ECOE
         total_points = df_question.loc[:,['max_points']].sum()['max_points']
@@ -41,6 +42,17 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
         right=df_answer,
         on=['id_student']).set_index('id_student', drop=False)
         dd = defaultdict(list)
+        
+        #order:: Orden segun las notas
+        df_final['pos'] = df_final['points'].rank(method='min', ascending=False)
+        #median:: Mediana de puntuación
+        df_final = df_final.assign(median = df_final['points'].median())
+        #perc:: Percentil de la columna punt
+        df_final['perc'] = df_final['points'].rank(pct=True)
+        df_final['perc'] = df_final['perc'].map(lambda x: ceil(x*10)*10)
+        #Esto lo hemos usado para ver si rank funcionaba para generar el orden
+        #serie_cantidad = df_final.value_counts(subset=['pos'], sort=False)
+        #numero_de_indexados = serie_cantidad.sum()
         
 
         if datatype == "dict":
