@@ -13,17 +13,22 @@ def get_total_points(id_area):
     conexion = db.engine
     return pd.read_sql("SELECT q.* FROM question q WHERE q.id_area = " + id_area, conexion).loc[:,['max_points']].sum()['max_points']
 
-def get_answer(id_area):
+def get_answer(id_area, id_ecoe):
     conexion = db.engine
-    return pd.read_sql("SELECT a.* FROM answer a, question q WHERE a.id_question = q.id AND q.id_area  = " + id_area, conexion).loc[:,['id_student','points']].groupby("id_student", as_index=False).sum()
+    df_all_students = get_students(id_ecoe)
+    df_answering_students = pd.read_sql("SELECT a.* FROM answer a, question q WHERE a.id_question = q.id AND q.id_area  = " + id_area, conexion).loc[
+        :,['id_student','points']].groupby("id_student", as_index=False).sum()
+    df_alumnos = pd.merge(left=df_all_students, right=df_answering_students,how='left', on=['id_student']).fillna(0)
+    return df_alumnos
 
 
-def get_results_for_area(area) -> pd.DataFrame:
+def get_results_for_area(area,ecoe) -> pd.DataFrame:
     try:
         total_points = get_total_points(area)
+        #if total_points = 0, there´s no questions asigned to this area, we return void to indicate this area isn´t being used and cant produce meaningfull info.
         if total_points == 0:
-            return "ko - Error: total_points = 0"
-        df_answer_area = get_answer(area).assign(total_points = total_points)
+            return {}
+        df_answer_area = get_answer(area,ecoe).assign(total_points = total_points)
         
         #max_points =df_answer_area['points'].max()
         #df_answer_area = df_answer_area.assign(max_points = max_points)
@@ -31,17 +36,11 @@ def get_results_for_area(area) -> pd.DataFrame:
         #punt:: Porcentaje de acierto 
         df_answer_area = df_answer_area.assign(punt = df_answer_area['points']/total_points*100)
         #pos:: Posición en el orden por area de los alumnos
-        df_answer_area = df_answer_area.sort_values(by=['points'], ascending=False).set_index(pd.Series(range(1, len(df_answer_area)+1) ) )
-        df_answer_area.index.name = 'pos'
-        df_answer_area = df_answer_area.sort_values(by=['id_student'], ascending=True).reset_index()
+        df_answer_area['pos'] = df_answer_area['points'].rank(method='min', ascending=False)
         #med:: Mediana de puntuación
         df_answer_area = df_answer_area.assign(med = df_answer_area['punt'].median())
-
         #perc:: Percentil de la columna punt
-        df_answer_area['perc'] = df_answer_area['points'].rank(pct=True)
-        df_answer_area['perc'] = df_answer_area['perc'].map(lambda x: ceil(x*10)*10)
-        
-        #return df_answer_area.to_html()
+        df_answer_area['perc'] = df_answer_area['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
 
         df_answer_area = df_answer_area.loc[:,['id_student','punt','pos','med','perc']]
         dd = defaultdict(list)

@@ -307,7 +307,8 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
             
         id_area = request.args['area']
-        return get_results_for_area(id_area)   
+        id_ecoe = str(ecoe.id)
+        return get_results_for_area(id_area, id_ecoe)   
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
