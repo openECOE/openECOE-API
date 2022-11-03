@@ -17,3 +17,4 @@
 from app.statistics.Resultados import resultados_evaluativo_ecoe
 from app.statistics.Csv import generar_csv
 from app.statistics.ResultsForArea import get_results_for_area
+from app.statistics.ItemScore import get_items_score
