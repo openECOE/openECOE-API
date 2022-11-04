@@ -250,8 +250,8 @@ class EcoeResource(OpenECOEResource):
                                 as_attachment=True)
 
     #Recoge los datos del trabajo
-    @ItemRoute.GET("/csv_asinc")
-    def get__csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+    @ItemRoute.GET("/csv-asinc")
+    def get_csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
@@ -264,8 +264,8 @@ class EcoeResource(OpenECOEResource):
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/csv_asinc")
-    def gen__csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
+    @ItemRoute.POST("/csv-asinc")
+    def gen_csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
@@ -288,7 +288,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
  
-    @ItemRoute.GET("/results/csv", rel='results_evaluation_ecoe_csv')
+    @ItemRoute.GET("/results-csv", rel='results_evaluation_ecoe_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
         import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -313,7 +313,7 @@ class EcoeResource(OpenECOEResource):
                                 attachment_filename=file_name,
                                 as_attachment=True)
         
-    @ItemRoute.GET("/resultsarea", rel='results_by_area')
+    @ItemRoute.GET("/results-area", rel='results_by_area')
     def send_results_for_area(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
