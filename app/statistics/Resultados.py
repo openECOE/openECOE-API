@@ -13,7 +13,7 @@ def estudiantes(id_ecoe):
     conexion = db.engine
     return pd.read_sql("SELECT * FROM student WHERE id_ecoe = " + id_ecoe, conexion)
 
-def resultados_evaluativo_ecoe(ecoe) -> dict:
+def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
     try:
         conexion = db.engine
 
@@ -32,16 +32,40 @@ def resultados_evaluativo_ecoe(ecoe) -> dict:
         max_points =df_answer['points'].max()
 
         #Asignamos las notas relativas y absolutas usando de parámetro los calculado arriba
-        df_answer = df_answer.assign(absolute_score = df_answer['points']/total_points*10).round(decimals=2).assign(
-            relative_score = df_answer['points']/max_points*10).round(decimals=2).loc[:,['id_student','absolute_score','relative_score']]
+        
+        df_answer = df_answer.assign(absolute_score = total_points).assign(relative_score = max_points).loc[
+                :,['id_student','points','absolute_score','relative_score']].round(
+                {'absolute_score':2, 'relative_score':2})
 
         df_final = pd.merge(left=df_student.rename(columns = {'id':'id_student'}),
         right=df_answer,
         on=['id_student']).set_index('id_student', drop=False)
         dd = defaultdict(list)
-        cadena = df_final.to_dict('records',into=dd)
         
-        return cadena
+
+        if datatype == "dict":
+            return  df_final.to_dict('records',into=dd)
+        
+        #Hace falta acabar los cálculos que no va a realizar el frot si exportamos a fichero
+        df_final['hit_rate'] = df_final['points']/df_final['absolute_score']*100
+        df_final['absolute_score'] = df_final['points']/df_final['absolute_score']*10
+        df_final['relative_score'] = df_final['points']/df_final['relative_score']*10
+        df_final = df_final.round({'hit_rate':2, 'absolute_score':2, 'relative_score':2})
+        #Añadimos aqui el porcentaje porque si no no se puede redondear
+        df_final['hit_rate'] = df_final['hit_rate'].astype(str) + '%'
+        df_final = df_final.reindex(columns=['id_student', 'surnames', 'name', 'dni', 'hit_rate','points','absolute_score','relative_score']).sort_values('points',ascending=False)
+        
+        import os
+        from flask import current_app
+        filename = "resultados_ecoe_" + ecoe + "." + datatype
+        _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        absolutefilepath = os.path.join(_archiveroute, filename)
+        
+        if datatype == "csv":
+            df_final.to_csv(absolutefilepath,index=False,encoding='utf-8')
+            return filename
+        #TODO:: Add more export methods by comparing datatype with other strings
+
     except Exception as err:
         for arg in err.args:
             error = ""

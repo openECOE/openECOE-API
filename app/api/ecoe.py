@@ -31,7 +31,7 @@ from app.jobs import statistics as jobs_statistics
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
-from flask import send_from_directory, current_app
+from flask import send_file, current_app
 from app.statistics import generar_csv, resultados_evaluativo_ecoe
 from app.auth import auth
 class Location(int, Enum):
@@ -164,69 +164,18 @@ class EcoeResource(OpenECOEResource):
         _dict_ecoe["answers"] = _student_answers
 
         return _dict_ecoe
-    '''
+    
     @ItemRoute.GET(
         "/export", rel="exportItem", description="export all ECOE data to file"
     )
     def export_ecoe(self, ecoe):
-        
-        #relativefilepath = generar_csv(ecoe=id_ecoe)
-        #return send_file(relativefilepath, as_attachment=True)
         # Only can export if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
-        return export.book_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)
-    '''
-    ##################### AQUI VAMOS A HACER LAS PRUEBAS PARA PASAR A JOBS LA GENERACIÓN DE CSV     ########
-    #Lanza de forma sincrona, funciona
-    @ItemRoute.GET(
-        "/export2", rel="exportItem", description="export all ECOE data to file"
-    )
-    def export_ecoe(self, ecoe):
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
+        return export.book_dict(self.get_ecoe_dict(ecoe), filename=ecoe.name)    
 
-        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        file_name = generar_csv(ecoe=str(ecoe.id))
-        return send_from_directory(directory=file_path,
-                                    filename=file_name,
-                                    as_attachment=True)
-
-    #Recoge los datos del trabajo
-    @ItemRoute.GET("/export3")
-    def get_opendata3(self, ecoe) -> fields.List(fields.Inline(JobResource)):
-        # Only can get data if have manage permissions
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-
-        job = current_user.jobs.filter_by(
-            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
-            name="app.jobs.statistics.export_csv(ecoe=%s, identidad=%s)" % (ecoe.id, auth.current_user.id)
-        )
-        return job
-    #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/export3")
-    def gen_opendata3(self, ecoe) -> fields.Inline(JobResource):
-        # Only can get data if have manage permissions
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-
-        
-        _identidad = str(auth.current_user.id)
-        _job = current_user.launch_job(
-            func=jobs_statistics.export_csv,
-            description="Export3 Lanzamiento prueba 2 %s" % ecoe.name,
-            ecoe=str(ecoe.id),
-            identidad=_identidad,
-        )
-
-        return _job                                
-    #########################################################################################################
     @Route.GET("/export", rel="export", description="export all ECOE data to file")
     def export_ecoes(self):
         # Only can export if have manage permissions
@@ -258,8 +207,7 @@ class EcoeResource(OpenECOEResource):
         return current_user.jobs.filter_by(
             name="app.jobs.ecoe.export_data(id_ecoe=%s)" % ecoe.id
         )
-        
-        
+                
     #Genera el trabajo y lo lanza en segundo plano
     @ItemRoute.POST("/opendata", rel="generateOpenData")
     def gen_opendata(self, ecoe) -> fields.Inline(JobResource):
@@ -276,17 +224,62 @@ class EcoeResource(OpenECOEResource):
 
         return _job
     
-    @ItemRoute.GET("/csv", rel='getecoe')
+    @ItemRoute.GET("/csv", rel='getecoe', description="export all ECOE data to file")
     def send_CSV_ecoe(self, ecoe):
+        import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         
         file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
         file_name = generar_csv(ecoe=str(ecoe.id))
-        return send_from_directory(directory=file_path,
-                                    filename=file_name,
-                                    as_attachment=True)
+
+        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
+            fileContent = file.read(-1)
+
+        os.remove(os.path.join(file_path, file_name))
+         
+        ficherotemporal=tempfile.TemporaryFile()
+        
+        ficherotemporal.write(fileContent)
+        
+        ficherotemporal.seek(0)
+        
+        return send_file(filename_or_fp = ficherotemporal,
+                                attachment_filename=file_name,
+                                as_attachment=True)
+
+    #Recoge los datos del trabajo
+    @ItemRoute.GET("/csv_asinc")
+    def get__csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        job = current_user.jobs.filter_by(
+            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
+            name="app.jobs.statistics.export_csv(ecoe=%s, identidad=%s)" % (ecoe.id, auth.current_user.id)
+        )
+        return job
+
+    #Genera el trabajo y lo lanza en segundo plano
+    @ItemRoute.POST("/csv_asinc")
+    def gen__csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        _identidad = str(auth.current_user.id)
+        _job = current_user.launch_job(
+            func=jobs_statistics.export_csv,
+            description="CSV_Asinc: ECOE = %s" % ecoe.name,
+            ecoe=str(ecoe.id),
+            identidad=_identidad,
+        )
+
+        return _job      
 
     @ItemRoute.GET("/results", rel='resultados_evaluativo_ecoe')
     def send_evaluativo_ecoe(self, ecoe):
@@ -294,7 +287,34 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
+ 
+    @ItemRoute.GET("/results/csv", rel='resultados_evaluativo_ecoe_csv')
+    def send_evaluativo_ecoe_en_csv(self, ecoe):
+        import tempfile
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        file_name = resultados_evaluativo_ecoe(ecoe=str(ecoe.id),datatype="csv")
+
+        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
+            fileContent = file.read(-1)
+
+        os.remove(os.path.join(file_path, file_name))
+         
+        ficherotemporal=tempfile.TemporaryFile()
         
+        ficherotemporal.write(fileContent)
+        
+        ficherotemporal.seek(0)
+        
+        return send_file(filename_or_fp = ficherotemporal,
+                                attachment_filename=file_name,
+                                as_attachment=True)
+        
+        
+
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
         return ecoe.configuration
