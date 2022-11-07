@@ -319,9 +319,14 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
             
+        from collections import defaultdict
         id_area = request.args['area']
         id_ecoe = str(ecoe.id)
-        return get_results_for_area(id_area, id_ecoe)   
+        dataFrame = get_results_for_area(id_area, id_ecoe)  
+        
+        dd = defaultdict(list)
+        cadena = dataFrame.to_dict('records',into=dd)
+        return cadena   
 
     @ItemRoute.GET("/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):

@@ -1,4 +1,3 @@
-from collections import defaultdict
 from math import ceil
 import pandas as pd
 
@@ -43,9 +42,7 @@ def get_results_for_area(area,ecoe) -> pd.DataFrame:
         df_answer_area['perc'] = df_answer_area['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
 
         df_answer_area = df_answer_area.loc[:,['id_student','punt','pos','med','perc']]
-        dd = defaultdict(list)
-        cadena = df_answer_area.to_dict('records',into=dd)
-        return cadena
+        return df_answer_area
     except Exception as err:
         for arg in err.args:
             error = ""
