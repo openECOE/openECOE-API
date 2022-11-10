@@ -14,6 +14,19 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import create_app
+from app.model import Organization
+from flask import Blueprint
 
-app = create_app()
+bp = Blueprint('status', __name__)
+#http://127.0.0.1:5000/status para acceder a esta ruta
+@bp.route("/")
+def status():
+    try:
+        yo = Organization.query.first()
+        if yo is not None:
+            return "ok"
+    except Exception as err:
+        for arg in err.args:
+            error = ""
+            error = error + arg
+        return "ko - Error: " + error

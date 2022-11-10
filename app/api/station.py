@@ -36,7 +36,7 @@ class StationResource(EcoeChildResource):
         write_only_fields = ['user']
         
         permissions = {
-            'read': ['manage', 'evaluate'],
+            'read': ['manage', 'evaluate', 'read:ecoe'],
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',

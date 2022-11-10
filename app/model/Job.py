@@ -16,16 +16,17 @@
 import os
 
 from flask import current_app
-from app.model import db
-from app.jobs import rq
 from sqlalchemy.sql import func
+
+from app.jobs import rq
+from app.model import db
 
 
 class Job(db.Model):
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=True)
     complete = db.Column(db.Boolean, default=False)
     created = db.Column(db.DateTime, server_default=func.now())
     finished = db.Column(db.DateTime, nullable=True)
@@ -35,7 +36,7 @@ class Job(db.Model):
         try:
             _q = rq.get_queue()
             _rq_job = _q.fetch_job(self.id)
-        except:
+        except Exception:
             return None
         return _rq_job
 
@@ -44,7 +45,7 @@ class Job(db.Model):
         _job = self.rq_job()
 
         if _job is not None:
-            _progress = _job.meta.get('progress', 0)
+            _progress = _job.meta.get("progress", 0)
         else:
             _progress = 100
 
@@ -54,8 +55,14 @@ class Job(db.Model):
         """Delete file attached if exist"""
         if self.file:
             try:
-                os.remove(os.path.join(os.path.dirname(current_app.instance_path),
-                                       current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
-                                       self.file))
+                os.remove(
+                    os.path.join(
+                        os.path.dirname(current_app.instance_path),
+                        current_app.config.get("DEFAULT_ARCHIVE_ROUTE"),
+                        self.file,
+                    )
+                )
             except Exception as e:
-                current_app.logger.info('File %s attached to job not found. %s' % (self.file, str(e)))
+                current_app.logger.info(
+                    "File %s attached to job not found. %s" % (self.file, str(e))
+                )
