@@ -288,7 +288,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
  
-    @ItemRoute.GET("/results-csv", rel='results_evaluation_ecoe_csv')
+    @ItemRoute.GET("/results-csv", rel='results_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
         import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
