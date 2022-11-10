@@ -69,8 +69,8 @@ class StatisticsResource(Resource):
                                 as_attachment=True)
 
     #Recoge los datos del trabajo
-    @Route.GET("/csv_asinc")
-    def get__csv_asinc_ecoe(self) -> fields.List(fields.Inline(JobResource)):
+    @Route.GET("/csv-asinc")
+    def get_csv_asinc_ecoe(self) -> fields.List(fields.Inline(JobResource)):
         # TODO Ver como ponerle los permisos a esto, por ahora solo pueden hacerlo los superadmins
         if auth.current_user.is_superadmin is not True:
             raise Forbidden
@@ -81,8 +81,8 @@ class StatisticsResource(Resource):
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @Route.POST("/csv_asinc")
-    def gen__csv_asinc_ecoe(self) -> fields.Inline(JobResource):
+    @Route.POST("/csv-asinc")
+    def gen_csv_asinc_ecoe(self) -> fields.Inline(JobResource):
         # TODO Ver como ponerle los permisos a esto, por ahora solo pueden hacerlo los superadmins
         if auth.current_user.is_superadmin is not True:
             raise Forbidden
