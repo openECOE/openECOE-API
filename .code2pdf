@@ -1,0 +1,27 @@
+:directories:
+  - .git
+  - log
+  - public/system
+  - tmp
+  - vendor
+  - .github
+  - .pytest_cache
+  - .trunk
+  - __pycache__
+  - .venv
+  - .vscode
+  - data
+  - deploy
+  - tests
+  - environments
+:files:
+  - .DS_Store
+  - database.yml
+  - favicon.ico
+  - Vagrantfile
+  - package-lock.json
+  - docker-compose.yml
+  - .gitmodules
+  - .flake8
+  - LICENSE
+  - .code2pdf
