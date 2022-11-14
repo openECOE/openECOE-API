@@ -37,6 +37,21 @@
       "envFile": "${workspaceFolder}/environments/dev.env",
       "autoReload": {"enable": false}
     },
+    {"name": "Migrate DB",
+      "type": "python",
+      "request": "launch",
+      "module": "flask",
+      "env": { 
+        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "0",
+      },
+      "args": ["db", "migrate"],
+      "jinja": false,
+      "justMyCode": true,
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "autoReload": {"enable": false}
+    },
     {"name": "Upgrade DB",
       "type": "python",
       "request": "launch",
@@ -50,6 +65,7 @@
       "jinja": false,
       "justMyCode": true,
       "envFile": "${workspaceFolder}/environments/dev.env",
-      "autoReload": {"enable": false}}
+      "autoReload": {"enable": false}
+    }
   ]
 }
