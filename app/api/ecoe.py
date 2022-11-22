@@ -32,7 +32,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area, get_items_score
+from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area, get_items_score, generate_reports
 from app.auth import auth
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -334,6 +334,13 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
+
+    @ItemRoute.POST("/results-report", rel='results-report')
+    def send_results_report(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        return generate_reports(id_ecoe=str(ecoe.id))
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

@@ -54,6 +54,7 @@ class BaseConfig:
     EXPORT_FILE_TYPES = ["csv", "tsv", "csvz", "tsvz", "xls", "xlsx", "xlsm", "ods"]
     DEFAULT_EXPORT_FILE_TYPE = "csv"
     DEFAULT_ARCHIVE_ROUTE = "archive"
+    DEFAULT_TEMPLATE_ROUTE = "template"
 
     """Redis configuration"""
     RQ_DEFAULT_QUEUE = "openecoe_jobs"

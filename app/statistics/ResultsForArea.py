@@ -50,21 +50,14 @@ def get_results_for_area(area,ecoe) -> pd.DataFrame:
             error = ""
             error = error + arg
         return "ko - Error: " + error
-
-   
-#TODO:: Funciones para construir los resultados del informe internamente aqui en la API.
-
-def get_areas(id_ecoe):
-    conexion = db.engine
-    return pd.read_sql("SELECT a.id, a.name  FROM area a WHERE a.id_ecoe = " + id_ecoe , conexion)
     
-def get_areas_list(ecoe) -> list:
+def get_areas_list(id_ecoe) -> list:
     try:
-        df_areas = get_areas(ecoe)
-        
-       
+        conexion = db.engine
+        df_areas = pd.read_sql('''SELECT a.id, a.name  FROM area a 
+        JOIN question q ON a.id = q.id_area  
+        WHERE a.id_ecoe = ''' + id_ecoe + " GROUP BY a.id ", conexion)
         cadena = df_areas.values.tolist()
-        
         return cadena          
     except Exception as err:
         for arg in err.args:

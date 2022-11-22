@@ -12,12 +12,11 @@ def estudiantes(id_ecoe):
     conexion = db.engine
     return pd.read_sql("SELECT * FROM student WHERE id_ecoe = " + id_ecoe, conexion)
 
-def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
+def get_results_for_area_total(ecoe):
+    conexion = db.engine
     try:
-        conexion = db.engine
-
         df_question = preguntas(ecoe) 
-        df_student = estudiantes(ecoe).loc[:,['id','name','surnames','dni']]
+        df_student = estudiantes(ecoe).loc[:,['id']]
         
         df_answer = pd.merge(
             left=df_student.rename(columns = {'id':'id_student'}),
@@ -27,42 +26,61 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
         
         #NOTA ABSOLUTA, sumamos los puntos de las preguntas que hay en toda la ECOE
         total_points = df_question.loc[:,['max_points']].sum()['max_points']
-
+        df_answer = df_answer.assign(absolute_score = total_points)
         #NOTA RELATIVA, en función de la puntuación máxima sacada por un estudiante
         max_points =df_answer['points'].max()
+        df_answer = df_answer.assign(relative_score = max_points)
 
+        #punt:: Puntuación del estudiante
+        df_answer['punt'] = df_answer['points']/total_points*100
+        #order:: Orden segun las notas
+        df_answer['pos'] = df_answer['points'].rank(method='min', ascending=False)
+        #median:: Mediana de puntuación
+        _median = df_answer['points'].median()
+        df_answer = df_answer.assign(med = _median)
+        #perc:: Percentil de la columna punt
+        df_answer['perc'] = df_answer['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
+
+        return df_answer
+    except Exception as err:
+        for arg in err.args:
+            error = ""
+            error = error + arg
+        return "ko - Error: " + error
+
+def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
+    try:
+        df_answer = get_results_for_area_total(ecoe)
+        df_student = estudiantes(ecoe).loc[:,['id','name','surnames','dni']]
+        
         values_to_round = {'absolute_score':3, 'relative_score':3}
 
-        #Asignamos las notas relativas y absolutas usando de parámetro los calculado arriba
-        df_answer = df_answer.assign(absolute_score = total_points).assign(relative_score = max_points).loc[
-                :,['id_student','points','absolute_score','relative_score']].round(values_to_round)
-
         df_final = pd.merge(left=df_student.rename(columns = {'id':'id_student'}),
-        right=df_answer,
-        on=['id_student']).set_index('id_student', drop=False)
-        dd = defaultdict(list)
+            right=df_answer,
+            on=['id_student']).set_index('id_student', drop=False)
         
-        #order:: Orden segun las notas
-        df_final['pos'] = df_final['points'].rank(method='min', ascending=False)
-        #median:: Mediana de puntuación
-        _median = df_final['points'].median()
-        df_final = df_final.assign(median = _median)
-        #perc:: Percentil de la columna punt
-        df_final['perc'] = df_final['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
-       
-        if datatype == "dict":
+        if datatype == "dict":  
+            df_final = df_final.loc[
+                :,['id_student','dni','name','surnames','points','absolute_score','relative_score','pos','med','perc']].rename(columns={'med':'median'}).round(values_to_round)
+
+            dd = defaultdict(list)
             return  df_final.to_dict('records',into=dd)
+
         
-        _median = _median/df_final['absolute_score'].values[0]*100
-        df_final = df_final.assign(median = _median).rename(columns={'pos':'pos_Total','median':'med_Total','perc':'perc_Total'
-        }, inplace=False)
+        
+
+        df_final = df_final.rename(columns={'punt':'punt_total','pos':'pos_total','med':'med_total','perc':'perc_total'
+        })
         #Hace falta acabar los cálculos que no va a realizar el frot si exportamos a fichero
+        _median = df_answer['med'].values[0]
+        _median = _median/df_answer['absolute_score'].values[0]*100
+        df_final['med_total'] = _median
         df_final['absolute_score'] = df_final['points']/df_final['absolute_score']*10
         df_final['relative_score'] = df_final['points']/df_final['relative_score']*10
-        df_final['punt_Total'] = df_final['absolute_score']*10
+        
         
         df_final = df_final.reindex(columns=['id_student','name','surnames','dni','points','absolute_score','relative_score',
-        'punt_Total','pos_Total','med_Total','perc_Total'])
+        'punt_total','pos_total','med_total','perc_total'])
         df_areas = results_by_area(ecoe)
         df_final = pd.merge(left=df_final.reset_index(drop=True), right=df_areas.reset_index(drop=True), on=['id_student'])
 
@@ -76,14 +94,16 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
                 df_final[cadena] = df_final[cadena].astype(int) 
             
         df_final = df_final.round(values_to_round)
-        import os
-        from flask import current_app
-        filename = "resultados_ecoe_" + ecoe + "." + datatype
-        _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        absolutefilepath = os.path.join(_archiveroute, filename)
-        
+
         if datatype == "csv":
+            import os
+            from flask import current_app
+
+            filename = "resultados_ecoe_" + ecoe + "." + datatype
+            _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+            absolutefilepath = os.path.join(_archiveroute, filename)
             df_final.to_csv(absolutefilepath,index=False,encoding='utf-8')
+
             return filename
         #TODO:: Add more export methods by comparing datatype with other strings
 
