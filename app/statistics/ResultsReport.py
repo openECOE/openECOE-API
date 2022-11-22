@@ -99,7 +99,7 @@ def generate_reports(id_ecoe):
         import shutil
         url_zip_absoluta = urlarchive + "/grades-ecoe" + str(id_ecoe)
         shutil.make_archive( url_zip_absoluta, 'zip', root_dir = urlbase, base_dir = "./")
-        #shutil.rmtree(urlbase)
+        shutil.rmtree(urlbase)
         return True
         
     except Exception as err:
