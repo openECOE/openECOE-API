@@ -78,9 +78,9 @@ def generate_reports(id_ecoe):
         options = {
             'page-size': 'Letter',
             'margin-top': '5px',
-            'margin-right': '10px',
+            'margin-right': '20px',
             'margin-bottom': '5px',
-            'margin-left': '10px',
+            'margin-left': '20px',
             'encoding': "UTF-8",
             'no-outline': None,
             'enable-local-file-access': None

@@ -1,5 +1,5 @@
 .background {
-    opacity: 0.1;
+    opacity: 0.05;
     position: absolute;
     left: 0;
     top: 0;
@@ -29,13 +29,11 @@ h3 {
     text-align: center;
 }
 p {
-    font-size: 20px;
+    font-size: 19px;
     margin-left: 20px;
     margin-right: 20px;
 }
 .center {
-    /*margin-left: auto;
-    margin-right: auto;*/
     text-align: center;
 
 }
@@ -48,7 +46,9 @@ table, th, td {
     font-size: 20px;
 }
 table {
-    width: 100%;
+    width: 96%;
+    margin-left: auto;
+    margin-right: auto;
 }
 td[colspan]:not([colspan="1"]) {
     text-align: center;
