@@ -4,6 +4,9 @@ from app.statistics.Resultados import get_results_for_area_total
 from app.model import db
 from collections import defaultdict
 import pdfkit
+import jinja2
+import os
+from flask import current_app
 
 def get_students(id_ecoe):
     conexion = db.engine
@@ -14,7 +17,7 @@ def get_students(id_ecoe):
     INNER JOIN shift s2  ON s2.id = p.id_shift 
     WHERE s.id_ecoe = """ + id_ecoe , conexion).rename(columns={'id':'id_student'})
 
-def generate_reports(id_ecoe):
+def generate_reports(id_ecoe, static_parameters):
     try:
         df_students = get_students(id_ecoe)
         df_results = results_by_area(id_ecoe)
@@ -62,10 +65,7 @@ def generate_reports(id_ecoe):
 
             diccionario["areas"] = arealist
             listdict.append(diccionario)
-        #TODO: Cambiar esta media para que se calcule tambien
-        import jinja2
-        import os
-        from flask import current_app
+
         templateLoader =jinja2.FileSystemLoader(searchpath=os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")))
         templateEnv = jinja2.Environment(loader=templateLoader)
         TEMPLATE_FILE = "results-report.html"
@@ -88,12 +88,15 @@ def generate_reports(id_ecoe):
         urlarchive = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
 
         urlbase = urlarchive + "/ecoe-" + str(id_ecoe)
-        if not os.path.exists(urlbase):
-            os.makedirs(urlbase)
+        import shutil
+        if os.path.exists(urlbase):
+            shutil.rmtree(urlbase)
+
+        os.makedirs(urlbase)
 
         for informe in listdict:
             #Variables a sustituir
-            outputText = template.render(**informe, tablerows=informe['areas'], imagen=img, fondo=fondo)
+            outputText = template.render(**informe, **static_parameters, imagen=img, fondo=fondo)
             url = urlbase + "/grades-" + informe['refECOE'] + ".pdf"
             pdfkit.from_string(outputText, url, options=options, css=css)
         import shutil

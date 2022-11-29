@@ -340,7 +340,102 @@ class EcoeResource(OpenECOEResource):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-        return generate_reports(id_ecoe=str(ecoe.id))
+
+        #DATOS DE PRUEBA
+        static_parameters = {
+            "ecoe":"Evaluación Clínica Objetiva y Estructurada (ECOE) 2022",
+            "faculty":"Facultad de Medicina",
+            "university":"Universidad Miguel Hernández de Elche",
+            "date":"3 y 4 de junio de 2022",
+            "explanation_ECOE":'La prueba ECOE 2022 de la UMH constó de dos fases: una fase online naional "ECOE CCS" de 10 casos clínicos computarizados en plataforma Moodle y una segunda fase presencial "ECOE CS" de de casos simulados de 12 estaciones de 9 minutos de duración cada una den las que el estudiante se enfrentó a 8 estaciones de supuestos clínicos con pcientes estandarizados, 3 estaciones de habilidades y 1 estación de búsqueda de información en un tiempo de 3 horas.<br>Los resultados alcanzados se expresan como porcentaje de la puntuación máxima posible, mediana del grupo y el percentil del estudiante.',
+            "explanation_results":"Los resultados de esta pruena únicamente son imputables a la nota de la asignatura Trabajo Fin de Grado en el curso académico 2021-2022.<br>Esperamos que la realización de estra prueba y la reflexión sobre los resultados te resulte útil para seguir mejorando ty competencial profesional<br>Atentamente"
+        }
+        signature_list =[]
+        sign1 = {
+            "text":"Fdo. electrónicamente por:",
+            "profesor":"Prof. Antonio F. Compañ Rosique",
+            "job":"Decano",
+            "faculty":"Facultad de Medicina"
+        }
+        signature_list.append(sign1)
+        sign2 = {
+            "text":"Fdo. electrónicamente por:",
+            "profesor":"Prof. José Manuel Ramos Rincón",
+            "job":"Coordinador Prueba ECOE",
+            "faculty":"Facultad de Medicina"
+        }
+        signature_list.append(sign2)
+        signature_list.append(sign1)
+        signature_list.append(sign2)
+        static_parameters["signatures"]=signature_list
+        #DATOS DE PRUEBA
+
+        return generate_reports(id_ecoe=str(ecoe.id), static_parameters=static_parameters)
+
+    @ItemRoute.GET("/results-report-asinc")
+    def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        job = current_user.jobs.filter_by(
+            id=item.id_job_reports
+        )
+        return job
+
+    #Genera el trabajo y lo lanza en segundo plano
+    @ItemRoute.POST("/results-report-asinc")
+    def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        
+        #DATOS DE PRUEBA
+        static_parameters = {
+            "ecoe":"Evaluación Clínica Objetiva y Estructurada (ECOE) 2022",
+            "faculty":"Facultad de Medicina",
+            "university":"Universidad Miguel Hernández de Elche",
+            "date":"3 y 4 de junio de 2022",
+            "explanation_ECOE":'La prueba ECOE 2022 de la UMH constó de dos fases: una fase online naional "ECOE CCS" de 10 casos clínicos computarizados en plataforma Moodle y una segunda fase presencial "ECOE CS" de de casos simulados de 12 estaciones de 9 minutos de duración cada una den las que el estudiante se enfrentó a 8 estaciones de supuestos clínicos con pcientes estandarizados, 3 estaciones de habilidades y 1 estación de búsqueda de información en un tiempo de 3 horas.\nLos resultados alcanzados se expresan como porcentaje de la puntuación máxima posible, mediana del grupo y el percentil del estudiante.',
+            "explanation_results":"Los resultados de esta pruena únicamente son imputables a la nota de la asignatura Trabajo Fin de Grado en el curso académico 2021-2022.\nEsperamos que la realización de estra prueba y la reflexión sobre los resultados te resulte útil para seguir mejorando ty competencial profesional\nAtentamente"
+        }
+        signature_list =[]
+        sign1 = {
+            "text":"Fdo. electrónicamente por:",
+            "profesor":"Prof. Antonio F. Compañ Rosique",
+            "job":"Decano",
+            "faculty":"Facultad de Medicina"
+        }
+        signature_list.append(sign1)
+        sign2 = {
+            "text":"Fdo. electrónicamente por:",
+            "profesor":"Prof. José Manuel Ramos Rincón",
+            "job":"Coordinador Prueba ECOE",
+            "faculty":"Facultad de Medicina"
+        }
+        signature_list.append(sign2)
+        signature_list.append(sign1)
+        signature_list.append(sign2)
+        static_parameters["signatures"]=signature_list
+        #DATOS DE PRUEBA
+        
+        static_parameters["explanation_ECOE"] = static_parameters["explanation_ECOE"].replace("\n","<br>")
+        static_parameters["explanation_results"] = static_parameters["explanation_results"].replace("\n","<br>")
+        
+        _job = current_user.launch_job(
+            func=jobs_statistics.generate_reports,
+            custom_args="id_ecoe=" + str(ecoe.id),
+            description="Generación de Notas ECOE = %s" % ecoe.name,
+            id_ecoe=str(ecoe.id),
+            static_parameters=static_parameters,
+        )
+        #Persistimos el job.id a la BBDD
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        self.manager.update(item, {"id_job_reports": _job.id})
+        return _job  
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

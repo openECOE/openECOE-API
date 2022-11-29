@@ -12,15 +12,15 @@
          src="{{imagen}}" class="logo"
          alt="logo-umh"
         />
-        <h2>Evaluación Clínica Objetiva y Estructurada (ECOE) 2022<br>Facultad de Medicina<br>Universidad Miguel Hernández de Elche</h2>
+        <h2>{{ecoe}}<br>{{faculty}}<br>{{university}}</h2>
     </div>
     <br>
     <p>Estudiante:<b> {{surnames}}, {{name}}</b>
     <br>DNI: <b>{{dni}}</b>
     <br>Ref. ECOE: <b>{{refECOE}}</b>
-    <br>Fecha: <b> 3 y 4 de junio de 2022</b></p>
+    <br>Fecha: <b>{{date}}</b></p>
     
-    <p>La prueba ECOE 2022 de la UMH constó de dos fases: una fase online naional "ECOE CCS" de 10 casos clínicos computarizados en plataforma Moodle y una segunda fase presencial "ECOE CS" de de casos simulados de 12 estaciones de 9 minutos de duración cada una den las que el estudiante se enfrentó a 8 estaciones de supuestos clínicos con pcientes estandarizados, 3 estaciones de habilidades y 1 estación de búsqueda de información en un tiempo de 3 horas.<br>Los resultados alcanzados se expresan como porcentaje de la puntuación máxima posible, mediana del grupo y el percentil del estudiante. </p>
+    <p>{{explanation_ECOE}}</p>
 
     <h3>EVALUACIÓN DE LA COMPETENCIA CLÍNICA</h3>
     <table>
@@ -29,7 +29,7 @@
             <tr><td>Áreas Competenciales</td><td>Estudiante</td><td>Mediana del grupo</td><td>Percentil</td><td>Posición</td></tr>
         </thead>
         <tbody>
-            {% for row in tablerows %}
+            {% for row in areas %}
             <tr>
                 {%- if loop.last -%}
                 <td><b>{{row['area']}}</b></td><td class="center"><b>{{'%0.2f'| format(row['punt']|float)}}%</b></td><td class="center"><b>{{'%0.2f'| format(row['med']|float)}}%</b></td><td class="center"><b>{{row['perc']}}</b></td><td class="center"><b>{{row['pos']}}</b></td>
@@ -41,23 +41,41 @@
         </tbody>
     </table>
 
-    <p>Los resultados de esta pruena únicamente son imputables a la nota de la asignatura Trabajo Fin de Grado en el curso académico 2021-2022.</p>
-    <p>Esperamos que la realización de estra prueba y la reflexión sobre los resultados te resulte útil para seguir mejorando ty competencial profesional</p>
-    <p>Atentamente</p>
-
+    <p>{{explanation_results}}</p>
+    
     <div class="row">
         <div class="column">
-            <p>Fdo. electrónicamente por:<br>
-            Prof. Antonio F. Compañ Rosique<br>
-            Decano<br>
-            Facultad de Medicina</p>
+            {% for signature in signatures %}
+                {% if loop.index is odd %}
+                <p>
+                    {{signature.text}}<br>
+                    {{signature.profesor}}<br>
+                    {{signature.job}}<br>
+                    {{signature.faculty}}
+                </p>
+                {% endif %}
+            {% endfor %}
         </div>
         <div class="column">
+            <p>
+                {% for signature in signatures %}
+                    {% if loop.index is even %}
+                    <p>
+                        {{signature.text}}<br>
+                        {{signature.profesor}}<br>
+                        {{signature.job}}<br>
+                        {{signature.faculty}}
+                    </p>
+                    {% endif %}
+                {% endfor %}
+            <p>
+            <!--
             <p>Fdo. electrónicamente por:<br>
                 Prof. José Manuel Ramos Rincón<br>
                 Coordinador Prueba ECOE<br>
                 Facultad de Medicina
             </p>
+            -->
         </div>
       </div>
 <tbody>
