@@ -334,7 +334,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
 
-    @ItemRoute.GET("/results-report-asinc")
+    @ItemRoute.GET("/results-report")
     def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -348,7 +348,7 @@ class EcoeResource(OpenECOEResource):
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/results-report-asinc")
+    @ItemRoute.POST("/results-report")
     def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
