@@ -248,6 +248,11 @@ def generate_reports(id_ecoe, static_parameters):
         img = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/logo-umh.jpg"
         fondo = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/fondo.jpg"
         css = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/styles.css"
+        
+        #Formating paragraphs
+        static_parameters["explanation_ECOE"] = static_parameters["explanation_ECOE"].replace("\n","<br>")
+        static_parameters["explanation_results"] = static_parameters["explanation_results"].replace("\n","<br>")
+
         options = {
             'page-size': 'Letter',
             'margin-top': '5px',

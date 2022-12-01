@@ -84,7 +84,6 @@ class OrganizationResource(OpenECOEResource):
             raise Forbidden
 
         job = current_user.jobs.filter_by(
-            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
             name="app.jobs.statistics.export_csv(organization=%s, identidad=%s)" % (organization.id, auth.current_user.id)
         )
         return job
