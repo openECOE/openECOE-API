@@ -33,8 +33,7 @@ class Job(db.Model):
     created = db.Column(db.DateTime, server_default=func.now())
     finished = db.Column(db.DateTime, nullable=True)
     file = db.Column(db.UnicodeText, nullable=True)
-
-    areas = db.relationship("ECOE", backref="job")
+    
 
     def rq_job(self):
         try:
