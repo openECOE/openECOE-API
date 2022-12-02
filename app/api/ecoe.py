@@ -223,9 +223,11 @@ class EcoeResource(OpenECOEResource):
         )
 
         return _job
+    
     #Antigua función para generar y devolver archivo CSV de forma síncrona
     # generar_csv devuelve el nombre del fichero generado (relativo a la ruta por defecto de archivos) 
     #TODO:: Usar de para ver como devolver los ficheros pedidos
+    #Los cambios que se hagan, también tiene que hacerse en api/organizations.py
     '''
     @ItemRoute.GET("/csv", rel='getecoe', description="export all ECOE data to file")
     def send_CSV_ecoe(self, ecoe):

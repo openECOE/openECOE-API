@@ -22,8 +22,10 @@ class Organization(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
+    id_job_csv = db.Column(db.String(36), db.ForeignKey('job.id'), nullable=True)
 
     users = db.relationship('User', backref='organization')
     ecoes = db.relationship('ECOE', backref='organization')
+    job_csv = db.relationship("Job",foreign_keys=[id_job_csv])
 
 

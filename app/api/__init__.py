@@ -35,7 +35,6 @@ from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource, RoleResource, PermissionResource
 from app.api.jobs import JobResource
-from app.api.statistics import StatisticsResource
 from app.api import export
 
 bp = Blueprint('api', __name__)
@@ -71,6 +70,5 @@ api.add_resource(EcoeResource)
 api.add_resource(JobResource)
 api.add_resource(UserResource)
 api.add_resource(OrganizationResource)
-api.add_resource(StatisticsResource)
 
 api.init_app(bp)
