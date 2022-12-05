@@ -47,7 +47,6 @@ class ECOE(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
-    description = db.Column(mysql.LONGTEXT())
     id_organization = db.Column(
         db.Integer, db.ForeignKey("organization.id"), nullable=False
     )
@@ -55,6 +54,9 @@ class ECOE(db.Model):
     id_coordinator = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     status = db.Column(db.Enum(ECOEstatus), nullable=False, default=ECOEstatus.DRAFT)
     chrono_token = db.Column(db.String(250), nullable=True)
+    description = db.Column(mysql.LONGTEXT())
+    id_job_reports = db.Column(db.String(36), db.ForeignKey('job.id'), nullable=True)
+    id_job_csv = db.Column(db.String(36), db.ForeignKey('job.id'), nullable=True)
 
     areas = db.relationship("Area", backref="ecoe")
     stations = db.relationship("Station", backref="ecoe")
@@ -63,6 +65,8 @@ class ECOE(db.Model):
     rounds = db.relationship("Round", backref="ecoe")
     shifts = db.relationship("Shift", backref="ecoe", order_by="Shift.time_start")
     stages = db.relationship("Stage", backref="ecoe")
+    job_reports = db.relationship("Job", foreign_keys=[id_job_reports])
+    job_csv = db.relationship("Job",foreign_keys=[id_job_csv])
 
     @property
     def configuration(self):

@@ -32,7 +32,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area, get_items_score, generate_reports
+from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
 from app.auth import auth
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -224,6 +224,11 @@ class EcoeResource(OpenECOEResource):
 
         return _job
     
+    #Antigua función para generar y devolver archivo CSV de forma síncrona
+    # generar_csv devuelve el nombre del fichero generado (relativo a la ruta por defecto de archivos) 
+    #TODO:: Usar de para ver como devolver los ficheros pedidos
+    #Los cambios que se hagan, también tiene que hacerse en api/organizations.py
+    '''
     @ItemRoute.GET("/csv", rel='getecoe', description="export all ECOE data to file")
     def send_CSV_ecoe(self, ecoe):
         import tempfile
@@ -248,23 +253,25 @@ class EcoeResource(OpenECOEResource):
         return send_file(filename_or_fp = ficherotemporal,
                                 attachment_filename=file_name,
                                 as_attachment=True)
-
+    '''
     #Recoge los datos del trabajo
-    @ItemRoute.GET("/csv-asinc")
+    @ItemRoute.GET("/csv")
     def get_csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
+        
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         job = current_user.jobs.filter_by(
-            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
-            name="app.jobs.statistics.export_csv(ecoe=%s, identidad=%s)" % (ecoe.id, auth.current_user.id)
+            id=item.id_job_csv
         )
+
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/csv-asinc")
+    @ItemRoute.POST("/csv")
     def gen_csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -278,7 +285,8 @@ class EcoeResource(OpenECOEResource):
             ecoe=str(ecoe.id),
             identidad=_identidad,
         )
-
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        self.manager.update(item, {"id_job_csv": _job.id})
         return _job      
 
     @ItemRoute.GET("/results", rel='results_evaluation_ecoe')
@@ -335,12 +343,42 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
 
-    @ItemRoute.POST("/results-report", rel='results-report')
-    def send_results_report(self, ecoe):
+    @ItemRoute.GET("/results-report")
+    def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-        return generate_reports(id_ecoe=str(ecoe.id))
+
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        job = current_user.jobs.filter_by(
+            id=item.id_job_reports
+        )
+        return job
+
+    #Genera el trabajo y lo lanza en segundo plano
+    @ItemRoute.POST("/results-report")
+    def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+                
+        import json
+        cadenajson = request.args['cadenaJSON']
+        static_parameters = json.loads(cadenajson)
+ 
+        _job = current_user.launch_job(
+            func=jobs_statistics.generate_reports,
+            custom_args="id_ecoe=" + str(ecoe.id),
+            description="Generación de Notas ECOE = %s" % ecoe.name,
+            id_ecoe=str(ecoe.id),
+            static_parameters=static_parameters,
+        )
+        #We save the job.id into the database
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        self.manager.update(item, {"id_job_reports": _job.id})
+        return _job  
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

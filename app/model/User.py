@@ -86,14 +86,16 @@ class User(UserMixin, db.Model):
         else:
             return None
 
-    def launch_job(self, func, description, *args, **kwargs):
+    def launch_job(self, func, description, custom_args=None, *args, **kwargs):
         _rq_job = func.queue(*args, **kwargs)
+        if custom_args is None:
+            _args = [str(arg) for arg in args]
+            _args += ['%s=%s' % (key, arg) for key, arg in kwargs.items()]
+            _list_args = ', '.join(_args)
 
-        _args = [str(arg) for arg in args]
-        _args += ['%s=%s' % (key, arg) for key, arg in kwargs.items()]
-        _list_args = ', '.join(_args)
-
-        _job = Job(id=_rq_job.get_id(), name='%s(%s)' % (_rq_job.func_name, _list_args), description=description, user_id=self.id)
+            _job = Job(id=_rq_job.get_id(), name='%s(%s)' % (_rq_job.func_name, _list_args), description=description, user_id=self.id)
+        else:
+            _job = Job(id=_rq_job.get_id(), name='%s(%s)' % (_rq_job.func_name, custom_args), description=description, user_id=self.id)
         db.session.add(_job)
         db.session.commit()
         return _job

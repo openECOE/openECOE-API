@@ -23,6 +23,8 @@ from app.model import db
 
 
 class Job(db.Model):
+    __tablename__ = "job"
+
     id = db.Column(db.String(36), primary_key=True)
     name = db.Column(db.String(128), index=True)
     description = db.Column(db.String(128))
@@ -31,6 +33,7 @@ class Job(db.Model):
     created = db.Column(db.DateTime, server_default=func.now())
     finished = db.Column(db.DateTime, nullable=True)
     file = db.Column(db.UnicodeText, nullable=True)
+    
 
     def rq_job(self):
         try:
