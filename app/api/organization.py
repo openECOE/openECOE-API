@@ -33,7 +33,7 @@ from app.jobs import statistics as jobs_statistics
 from app.auth import auth
 
 class OrganizationResource(OpenECOEResource):
-    users = Relation('users')
+    organizations = Relation('organizations')
     ecoes = Relation('ecoes')
 
     class Meta:

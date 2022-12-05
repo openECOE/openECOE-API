@@ -41,7 +41,7 @@ def upgrade():
                nullable=False)
     # ### end Alembic commands ###
 
-    # Assign superadmin role to users with 'is_superadmin'
+    # Assign superadmin role to organizations with 'is_superadmin'
     op.execute("INSERT INTO role (id_user, name) SELECT id, 'superadmin' FROM user where is_superadmin = true")
 
 

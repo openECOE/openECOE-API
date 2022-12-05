@@ -64,7 +64,7 @@ def on_identity_loaded(sender, identity):
         identity.provides.add(UserNeed(identity.id))
 
         # Have permission to manage their own User
-        identity.provides.add(ItemNeed(PermissionType.MANAGE, current_user.id, "users"))
+        identity.provides.add(ItemNeed(PermissionType.MANAGE, current_user.id, "organizations"))
         identity.provides.add(
             ItemNeed(PermissionType.READ, current_user.id_organization, "organizations")
         )

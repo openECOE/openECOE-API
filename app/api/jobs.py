@@ -43,7 +43,7 @@ class JobResource(OpenECOEResource):
         read_only_fields = ['name', 'file', 'created', 'finished', 'complete']
 
     class Schema:
-        user = fields.ToOne('users')
+        user = fields.ToOne('organizations')
         progress = fields.Number()
 
     @ItemRoute.GET('/download')

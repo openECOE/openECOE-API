@@ -47,7 +47,7 @@ class StationResource(EcoeChildResource):
 
     class Schema:
         ecoe = fields.ToOne('ecoes')
-        user = fields.ToOne('users', nullable=True)
+        user = fields.ToOne('organizations', nullable=True)
         parent_station = fields.ToOne('stations', nullable=True)
         children_stations = fields.ToMany('stations', nullable=True)
 

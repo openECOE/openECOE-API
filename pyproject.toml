@@ -1,0 +1,47 @@
+[tool.poetry]
+name = "openecoe-api"
+version = "2.0.0"
+description = "OpenECOE API"
+authors = ["Alberto Moreno <amoreno@umh.es>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pydantic = "^1.8.2"
+fastapi = "0.86.0"
+uvicorn = {extras = ["standard"], version = "0.19.0"}
+dependency-injector = {extras = ["yaml"], version = "4.38.0"}
+sqlalchemy = "^1.4.43"
+sqlalchemy-json = "^0.5.0"
+colorlog = "^5.0.1"
+python-json-logger = "^2.0.2"
+alembic = "^1.7.3"
+typed-ast = "^1.5.4"
+python-multipart = "^0.0.5"
+psycopg2-binary = "^2.9.2"
+
+[tool.poetry.dev-dependencies]
+black = "^22.1.0"
+pytest = "^7.2.0"
+isort = "^5.7.0"
+pylint = "^2.6.2"
+poethepoet = "^0.10.0"
+pytest-cov = "^2.12.1"
+mypy = "^0.982"
+freezegun = "^1.1.0"
+
+[tool.black]
+line-length = 100
+target-version = ['py310']
+exclude = 'tmp'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+test = { shell = "DATABASE_URL=postgresql://postgres:password@localhost:5433/postgres pytest src" }
+test_coverage = "pytest --cov=src --cov-report=html"
+start = "uvicorn src.api.main:app --reload"
+compose_up = "docker-compose -f docker-compose.dev.yml up"

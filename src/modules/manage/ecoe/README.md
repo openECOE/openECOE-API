@@ -1,0 +1,1 @@
+# ECOE Management module

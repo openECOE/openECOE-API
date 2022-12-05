@@ -23,7 +23,7 @@ class Organization(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
 
-    users = db.relationship('User', backref='organization')
+    organizations = db.relationship('User', backref='organization')
     ecoes = db.relationship('ECOE', backref='organization')
 
 

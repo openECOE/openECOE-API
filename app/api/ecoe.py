@@ -127,7 +127,7 @@ class EcoeResource(OpenECOEResource):
 
     class Schema:
         organization = fields.ToOne("organizations", nullable=True)
-        user = fields.ToOne("users", nullable=True)
+        user = fields.ToOne("organizations", nullable=True)
         status = fields.String(enum=ECOEstatus, io="r")
 
     @staticmethod

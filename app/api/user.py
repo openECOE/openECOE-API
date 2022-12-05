@@ -54,7 +54,7 @@ class RoleResource(OpenECOEResource):
         }
 
     class Schema:
-        user = fields.ToOne("users")
+        user = fields.ToOne("organizations")
         name = fields.String(enum=RoleType)
 
 
@@ -80,7 +80,7 @@ class PermissionResource(OpenECOEResource):
         }
 
     class Schema:
-        user = fields.ToOne("users")
+        user = fields.ToOne("organizations")
         name = fields.String(enum=PermissionType)
 
 
@@ -90,7 +90,7 @@ class UserResource(OpenECOEResource):
     jobs = Relation("jobs")
 
     class Meta:
-        name = "users"
+        name = "organizations"
         model = User
         read_only_fields = ["registered_on", "token_expiration"]
         write_only_fields = ["password", "token"]
