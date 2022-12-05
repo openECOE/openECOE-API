@@ -33,7 +33,9 @@ os.environ.setdefault("API_AUTH", "False")
 os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "localhost:8083/openECOE_dev")
 os.environ.setdefault("CHRONO_ROUTE", "localhost:6061")
 
-load_dotenv(os.path.join(basedir, ".env"))
+envpath = os.path.join(basedir, ".env")
+
+load_dotenv(dotenv_path=envpath, override=True)
 
 
 class BaseConfig:
