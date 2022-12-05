@@ -20,6 +20,7 @@ from enum import Enum
 import requests
 from flask import current_app
 from flask_potion.exceptions import BackendConflict, PageNotFound
+from sqlalchemy.dialects import mysql
 
 from app.model import db
 
@@ -53,6 +54,8 @@ class ECOE(db.Model):
     id_coordinator = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
     status = db.Column(db.Enum(ECOEstatus), nullable=False, default=ECOEstatus.DRAFT)
     chrono_token = db.Column(db.String(250), nullable=True)
+    description = db.Column(mysql.LONGTEXT())
+    id_job_reports = db.Column(db.String(36), db.ForeignKey('job.id'), nullable=True)
 
     areas = db.relationship("Area", backref="ecoe")
     stations = db.relationship("Station", backref="ecoe")

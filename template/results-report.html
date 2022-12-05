@@ -1,0 +1,81 @@
+<head>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <img
+    class="background"
+    src="{{fondo}}"
+    alt="background image"
+  >
+    <div class="titulo">
+        <img
+         src="{{imagen}}" class="logo"
+         alt="logo-umh"
+        />
+        <h2>{{ecoe}}<br>{{faculty}}<br>{{university}}</h2>
+    </div>
+    <br>
+    <p>Estudiante:<b> {{surnames}}, {{name}}</b>
+    <br>DNI: <b>{{dni}}</b>
+    <br>Ref. ECOE: <b>{{refECOE}}</b>
+    <br>Fecha: <b>{{date}}</b></p>
+    
+    <p>{{explanation_ECOE}}</p>
+
+    <h3>EVALUACIÓN DE LA COMPETENCIA CLÍNICA</h3>
+    <table>
+        <thead>
+            <tr><td></td><td colspan="4">Calificación</td></tr>
+            <tr><td>Áreas Competenciales</td><td>Estudiante</td><td>Mediana del grupo</td><td>Percentil</td><td>Posición</td></tr>
+        </thead>
+        <tbody>
+            {% for row in areas %}
+            <tr>
+                {%- if loop.last -%}
+                <td><b>{{row['area']}}</b></td><td class="center"><b>{{'%0.2f'| format(row['punt']|float)}}%</b></td><td class="center"><b>{{'%0.2f'| format(row['med']|float)}}%</b></td><td class="center"><b>{{row['perc']}}</b></td><td class="center"><b>{{row['pos']}}</b></td>
+                {% else %}
+                <td>{{row['area']}}</td><td class="center">{{'%0.2f'| format(row['punt']|float)}}%</td><td class="center">{{'%0.2f'| format(row['med']|float)}}%</td><td class="center">{{row['perc']}}</td><td class="center">{{row['pos']}}</td>
+                {%- endif %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p>{{explanation_results}}</p>
+    
+    <div class="row">
+        <div class="column">
+            {% for signature in signatures %}
+                {% if loop.index is odd %}
+                <p>
+                    {{signature.text}}<br>
+                    {{signature.profesor}}<br>
+                    {{signature.job}}<br>
+                    {{signature.faculty}}
+                </p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="column">
+            <p>
+                {% for signature in signatures %}
+                    {% if loop.index is even %}
+                    <p>
+                        {{signature.text}}<br>
+                        {{signature.profesor}}<br>
+                        {{signature.job}}<br>
+                        {{signature.faculty}}
+                    </p>
+                    {% endif %}
+                {% endfor %}
+            <p>
+            <!--
+            <p>Fdo. electrónicamente por:<br>
+                Prof. José Manuel Ramos Rincón<br>
+                Coordinador Prueba ECOE<br>
+                Facultad de Medicina
+            </p>
+            -->
+        </div>
+      </div>
+<tbody>

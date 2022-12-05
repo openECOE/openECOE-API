@@ -258,7 +258,6 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
 
         job = current_user.jobs.filter_by(
-            #TODO:: Esto es una función customizada que se gestiona en el módulo jobs, cambiar la ruta al 
             name="app.jobs.statistics.export_csv(ecoe=%s, identidad=%s)" % (ecoe.id, auth.current_user.id)
         )
         return job
@@ -334,6 +333,43 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
+
+    @ItemRoute.GET("/results-report")
+    def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        job = current_user.jobs.filter_by(
+            id=item.id_job_reports
+        )
+        return job
+
+    #Genera el trabajo y lo lanza en segundo plano
+    @ItemRoute.POST("/results-report")
+    def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
+        # Only can get data if have manage permissions
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+                
+        import json
+        cadenajson = request.args['cadenaJSON']
+        static_parameters = json.loads(cadenajson)
+ 
+        _job = current_user.launch_job(
+            func=jobs_statistics.generate_reports,
+            custom_args="id_ecoe=" + str(ecoe.id),
+            description="Generación de Notas ECOE = %s" % ecoe.name,
+            id_ecoe=str(ecoe.id),
+            static_parameters=static_parameters,
+        )
+        #Persistimos el job.id a la BBDD
+        item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        self.manager.update(item, {"id_job_reports": _job.id})
+        return _job  
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
