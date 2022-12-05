@@ -32,7 +32,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area, get_items_score
+from app.statistics import generar_csv, resultados_evaluativo_ecoe, get_results_for_area, get_items_score, generate_reports
 from app.auth import auth
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -288,7 +288,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return resultados_evaluativo_ecoe(ecoe=str(ecoe.id))
  
-    @ItemRoute.GET("/results-csv", rel='results_evaluation_ecoe_csv')
+    @ItemRoute.GET("/results-csv", rel='results_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
         import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -319,9 +319,14 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
             
+        from collections import defaultdict
         id_area = request.args['area']
         id_ecoe = str(ecoe.id)
-        return get_results_for_area(id_area, id_ecoe)   
+        dataFrame = get_results_for_area(id_area, id_ecoe)  
+        
+        dd = defaultdict(list)
+        cadena = dataFrame.to_dict('records',into=dd)
+        return cadena   
 
     @ItemRoute.GET("/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):
@@ -329,6 +334,13 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
+
+    @ItemRoute.POST("/results-report", rel='results-report')
+    def send_results_report(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        return generate_reports(id_ecoe=str(ecoe.id))
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

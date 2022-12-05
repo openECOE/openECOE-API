@@ -20,6 +20,7 @@ from enum import Enum
 import requests
 from flask import current_app
 from flask_potion.exceptions import BackendConflict, PageNotFound
+from sqlalchemy.dialects import mysql
 
 from app.model import db
 
@@ -46,6 +47,7 @@ class ECOE(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), unique=True)
+    description = db.Column(mysql.LONGTEXT())
     id_organization = db.Column(
         db.Integer, db.ForeignKey("organization.id"), nullable=False
     )
