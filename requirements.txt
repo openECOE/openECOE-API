@@ -24,7 +24,7 @@ idna==2.8
 itsdangerous==0.24
 Jinja2==2.11.3
 jsonschema==2.6.0
-Mako==1.0.7
+Mako==1.2.2
 MarkupSafe==1.1.1
 pycparser==2.18
 PyJWT==1.4.2
