@@ -26,7 +26,7 @@ import datetime
 
 @rq.job(timeout=300)
 def export_csv(identidad, ecoe="", organization=""):
-    from app.statistics.Csv import introducir_key_id
+    from app.statistics import introducir_key_id
     rq.set_task_progress(0)
 
     try:
@@ -182,7 +182,7 @@ def generate_reports(id_ecoe, static_parameters):
     import pandas as pd
     from app.statistics.ResultsForArea import results_by_area, get_areas_list
     from app.statistics.Resultados import get_results_for_area_total
-    from app.statistics.ResultsReport import get_students
+    from app.statistics import get_students
     from collections import defaultdict
     import pdfkit
     import jinja2
