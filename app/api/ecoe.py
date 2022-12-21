@@ -130,6 +130,7 @@ class EcoeResource(OpenECOEResource):
         user = fields.ToOne("users", nullable=True)
         status = fields.String(enum=ECOEstatus, io="r")
         job_reports = fields.ToOne("jobs", nullable=True)
+        job_csv = fields.ToOne("jobs",nullable=True)
 
     @staticmethod
     def get_ecoe_dict(ecoe):
