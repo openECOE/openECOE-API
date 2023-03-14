@@ -15,27 +15,37 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from flask import g
-from flask_login import current_user
-from flask_principal import Identity, UserNeed, ItemNeed, AnonymousIdentity, identity_loaded, RoleNeed, TypeNeed
 from flask_httpauth import HTTPTokenAuth
+from flask_login import current_user
+from flask_principal import (
+    AnonymousIdentity,
+    Identity,
+    ItemNeed,
+    RoleNeed,
+    UserNeed,
+    identity_loaded,
+)
 from werkzeug.exceptions import abort
 
 from app.auth import login_manager, principals
-from app.model.User import User, RoleType, PermissionType
+from app.model.User import PermissionType, RoleType, User
 
 token_auth = HTTPTokenAuth()
 
 
 @login_manager.request_loader
 def load_user_from_request(request):
-    auth_token = request.headers.get('Authorization')
+    auth_token = request.headers.get("Authorization")
     user = None
 
     if request.authorization:
-        username, password = request.authorization.username, request.authorization.password
+        username, password = (
+            request.authorization.username,
+            request.authorization.password,
+        )
         user = User.check_email_password(username, password)
     elif auth_token:
-        auth_token = auth_token.replace('Bearer ', '', 1)
+        auth_token = auth_token.replace("Bearer ", "", 1)
         user = User.check_token(auth_token)
 
     return user
@@ -54,27 +64,39 @@ def on_identity_loaded(sender, identity):
         identity.provides.add(UserNeed(identity.id))
 
         # Have permission to manage their own User
-        identity.provides.add(ItemNeed(PermissionType.MANAGE, current_user.id, 'users'))
-        identity.provides.add(ItemNeed(PermissionType.READ, current_user.id_organization, 'organizations'))
+        identity.provides.add(ItemNeed(PermissionType.MANAGE, current_user.id, "users"))
+        identity.provides.add(
+            ItemNeed(PermissionType.READ, current_user.id_organization, "organizations")
+        )
 
-        if hasattr(current_user, 'roles'):
+        if hasattr(current_user, "roles"):
             for role in current_user.roles:
                 identity.provides.add(RoleNeed(role.name))
 
                 # If user is ADMIN gives permission to manage all ECOEs and their organization
                 if role.name == RoleType.ADMIN:
-                    identity.provides.add(ItemNeed(PermissionType.MANAGE, current_user.id_organization, 'organizations'))
+                    identity.provides.add(
+                        ItemNeed(
+                            PermissionType.MANAGE,
+                            current_user.id_organization,
+                            "organizations",
+                        )
+                    )
                     for ecoe in current_user.organization.ecoes:
-                        identity.provides.add(ItemNeed(PermissionType.MANAGE, ecoe.id, 'ecoes'))
+                        identity.provides.add(
+                            ItemNeed(PermissionType.MANAGE, ecoe.id, "ecoes")
+                        )
 
                 # User SUPERADMIN obtain all roles
                 if role.name == RoleType.SUPERADMIN:
                     for roleType in RoleType:
                         identity.provides.add(RoleNeed(roleType))
 
-        if hasattr(current_user, 'permissions'):
+        if hasattr(current_user, "permissions"):
             for permission in current_user.permissions:
-                identity.provides.add(ItemNeed(permission.name, permission.id_object, permission.object))
+                identity.provides.add(
+                    ItemNeed(permission.name, permission.id_object, permission.object)
+                )
 
 
 @token_auth.verify_token

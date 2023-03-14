@@ -14,18 +14,19 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app.model import db
+from app.model import Organization
+from flask import Blueprint
 
-
-class Organization(db.Model):
-    __tablename__ = 'organization'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(255), unique=True)
-    id_job_csv = db.Column(db.String(36), db.ForeignKey('job.id'), nullable=True)
-
-    users = db.relationship('User', backref='organization')
-    ecoes = db.relationship('ECOE', backref='organization')
-    job_csv = db.relationship("Job",foreign_keys=[id_job_csv])
-
-
+bp = Blueprint('status', __name__)
+#http://127.0.0.1:5000/status para acceder a esta ruta
+@bp.route("/")
+def status():
+    try:
+        yo = Organization.query.first()
+        if yo is not None:
+            return "ok"
+    except Exception as err:
+        for arg in err.args:
+            error = ""
+            error = error + arg
+        return "ko - Error: " + error

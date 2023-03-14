@@ -14,6 +14,7 @@
 #       You should have received a copy of the GNU General Public License
 #       along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 from app import flask_app
 from flask_rq2 import RQ
 from rq import get_current_job
@@ -27,6 +28,13 @@ class OpenECOEQueue(RQ):
     TASK_MAX_TRIES = 15
     TASK_RETRY_DELAY = timedelta(seconds=12)
     TASK_STACKTRACE = False
+    
+    ARCHIVE_ROUTE = os.path.join(
+        os.path.dirname(flask_app.instance_path),
+        flask_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+    
+    if not os.path.exists(ARCHIVE_ROUTE):
+        os.mkdir(ARCHIVE_ROUTE)
 
     def start_service(self):
         worker = self.get_worker()
@@ -61,8 +69,8 @@ class OpenECOEQueue(RQ):
 
 
 rq = OpenECOEQueue(flask_app)
+#flask_app.config.get('RQ_DEFAULT_QUEUE') es 'openecoe_jobs'
 rq.default_queue = flask_app.config.get('RQ_DEFAULT_QUEUE')
-
 
 @rq.exception_handler
 def failed_job(job, *exc_info):

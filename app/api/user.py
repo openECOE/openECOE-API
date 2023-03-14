@@ -14,29 +14,26 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from flask_potion import fields, signals, exceptions
-from flask_potion.routes import Route, Relation, ItemRoute
-from flask_potion.fields import Inline
-
-from werkzeug.exceptions import Forbidden
 from datetime import datetime
+
 from flask_login import current_user
+from flask_potion import fields, signals
+from flask_potion.routes import Relation, Route
+from werkzeug.exceptions import Forbidden
+
 from app.api._mainresource import OpenECOEResource
-
-
-from app.model.User import User, Role, Permission, RoleType, PermissionType
-from app.api.jobs import JobResource
+from app.model.User import Permission, PermissionType, Role, RoleType, User
 
 
 class ForbiddenSuperadmin(Forbidden):
     description = (
-        'You don\'t have the permission to change superadmin permissions. '
-        'It is either read-protected or not readable by the server.'
+        "You don't have the permission to change superadmin permissions. "
+        "It is either read-protected or not readable by the server."
     )
 
 
 class RoleResource(OpenECOEResource):
-    @Route.GET('/types')
+    @Route.GET("/types")
     def roletypes(self) -> fields.String():
         roles = []
 
@@ -46,23 +43,23 @@ class RoleResource(OpenECOEResource):
         return roles
 
     class Meta:
-        name = 'roles'
+        name = "roles"
         model = Role
         permissions = {
-            'read': ['user:user', 'manage'],
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': ['manage', RoleType.ADMIN]
+            "read": ["user:user", "manage"],
+            "create": "manage",
+            "update": "manage",
+            "delete": "manage",
+            "manage": ["manage", RoleType.ADMIN],
         }
 
     class Schema:
-        user = fields.ToOne('users')
+        user = fields.ToOne("users")
         name = fields.String(enum=RoleType)
 
 
 class PermissionResource(OpenECOEResource):
-    @Route.GET('/types')
+    @Route.GET("/types")
     def permissiontypes(self) -> fields.String():
         permissions = []
 
@@ -72,44 +69,45 @@ class PermissionResource(OpenECOEResource):
         return permissions
 
     class Meta:
-        name = 'permissions'
+        name = "permissions"
         model = Permission
         permissions = {
-            'read': ['user:user', 'manage'],
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': ['manage', RoleType.ADMIN]
+            "read": ["user:user", "manage"],
+            "create": "manage",
+            "update": "manage",
+            "delete": "manage",
+            "manage": ["manage", RoleType.ADMIN],
         }
 
     class Schema:
-        user = fields.ToOne('users')
+        user = fields.ToOne("users")
         name = fields.String(enum=PermissionType)
 
 
 class UserResource(OpenECOEResource):
     roles = Relation(RoleResource)
     permissions = Relation(PermissionResource)
-    jobs = Relation('jobs')
+    jobs = Relation("jobs")
 
     class Meta:
-        name = 'users'
+        name = "users"
         model = User
-        read_only_fields = ['registered_on', 'token_expiration']
-        write_only_fields = ['password', 'token']
+        read_only_fields = ["registered_on", "token_expiration"]
+        write_only_fields = ["password", "token"]
         permissions = {
-            'read': 'manage',
-            'create': 'manage',
-            'update': 'manage',
-            'delete': 'manage',
-            'manage': ['manage', RoleType.ADMIN]
+            "read": "manage",
+            "create": "manage",
+            "update": "manage",
+            "delete": "manage",
+            "manage": ["manage", RoleType.ADMIN],
         }
 
     class Schema:
-        organization = fields.ToOne('organizations')
+        organization = fields.ToOne("organizations")
 
-    @Route.GET('/me')
-    def me(self) -> fields.Inline('self'):
+    @Route.GET("/me")
+    # trunk-ignore(flake8/F821)
+    def me(self) -> fields.Inline("self"):
         if not current_user.is_authenticated:
             return None, 401
 
@@ -124,13 +122,13 @@ def on_before_create_user(sender, item):
 
 @signals.after_update.connect_via(UserResource)
 def after_update_user(sender, item, changes):
-    if 'password' in changes.keys():
+    if "password" in changes.keys():
         item.encode_password(item.password)
 
 
 @signals.before_update.connect_via(UserResource)
 def before_update_user(sender, item, changes):
     # Only superadmin can change superadmin
-    if 'is_superadmin' in changes.keys():
+    if "is_superadmin" in changes.keys():
         if not current_user.is_superadmin:
             raise ForbiddenSuperadmin

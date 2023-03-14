@@ -35,7 +35,6 @@ from app.api.planner import PlannerResource
 from app.api.round import RoundResource
 from app.api.user import UserResource, RoleResource, PermissionResource
 from app.api.jobs import JobResource
-
 from app.api import export
 
 bp = Blueprint('api', __name__)
