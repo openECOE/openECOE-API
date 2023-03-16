@@ -10,7 +10,7 @@ RUN env/bin/pip install gunicorn
 RUN env/bin/pip install requests
 EXPOSE 1081
 ENV ALEMBIC_UPGRADE=DO
-COPY deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf
-COPY deploy/alembic.sh /docker-entrypoint.d/80-alembic.sh
-COPY deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
-COPY deploy/gunicorn.sh /docker-entrypoint.d/99-gunicorn.sh
+COPY .docker/deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf
+COPY .docker/deploy/alembic.sh /docker-entrypoint.d/80-alembic.sh
+COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
+COPY .docker/deploy/gunicorn.sh /docker-entrypoint.d/99-gunicorn.sh
