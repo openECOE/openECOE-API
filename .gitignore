@@ -211,6 +211,3 @@ venv.bak/
 
 ansible_vault.pass
 
-# Data folder
-data/
-archive/

@@ -17,36 +17,35 @@ services:
       test: "mysqladmin ping -p$$MYSQL_ROOT_PASSWORD"
       timeout: 5s
       retries: 3
-  openecoe-api:
+  api:
     build:
       context: .
       dockerfile: .docker/prod.dockerfile
     image: openecoe/api
-    container_name: openecoe-api
     ports:
-      - 8082:1080
-    volumes:
-      - .docker/deploy/local.env:/app/api/.env
+      - 8000:1081
     environment:
-      SECRET_KEY: eiQuain4_aelohKa3_giGh6Fai_reeTh6Ai_Aegeic6l_ekuigo0M_aeph6Qua_uuZaac5n
-      BCRYPT_LOG_ROUNDS: 4
+      # API Configuration
+      SERVER_NAME: localhost
       DEBUG: "True"
       TESTING: "False"
-      LOG_TO_STDOUT: "True"
+      BCRYPT_LOG_ROUNDS: 4
       SQLALCHEMY_TRACK_MODIFICATIONS: "False"
       API_AUTH: "True"
       SQLALCHEMY_DATABASE_URI: mysql+pymysql://openecoe:openecoe@mysql/openECOE_dev
+      RQ_REDIS_URL: 'redis://redis:6379/0'
       CHRONO_ROUTE: http://localhost:8082
+      LOG_TO_STDOUT: "True"
+      # Data for first run
       EMAIL: ecoe@umh.es
       PASSWORD: Ki0uchee
       FIRSTNAME: Open
       SURNAME: ECOE
       ORGANIZATION: UMH
-      RQ_REDIS_URL: 'redis://redis:6379/0'
       ALEMBIC_UPGRADE: DO
     depends_on:
-      mysql:
-          condition: service_healthy
       redis:
+        condition: service_started
+      mysql:
         condition: service_healthy
 
