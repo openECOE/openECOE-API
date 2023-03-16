@@ -32,6 +32,7 @@ os.environ.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", "False")
 os.environ.setdefault("API_AUTH", "False")
 os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "localhost:8083/openECOE_dev")
 os.environ.setdefault("CHRONO_ROUTE", "localhost:6061")
+os.environ.setdefault("RQ_REDIS_URL", "redis://localhost:6379/0")
 
 envpath = os.path.join(basedir, ".env")
 
@@ -59,6 +60,7 @@ class BaseConfig:
     DEFAULT_TEMPLATE_ROUTE = "template"
 
     """Redis configuration"""
+    RQ_REDIS_URL = os.environ.get("RQ_REDIS_URL")
     RQ_DEFAULT_QUEUE = "openecoe_jobs"
     RQ_QUEUES = ["openecoe_jobs"]
 
