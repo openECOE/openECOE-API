@@ -11,6 +11,8 @@ services:
       MYSQL_DATABASE: openECOE_dev
       MYSQL_USER: openecoe
       MYSQL_PASSWORD: openecoe
+    volumes:
+      - ./.docker/data:/docker-entrypoint-initdb.d
     cap_add:
       - SYS_NICE
     healthcheck:

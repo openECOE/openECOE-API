@@ -5,9 +5,11 @@ RUN apt-get update \
 COPY . /app/api
 WORKDIR /app/api
 RUN virtualenv env
-RUN env/bin/pip install -r requirements.txt
+RUN env/bin/pip install poetry
 RUN env/bin/pip install gunicorn
 RUN env/bin/pip install requests
+RUN env/bin/poetry
+# RUN env/bin/pip install -r requirements.txt
 EXPOSE 1081
 ENV ALEMBIC_UPGRADE=DO
 COPY .docker/deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf

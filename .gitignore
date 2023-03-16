@@ -211,3 +211,4 @@ venv.bak/
 
 ansible_vault.pass
 
+.docker/data
