@@ -4,11 +4,14 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 COPY . /app/api
 WORKDIR /app/api
+
+ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 RUN virtualenv env
-RUN env/bin/pip install poetry
-RUN env/bin/pip install gunicorn
-RUN env/bin/pip install requests
-RUN env/bin/poetry
+RUN pip install poetry
+
+RUN poetry config virtualenvs.create false
+RUN poetry install
+
 # RUN env/bin/pip install -r requirements.txt
 EXPOSE 1081
 ENV ALEMBIC_UPGRADE=DO

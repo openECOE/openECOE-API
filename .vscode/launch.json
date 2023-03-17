@@ -27,7 +27,7 @@
       "args": ["run"],
       "jinja": false,
       "justMyCode": true,
-      "autoReload": {"enable": false}
+      "autoReload": {"enable": true}
     },
     {
       "name": "Launch RQ Worker",

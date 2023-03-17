@@ -1,16 +1,38 @@
-FROM nginx
-RUN apt-get update \
-  && apt-get install -y python3-virtualenv python3-pip \
-  && rm -rf /var/lib/apt/lists/*
-COPY . /app/api
+FROM python:3.8-slim-buster as base
+
+# set work directory
 WORKDIR /app/api
-RUN virtualenv env
-RUN env/bin/pip install -r requirements.txt
-RUN env/bin/pip install gunicorn
-RUN env/bin/pip install requests
-EXPOSE 1081
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV PYTHONPATH=${PYTHONPATH}:${PWD}
+
+# install dependencies
+RUN pip install --upgrade pip
+RUN pip install poetry
+COPY pyproject.toml /app/pyproject.toml
+RUN poetry config virtualenvs.create false
+RUN poetry install --only main
+
+# copy project
+COPY . /app/api
+
 ENV ALEMBIC_UPGRADE=DO
-COPY .docker/deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf
+
 COPY .docker/deploy/alembic.sh /docker-entrypoint.d/80-alembic.sh
 COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
+
+FROM base as debug
+# Debug image reusing the base
+# Install dev dependencies for debugging
+RUN pip install debugpy
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
+
+FROM base as prod
+
 COPY .docker/deploy/gunicorn.sh /docker-entrypoint.d/99-gunicorn.sh
+
