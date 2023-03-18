@@ -190,10 +190,15 @@ celerybeat-schedule
 .env
 .venv
 env/
+environments/
 venv/
 ENV/
 env.bak/
 venv.bak/
+*.env
+!dev.env
+!test.env
+!prod.template.env
 
 # Spyder project settings
 .spyderproject
@@ -211,4 +216,6 @@ venv.bak/
 
 ansible_vault.pass
 
-.docker/data
+# data folders
+.docker/data/
+archive/
