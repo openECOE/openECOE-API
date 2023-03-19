@@ -6,6 +6,8 @@ RUN apt-get update \
 # set work directory
 WORKDIR /app/api
 
+EXPOSE 80
+
 # set environment variables
 ENV PYTHONPATH=${PYTHONPATH}:${PWD}
 ENV FLASK_APP=openECOE-API.py
@@ -44,7 +46,6 @@ RUN pip install gunicorn
 
 # Nginx config
 COPY .docker/deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf
-EXPOSE 1081
 
 ENV FLASK_ENV = production
 ENV FLASK_DEBUG = 0

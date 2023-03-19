@@ -22,11 +22,40 @@
       "type": "python",
       "request": "launch",
       "module": "flask",
-      "envFile": "${workspaceFolder}/environment/local.env",
-      "args": ["run"],
-      "jinja": false,
-      "justMyCode": true,
-      "autoReload": {"enable": true}
+      "envFile": "${workspaceFolder}/environments/local.env",
+      "env": {
+        "FLASK_APP": "openECOE-API.py",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "run",
+        "--no-debugger",
+        "-h",
+        "localhost",
+        "-p",
+        "5000"
+      ],
+      "jinja": true
+    },
+    {
+      "name": "Launch openECOE API with Gunicorn",
+      "type": "python",
+      "request": "launch",
+      "module": "gunicorn",
+      "args": [
+        "openECOE-API:app",
+        "-b",
+        "localhost:5000",
+        "--reload"
+      ],
+      "envFile": "${workspaceFolder}/environments/local.env",
+      "env": {
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
     },
     {
       "name": "Launch RQ Worker",

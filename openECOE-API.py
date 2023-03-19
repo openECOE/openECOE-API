@@ -14,6 +14,11 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import create_app
+from app import create_app, socketio
+from app.chrono import Manager as chronoManager
 
 app = create_app()
+chronoManager.reload_status()
+
+if __name__ == '__main__':
+    socketio.run(app)

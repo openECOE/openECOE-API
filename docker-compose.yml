@@ -8,7 +8,7 @@ services:
     volumes:
       - ./:/app/api
     ports:
-      - 8081:5000
+      - 5000:5000
       - 5678:5678
     env_file:
       - ./environments/dev.env
@@ -24,7 +24,7 @@ services:
       redis:
         condition: service_started
       mysql:
-        condition: service_started
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
       interval: 30s

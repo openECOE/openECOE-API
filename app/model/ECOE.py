@@ -17,12 +17,12 @@ import base64
 import os
 from enum import Enum
 
-import requests
 from flask import current_app
 from flask_potion.exceptions import BackendConflict, PageNotFound
 from sqlalchemy.dialects import mysql
 
 from app.model import db
+from app.chrono import routes as chrono_routes
 
 
 class ChronoNotFound(PageNotFound):
@@ -131,99 +131,34 @@ class ECOE(db.Model):
 
     def load_config(self):
         self.chrono_token = base64.b64encode(os.urandom(250)).decode("utf-8")[:250]
-        db.session.commit()
         config = self.configuration
-        endpoint = current_app.config["CHRONO_ROUTE"] + "/load"
 
         # sending post request and saving response as response object
         try:
-            r = requests.post(url=endpoint, json=config)
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.ConnectTimeout,
-        ):
-            raise ChronoNotFound(url=endpoint)
-        # extracting response text
-        if r.status_code == 200:
+            chrono_routes.load_configuration(config)
             return self.configuration
-        else:
+        except Exception as e:
             raise BackendConflict(
                 err_chrono={
-                    "url": r.url,
-                    "status_code": r.status_code,
-                    "reason": r.reason,
-                    "text": r.text,
-                    "config": config,
+                    'type': type(e).__name__,
+                    'message': str(e),
                 }
             )
 
     def delete_config(self):
-        endpoint = "%s/%d" % (current_app.config["CHRONO_ROUTE"], self.id)
-        try:
-            r = requests.delete(url=endpoint, headers={"tfc": self.chrono_token})
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.ConnectTimeout,
-        ):
-            raise ChronoNotFound(url=endpoint)
-        # extracting response text
-        if r.status_code == 200:
+        r = chrono_routes.delete_configuration(self.id)
+        if r[0] == 'OK':
             self.chrono_token = None
-        else:
-            raise BackendConflict(
-                err_chrono={
-                    "url": r.url,
-                    "status_code": r.status_code,
-                    "reason": r.reason,
-                    "text": r.text,
-                }
-            )
+        return r
 
     def start(self):
-        endpoint = "start/%d" % self.id
-        return self.__call_chrono(endpoint)
+        return chrono_routes.start_chronos(self.id)
 
     def play(self, round_id=None):
-        endpoint = "play/%d" % self.id
-        if round_id is not None:
-            endpoint += "/" + str(round_id)
-        return self.__call_chrono(endpoint)
+        return chrono_routes.play_chronos(self.id, round_id)
 
     def pause(self, round_id=None):
-        endpoint = "pause/%d" % self.id
-        if round_id is not None:
-            endpoint += "/" + str(round_id)
-        return self.__call_chrono(endpoint)
+        return chrono_routes.pause_chronos(self.id, round_id)
 
     def abort(self):
-        endpoint = "abort/%d" % self.id
-        return self.__call_chrono(endpoint)
-
-    def __call_chrono(self, endpoint):
-
-        endpoint = "%s/%s" % (current_app.config["CHRONO_ROUTE"], endpoint)
-        try:
-            r = requests.post(url=endpoint, headers={"tfc": self.chrono_token})
-        except (
-            requests.exceptions.ConnectionError,
-            requests.exceptions.ConnectTimeout,
-        ):
-            raise ChronoNotFound(url=endpoint)
-
-        # extracting response text
-        if r.status_code != 200:
-            raise BackendConflict(
-                err_chrono={
-                    "url": r.url,
-                    "status_code": r.status_code,
-                    "reason": r.reason,
-                    "text": r.text,
-                }
-            )
-        else:
-            return {
-                "url": r.url,
-                "status_code": r.status_code,
-                "reason": r.reason,
-                "text": r.text,
-            }
+        return chrono_routes.abort_all(self.id)

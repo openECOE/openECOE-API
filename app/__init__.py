@@ -19,14 +19,18 @@ import os
 from logging.handlers import RotatingFileHandler
 
 import click
-from flask import Flask, current_app
+from flask import Flask, current_app, request, url_for
 from flask_cors import CORS
+from flask_socketio import SocketIO
+
+from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import BaseConfig
 
 flask_app = Flask(__name__)
 flask_app.config.from_object(BaseConfig)
 
+socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet')
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
@@ -46,7 +50,12 @@ def create_app(config_class=BaseConfig):
 
     api_bp.url_prefix = "/api"
     flask_app.register_blueprint(api_bp)
+    
+    from app.chrono import bp as chrono_bp
 
+    chrono_bp.url_prefix = "/chrono"
+    flask_app.register_blueprint(chrono_bp)
+    
     if not flask_app.debug and not flask_app.testing:
         if flask_app.config["LOG_TO_STDOUT"]:
             stream_handler = logging.StreamHandler()
@@ -70,6 +79,7 @@ def create_app(config_class=BaseConfig):
         flask_app.logger.setLevel(logging.INFO)
         flask_app.logger.info("openECOE-API startup")
 
+    socketio.init_app(flask_app)
     return flask_app
 
 

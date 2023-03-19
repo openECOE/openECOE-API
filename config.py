@@ -31,7 +31,6 @@ os.environ.setdefault("LOG_TO_STDOUT", "False")
 os.environ.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", "False")
 os.environ.setdefault("API_AUTH", "False")
 os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "localhost:8083/openECOE_dev")
-os.environ.setdefault("CHRONO_ROUTE", "localhost:6061")
 os.environ.setdefault("RQ_REDIS_URL", "redis://localhost:6379/0")
 
 envpath = os.path.join(basedir, ".env")
@@ -52,7 +51,6 @@ class BaseConfig:
     )
     API_AUTH = literal_eval(os.environ.get("API_AUTH"))
     SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
-    CHRONO_ROUTE = os.environ.get("CHRONO_ROUTE")
     CORS_EXPOSE_HEADERS = "x-total-count"
     EXPORT_FILE_TYPES = ["csv", "tsv", "csvz", "tsvz", "xls", "xlsx", "xlsm", "ods"]
     DEFAULT_EXPORT_FILE_TYPE = "csv"
