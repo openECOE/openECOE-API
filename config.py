@@ -32,6 +32,7 @@ os.environ.setdefault("SQLALCHEMY_TRACK_MODIFICATIONS", "False")
 os.environ.setdefault("API_AUTH", "True")
 os.environ.setdefault("SQLALCHEMY_DATABASE_URI", "localhost:8083/openECOE")
 os.environ.setdefault("RQ_REDIS_URL", "redis://localhost:6379/0")
+os.environ.setdefault("SQLALCHEMY_ECHO", "False")
 
 envpath = os.path.join(basedir, ".env")
 
@@ -46,16 +47,21 @@ class BaseConfig:
     DEBUG = literal_eval(os.environ.get("DEBUG"))
     TESTING = literal_eval(os.environ.get("TESTING"))
     LOG_TO_STDOUT = literal_eval(os.environ.get("LOG_TO_STDOUT"))
-    SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(
-        os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
-    )
     API_AUTH = literal_eval(os.environ.get("API_AUTH"))
-    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
     CORS_EXPOSE_HEADERS = "x-total-count"
     EXPORT_FILE_TYPES = ["csv", "tsv", "csvz", "tsvz", "xls", "xlsx", "xlsm", "ods"]
     DEFAULT_EXPORT_FILE_TYPE = "csv"
     DEFAULT_ARCHIVE_ROUTE = "archive"
     DEFAULT_TEMPLATE_ROUTE = "template"
+    
+    """SQLAlchemy config"""
+    SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
+    SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(
+        os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
+    )
+    SQLALCHEMY_ECHO = literal_eval(
+        os.environ.get("SQLALCHEMY_ECHO")
+    )
 
     """Redis configuration"""
     RQ_REDIS_URL = os.environ.get("RQ_REDIS_URL")
