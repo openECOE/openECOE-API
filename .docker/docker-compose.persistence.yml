@@ -14,8 +14,6 @@ services:
       MYSQL_DATABASE: openECOE_dev
       MYSQL_USER: openecoe
       MYSQL_PASSWORD: openecoe
-      MYSQL_CHARSET: utf8
-      MYSQL_COLLATION: latin1_general_ci
     volumes:
       - ./data:/docker-entrypoint-initdb.d
     command: []
