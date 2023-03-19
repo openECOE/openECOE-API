@@ -27,7 +27,6 @@ services:
       FIRSTNAME: Open
       SURNAME: ECOE
       ORGANIZATION: UMH
-      ALEMBIC_UPGRADE: DO
     depends_on:
       redis:
         condition: service_started

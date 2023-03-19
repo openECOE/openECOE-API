@@ -30,7 +30,7 @@ from config import BaseConfig
 flask_app = Flask(__name__)
 flask_app.config.from_object(BaseConfig)
 
-socketio = SocketIO(logger=True, engineio_logger=True, async_mode='eventlet')
+socketio = SocketIO(async_mode='eventlet')
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
@@ -173,10 +173,16 @@ def create_user(email, password, name, surname, admin, organization, organizatio
             db.session.commit()
 
             if admin:
-                role = Role()
-                role.id_user = user.id
-                role.name = RoleType.ADMIN
-                db.session.add(role)
+                roleAdmin = Role()
+                roleAdmin.id_user = user.id
+                roleAdmin.name = RoleType.ADMIN
+                db.session.add(roleAdmin)
+                db.session.commit()
+                
+                roleSuperAdmin = Role()
+                roleSuperAdmin.id_user = user.id
+                roleSuperAdmin.name = RoleType.SUPERADMIN
+                db.session.add(roleSuperAdmin)
                 db.session.commit()
 
             click.echo('User {} created in organization {}'.format(email, organization))

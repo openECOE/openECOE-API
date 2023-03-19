@@ -31,7 +31,6 @@
       },
       "args": [
         "run",
-        "--no-debugger",
         "-h",
         "localhost",
         "-p",
@@ -95,7 +94,7 @@
       "args": ["db", "upgrade"],
       "jinja": false,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/environments/dev.env",
+      "envFile": "${workspaceFolder}/environments/local.env",
       "autoReload": {"enable": false}
     },
     {"name": "Downgrade DB",
