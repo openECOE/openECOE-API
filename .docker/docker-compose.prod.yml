@@ -2,18 +2,13 @@ version: '3'
 services:
   api:
     build: 
-      context: .
+      context: ..
       target: prod
     image: openecoe/api:latest
     ports:
       - 1081:1081
     env_file:
-      - ./environments/prod.env
-    depends_on:
-      redis:
-        condition: service_started
-      mysql:
-        condition: service_healthy
+      - ../environments/prod.env
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
       interval: 30s
@@ -21,33 +16,12 @@ services:
       retries: 3
   rq-worker:
     build: 
-      context: .
+      context: ..
       target: prod
     image: openecoe/api:latest
     entrypoint: [ "flask", "rq", "worker"]
-    volumes:
-      - ./:/app/api
     env_file:
-      - ./environments/dev.env
+      - ../environments/prod.env
     depends_on:
       api:
         condition: service_healthy
-  redis:
-    image: redis:latest
-  mysql:
-    image: mysql:latest
-    ports:
-      - 8083:3306
-    environment:
-      MYSQL_ROOT_PASSWORD: openecoe_1234
-      MYSQL_DATABASE: openECOE_dev
-      MYSQL_USER: openecoe
-      MYSQL_PASSWORD: openecoe
-    volumes:
-      - ./.docker/data:/docker-entrypoint-initdb.d
-    cap_add:
-      - SYS_NICE
-    healthcheck:
-      test: "mysqladmin ping -p$$MYSQL_ROOT_PASSWORD"
-      timeout: 5s
-      retries: 3
