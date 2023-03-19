@@ -5,7 +5,7 @@ services:
     image: redis:latest
     ports:
       - 6379:6379
-  mysql:
+  db:
     image: mysql:latest
     ports:
       - 8083:3306
@@ -14,8 +14,11 @@ services:
       MYSQL_DATABASE: openECOE_dev
       MYSQL_USER: openecoe
       MYSQL_PASSWORD: openecoe
+      MYSQL_CHARSET: utf8
+      MYSQL_COLLATION: latin1_general_ci
     volumes:
       - ./data:/docker-entrypoint-initdb.d
+    command: []
     cap_add:
       - SYS_NICE
     healthcheck:
