@@ -1,16 +1,16 @@
 version: '3'
 services:
-  mysql:
+  db:
     extends:
       file: .docker/docker-compose.persistence.yml
-      service: mysql
+      service: db
   redis:
     extends:
       file: .docker/docker-compose.persistence.yml
       service: redis
   api:
     build: 
-      context: .docker/Dockerfile
+      context: .
       target: debug
     image: openecoe/api:debug
     volumes:
@@ -30,7 +30,7 @@ services:
     depends_on:
       redis:
         condition: service_started
-      mysql:
+      db:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
@@ -39,7 +39,7 @@ services:
       retries: 3
   worker:
     build: 
-      context: .docker/Dockerfile
+      context: .
       target: debug
     image: openecoe/api:debug
     entrypoint: [ "flask", "rq", "worker"]

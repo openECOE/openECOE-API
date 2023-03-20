@@ -45,10 +45,15 @@
       "module": "gunicorn",
       "args": [
         "openECOE-API:app",
+        "-k",
+        "eventlet",
         "-b",
         "localhost:5000",
-        "--reload"
+        "--reload",
+        "-w",
+        "2"
       ],
+      "gevent": true,
       "envFile": "${workspaceFolder}/environments/local.env",
       "env": {
         "FLASK_ENV": "development",

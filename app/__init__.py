@@ -19,18 +19,16 @@ import os
 from logging.handlers import RotatingFileHandler
 
 import click
-from flask import Flask, current_app, request, url_for
+from flask import Flask, current_app
 from flask_cors import CORS
 from flask_socketio import SocketIO
-
-from werkzeug.middleware.proxy_fix import ProxyFix
 
 from config import BaseConfig
 
 flask_app = Flask(__name__)
 flask_app.config.from_object(BaseConfig)
 
-socketio = SocketIO(async_mode='eventlet')
+socketio = SocketIO(flask_app, async_mode='eventlet')
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
@@ -78,8 +76,7 @@ def create_app(config_class=BaseConfig):
 
         flask_app.logger.setLevel(logging.INFO)
         flask_app.logger.info("openECOE-API startup")
-
-    socketio.init_app(flask_app)
+        
     return flask_app
 
 
