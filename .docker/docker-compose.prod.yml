@@ -18,7 +18,7 @@ services:
     ports:
       - 1081:1081
     environment:
-      RQ_REDIS_URL: 'redis://redis:6379'
+      RQ_REDIS_URL: 'redis://redis:6379/0'
       LOG_TO_STDOUT: 'True'
       SQLALCHEMY_DATABASE_URI: 'mysql+pymysql://openecoe:openecoe@db/openECOE_dev'
       EMAIL: ecoe@umh.es
@@ -31,7 +31,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    scale: 3
   worker:
     build: 
       context: ..
