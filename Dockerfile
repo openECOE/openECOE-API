@@ -45,7 +45,7 @@ FROM base as prod
 RUN pip install gunicorn
 
 # Nginx config
-COPY .docker/deploy/api.conf /etc/nginx/conf.d/ecoe-api.conf
+COPY .docker/deploy/api.conf /etc/nginx/conf.d/api.conf
 
 ENV FLASK_ENV = production
 ENV FLASK_DEBUG = 0

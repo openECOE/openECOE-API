@@ -28,7 +28,15 @@ from config import BaseConfig
 flask_app = Flask(__name__)
 flask_app.config.from_object(BaseConfig)
 
-socketio = SocketIO(flask_app, async_mode='eventlet')
+socketio = SocketIO(flask_app,
+                    async_mode="eventlet", 
+                    message_queue=flask_app.config["RQ_REDIS_URL"], 
+                    always_connect=True,
+                    manage_session=False,
+                    logger = True,
+                    cors_credentials = False,
+                    cors_allowed_origins = "*"
+                    )
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)

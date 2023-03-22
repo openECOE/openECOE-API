@@ -1,27 +1,42 @@
 version: '3'
 services:
+  db:
+    extends:
+      file: docker-compose.persistence.yml
+      service: db
+  redis:
+    extends:
+      file: docker-compose.persistence.yml
+      service: redis
   api:
     build: 
       context: ..
       target: prod
     image: openecoe/api:latest
+    volumes:
+      - /tmp:/tmp
     ports:
       - 1081:1081
-    env_file:
-      - ../environments/prod.env
+    environment:
+      RQ_REDIS_URL: 'redis://redis:6379'
+      LOG_TO_STDOUT: 'True'
+      SQLALCHEMY_DATABASE_URI: 'mysql+pymysql://openecoe:openecoe@db/openECOE_dev'
+      EMAIL: ecoe@umh.es
+      PASSWORD: Ki0uchee
+      FIRSTNAME: Open
+      SURNAME: ECOE
+      ORGANIZATION: UMH
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
+      test: ["CMD", "curl", "-f", "http://localhost:1081/status/"]
       interval: 30s
       timeout: 10s
       retries: 3
-  rq-worker:
+    scale: 3
+  worker:
     build: 
       context: ..
       target: prod
     image: openecoe/api:latest
     entrypoint: [ "flask", "rq", "worker"]
-    env_file:
-      - ../environments/prod.env
-    depends_on:
-      api:
-        condition: service_healthy
+    environment:
+      RQ_REDIS_URL: 'redis://redis:6379/0'

@@ -51,7 +51,7 @@
         "localhost:5000",
         "--reload",
         "-w",
-        "2"
+        "1"
       ],
       "gevent": true,
       "envFile": "${workspaceFolder}/environments/local.env",
