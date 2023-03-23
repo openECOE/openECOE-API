@@ -14,9 +14,8 @@
 #      You should have received a copy of the GNU General Public License
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
-from app import create_app, socketio
-
+from app import create_app
 app = create_app()
 
 if __name__ == '__main__':
-    socketio.run(app)
+    app.run(port=5000)

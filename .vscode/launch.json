@@ -22,9 +22,9 @@
       "type": "python",
       "request": "launch",
       "module": "flask",
-      "envFile": "${workspaceFolder}/environments/local.env",
+      "envFile": "${workspaceFolder}/environments/dev.env",
       "env": {
-        "FLASK_APP": "openECOE-API.py",
+        "FLASK_APP": "manager:api",
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "1",
         "PYTHONPATH": "${workspaceFolder}"
@@ -36,26 +36,64 @@
         "-p",
         "5000"
       ],
-      "jinja": true
+      "jinja": false,
+      "justMyCode": true
     },
     {
-      "name": "Launch openECOE API with Gunicorn",
+      "name": "Launch openECOE CHRONO",
+      "type": "python",
+      "request": "launch",
+      "module": "flask",
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "env": {
+        "FLASK_APP": "manager:chrono",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "run",
+        "-h", "localhost",
+        "-p", "5001",
+      ],
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "Launch openECOE API (Gunicorn)",
       "type": "python",
       "request": "launch",
       "module": "gunicorn",
       "args": [
-        "openECOE-API:app",
-        "-k",
-        "eventlet",
-        "-b",
-        "localhost:5000",
         "--reload",
-        "-w",
-        "1"
+        "-c","${workspaceFolder}/configs/gunicorn_conf.py",
+        "openecoe-api:app"
       ],
       "gevent": true,
-      "envFile": "${workspaceFolder}/environments/local.env",
+      "envFile": "${workspaceFolder}/environments/dev.env",
       "env": {
+        "PORT": "5000",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Launch openECOE Chrono (Gunicorn)",
+      "type": "python",
+      "request": "launch",
+      "module": "gunicorn",
+      "args": [
+        "--reload",
+        "-c","${workspaceFolder}/configs/gunicorn_conf.py",
+        "--workers","1",
+        "-k","eventlet",
+        "openecoe-chrono:app"
+      ],
+      "gevent": true,
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "env": {
+        "PORT": "5001",
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "1",
         "PYTHONPATH": "${workspaceFolder}"

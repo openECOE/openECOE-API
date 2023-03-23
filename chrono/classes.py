@@ -1,9 +1,8 @@
-from app.chrono import bp
-from app import socketio
+from . import socketio, chrono_app
 import json
 import os
 
-base_namespace = ''
+
 
 class Manager:
     path = '/tmp/'
@@ -13,7 +12,7 @@ class Manager:
     def create_config(config):
         ecoe = ECOE(config)
 
-        bp.ecoes.append(ecoe)
+        chrono_app.ecoes.append(ecoe)
         filename = Manager.file_template % ecoe.id
 
         with open(filename, 'w') as f:
@@ -24,7 +23,7 @@ class Manager:
     @staticmethod
     def delete_config(ecoe_id):
         try:
-            bp.ecoes.remove(Manager.find_ecoe(ecoe_id))
+            chrono_app.ecoes.remove(Manager.find_ecoe(ecoe_id))
         except ValueError:
             pass
         filename = Manager.file_template % ecoe_id
@@ -102,7 +101,7 @@ class Manager:
 
     @staticmethod
     def find_ecoe(ecoe_id):
-        return next((x for x in bp.ecoes if x.id == ecoe_id), None)
+        return next((x for x in chrono_app.ecoes if x.id == ecoe_id), None)
 
 class ECOE:
     def __init__(self, config):
@@ -127,7 +126,7 @@ class Round:
 
     def __init__(self, id, schedules, num_reruns):
         self.id = id
-        self.namespace = base_namespace+'/round%d' % id
+        self.namespace = '/round%d' % id
         self.chrono = Chrono(id, self.namespace)
         self.schedules = schedules
         self.num_reruns = num_reruns

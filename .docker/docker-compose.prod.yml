@@ -13,8 +13,6 @@ services:
       context: ..
       target: prod
     image: openecoe/api:latest
-    volumes:
-      - /tmp:/tmp
     ports:
       - 1081:1081
     environment:

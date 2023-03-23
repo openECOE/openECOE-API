@@ -8,7 +8,7 @@
 
     $(document).ready(function() {
 
-        var namespace = '{{base_namespace}}/round{{ round_id }}';
+        var namespace = '/round{{ round_id }}';
         var socket = io.connect('http://' + document.domain + ':' + location.port + namespace, { reconnectionDelayMax : 1000 });
 
         socket.on('connect', function () {

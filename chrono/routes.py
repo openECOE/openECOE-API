@@ -1,6 +1,5 @@
-from app.chrono import bp
-from app import socketio
-from .classes import Manager, base_namespace
+from . import socketio, chrono_app
+from .classes import Manager
 import json
 
 from flask import render_template, request
@@ -23,18 +22,18 @@ def requires_tfc(f):
     return decorated
 
 
-@bp.route('/<int:station_id>/<int:round_id>')
+@chrono_app.route('/<int:station_id>/<int:round_id>')
 def index(station_id, round_id):
-    return render_template('index.html', station_id=station_id, round_id=round_id, base_namespace=base_namespace)
+    return render_template('index.html', station_id=station_id, round_id=round_id)
 
 
-@bp.route('/admin')
+@chrono_app.route('/admin')
 def admin():
-    return render_template('admin.html', ecoes=bp.ecoes, base_namespace=base_namespace)
+    return render_template('admin.html', ecoes=chrono_app.ecoes)
 
 
-# @bp.route('/abort/<int:ecoe_id>', methods=['POST'])
-# @requires_tfc
+@chrono_app.route('/abort/<int:ecoe_id>', methods=['POST'])
+@requires_tfc
 def abort_all(ecoe_id):
     ecoe = Manager.find_ecoe(ecoe_id)
     if ecoe is not None:
@@ -64,17 +63,17 @@ def manage_chronos(active, ecoe_id, round_id):
             e_rounds[0].chrono.pause()
 
 
-# @bp.route('/pause/<int:ecoe_id>', methods=['POST'])
-# @bp.route('/pause/<int:ecoe_id>/<int:round_id>', methods=['POST'])
-# @requires_tfc
+@chrono_app.route('/pause/<int:ecoe_id>', methods=['POST'])
+@chrono_app.route('/pause/<int:ecoe_id>/<int:round_id>', methods=['POST'])
+@requires_tfc
 def pause_chronos(ecoe_id, round_id=None):
     manage_chronos(active=False, ecoe_id=ecoe_id, round_id=round_id)
     return '', 200
 
 
-# @bp.route('/play/<int:ecoe_id>', methods=['POST'])
-# @bp.route('/play/<int:ecoe_id>/<int:round_id>', methods=['POST'])
-# @requires_tfc
+@chrono_app.route('/play/<int:ecoe_id>', methods=['POST'])
+@chrono_app.route('/play/<int:ecoe_id>/<int:round_id>', methods=['POST'])
+@requires_tfc
 def play_chronos(ecoe_id, round_id=None):
     manage_chronos(active=True, ecoe_id=ecoe_id, round_id=round_id)
     return '', 200
@@ -88,27 +87,25 @@ def has_threads_alive(ecoe_id):
         return True in [t.is_alive() for t in ecoe.threads]
 
 
-#@bp.route('/load', methods=['POST'])
-def load_configuration(config: json):
-    if not config:
-        config = request.get_json()
-        
+@chrono_app.route('/load', methods=['POST'])
+def load_configuration():
+    config = request.get_json()
     if 'ecoe' in config:
         ecoe_id = config['ecoe']['id']
 
         if not has_threads_alive(ecoe_id):
-            try:
-                Manager.create_config(config)
-            except Exception as e:
-                raise e
+
+            Manager.create_config(config)
+
+            return 'OK', 200
         else:
-            raise Exception('No cargado porque los cronos ya están iniciados')
+            return 'No cargado porque los cronos ya están iniciados', 409
     else:
-        raise Exception('Config error')
+        return 'Config error', 500
 
 
-# @bp.route('/<int:ecoe_id>', methods=['DELETE'])
-# @requires_tfc
+@chrono_app.route('/<int:ecoe_id>', methods=['DELETE'])
+@requires_tfc
 def delete_configuration(ecoe_id):
     if not has_threads_alive(ecoe_id):
 
@@ -119,8 +116,8 @@ def delete_configuration(ecoe_id):
         return 'No eliminado porque los cronos ya están iniciados', 409
 
 
-#@bp.route('/start/<int:ecoe_id>', methods=['POST'])
-#@requires_tfc
+@chrono_app.route('/start/<int:ecoe_id>', methods=['POST'])
+@requires_tfc
 def start_chronos(ecoe_id):
     if not has_threads_alive(ecoe_id):
 
@@ -146,8 +143,8 @@ def check_tfc(tfc, ecoe_id):
         return tfc == ecoe.tfc
 
 
-@bp.route('/configurations')
-@bp.route('/configurations/<int:ecoe_id>')
+@chrono_app.route('/configurations')
+@chrono_app.route('/configurations/<int:ecoe_id>')
 def get_configurations(ecoe_id=None):
     configs = Manager.get_ecoe_config_files(ecoe_id)
 

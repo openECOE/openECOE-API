@@ -10,7 +10,7 @@ EXPOSE 80
 
 # set environment variables
 ENV PYTHONPATH=${PYTHONPATH}:${PWD}
-ENV FLASK_APP=openECOE-API.py
+ENV FLASK_APP=openecoe-api.py
 
 # install dependencies
 RUN pip install --upgrade pip

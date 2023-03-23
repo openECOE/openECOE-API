@@ -53,6 +53,7 @@ class BaseConfig:
     DEFAULT_EXPORT_FILE_TYPE = "csv"
     DEFAULT_ARCHIVE_ROUTE = "archive"
     DEFAULT_TEMPLATE_ROUTE = "template"
+    CHRONO_ROUTE = "http://localhost:5001"
     
     """SQLAlchemy config"""
     SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")

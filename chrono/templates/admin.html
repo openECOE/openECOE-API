@@ -8,7 +8,7 @@
 
             {% for r in e.rounds %}
 
-                var socket{{ r.id }} = io.connect('http://' + document.domain + ':' + location.port + '{{base_namespace}}/round{{ r.id }}', { reconnectionDelayMax : 1000 });
+                var socket{{ r.id }} = io.connect('http://' + document.domain + ':' + location.port + '/round{{ r.id }}', { reconnectionDelayMax : 1000 });
 
                 socket{{ r.id }}.on('connect', function () {
                     $("#log").append('Conectado para monitorizacion de rueda {{ r.id }}<br>');
