@@ -14,7 +14,7 @@ services:
       target: prod
     image: openecoe/api:latest
     ports:
-      - 1081:1081
+      - 80:80
     environment:
       RQ_REDIS_URL: 'redis://redis:6379/0'
       LOG_TO_STDOUT: 'True'
@@ -25,7 +25,7 @@ services:
       SURNAME: ECOE
       ORGANIZATION: UMH
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:1081/status/"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
       interval: 30s
       timeout: 10s
       retries: 3

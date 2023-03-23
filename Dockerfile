@@ -6,7 +6,7 @@ RUN apt-get update \
 # set work directory
 WORKDIR /app/api
 
-EXPOSE 80
+EXPOSE 8081
 
 # set environment variables
 ENV PYTHONPATH=${PYTHONPATH}:${PWD}
@@ -45,7 +45,7 @@ FROM base as prod
 RUN pip install gunicorn
 
 # Nginx config
-COPY .docker/deploy/api.conf /etc/nginx/conf.d/api.conf
+COPY .docker/deploy/api.conf /etc/nginx/conf.d/default.conf
 
 ENV FLASK_ENV = production
 ENV FLASK_DEBUG = 0
