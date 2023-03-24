@@ -42,7 +42,7 @@ def create_app(config_class=BaseConfig):
 
     from app.api import bp as api_bp
 
-    api_bp.url_prefix = "/api"
+    api_bp.url_prefix = "/"
     flask_app.register_blueprint(api_bp)
     
     if not flask_app.debug and not flask_app.testing:

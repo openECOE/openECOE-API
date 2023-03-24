@@ -14,7 +14,7 @@ services:
       target: prod
     image: openecoe/api:latest
     ports:
-      - 80:80
+      - 1081:8081
     environment:
       RQ_REDIS_URL: 'redis://redis:6379/0'
       LOG_TO_STDOUT: 'True'
