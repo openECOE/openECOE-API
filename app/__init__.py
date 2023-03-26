@@ -31,18 +31,20 @@ def create_app(config_class=BaseConfig):
     CORS(flask_app)
 
     from app.status import bp as status_bp
+    
+    app_root = "/backend"
 
-    status_bp.url_prefix = "/status"
+    status_bp.url_prefix = app_root + "/status"
     flask_app.register_blueprint(status_bp)
 
     from app.auth import bp as auth_bp
 
-    auth_bp.url_prefix = "/auth"
+    auth_bp.url_prefix = app_root + "/auth"
     flask_app.register_blueprint(auth_bp)
 
     from app.api import bp as api_bp
 
-    api_bp.url_prefix = "/"
+    api_bp.url_prefix = app_root + "/api"
     flask_app.register_blueprint(api_bp)
     
     if not flask_app.debug and not flask_app.testing:

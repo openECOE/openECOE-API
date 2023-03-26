@@ -71,9 +71,9 @@ dnspython = "1.16.0"
 enum34 = "1.1.6"
 monotonic = "1.5"
 eventlet = "0.25.0"
-greenlet = "0.4.17"
-gevent-websocket = "0.10.1"
 flask-socketio = "^4"
+gevent = "^21"
+python-socketio = "^4"
 
 
 [tool.poetry.group.api.dependencies]
@@ -84,5 +84,5 @@ meinheld = "1.0.2"
 psutil = "^5.9.4"
 
 [build-system]
-requires = ["poetry-core"]
+requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"

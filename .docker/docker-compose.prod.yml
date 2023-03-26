@@ -14,7 +14,7 @@ services:
       target: prod
     image: openecoe/api:latest
     ports:
-      - 1081:8081
+      - 8081:80
     environment:
       RQ_REDIS_URL: 'redis://redis:6379/0'
       LOG_TO_STDOUT: 'True'
@@ -29,11 +29,8 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-  worker:
-    build: 
-      context: ..
-      target: prod
-    image: openecoe/api:latest
-    entrypoint: [ "flask", "rq", "worker"]
-    environment:
-      RQ_REDIS_URL: 'redis://redis:6379/0'
+    depends_on:
+      redis:
+        condition: service_started
+      db:
+        condition: service_healthy
