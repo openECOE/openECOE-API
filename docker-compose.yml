@@ -10,44 +10,40 @@ services:
       service: redis
   api:
     build: 
-      context: .
-      target: debug
-    image: openecoe/api:debug
-    volumes:
-      - ./:/app/api
+      context: ..
+      target: prod
+    image: openecoe/api:latest
     ports:
-      - 5000:5000
-      - 5678:5678
-    env_file:
-      - ./environments/dev.env
+      - 8081:80
     environment:
-      # Data for first run if no organization created
+      OPENECOE_SECRET: eiQuain4_aelohKa3_giGh6Fai_reeTh6Ai_Aegeic6l_ekuigo0M_aeph6Qua_uuZaac5n
+      OPENECOE_DB_HOST: db
+      OPENECOE_DB_PORT: 3306
+      OPENECOE_DB_USER: openecoe
+      OPENECOE_DB_PASSWORD: openecoe
+      OPENECOE_DB_NAME: openECOE_dev
+      OPENECOE_REDIS_HOST: redis
+      OPENECOE_REDIS_PORT: 6379
+      OPENECOE_REDIS_DB: 0
+      
+      # Usuario por defecto creado la primera vez
       EMAIL: ecoe@umh.es
-      PASSWORD: Ki0uchee
+      PASSWORD: Kui0chee
       FIRSTNAME: Open
       SURNAME: ECOE
       ORGANIZATION: UMH
-    depends_on:
-      redis:
-        condition: service_started
-      db:
-        condition: service_healthy
+      ALEMBIC_UPGRADE: DO
+
+      # Configruación debug
+      DEBUG: "True"
+      LOG_TO_STDOUT: "True"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
       interval: 30s
       timeout: 10s
       retries: 3
-  worker:
-    build: 
-      context: .
-      target: debug
-    image: openecoe/api:debug
-    entrypoint: [ "flask", "rq", "worker"]
-    volumes:
-      - ./:/app/api
-    env_file:
-      - ./environments/dev.env
     depends_on:
       redis:
         condition: service_started
-
+      db:
+        condition: service_healthy
