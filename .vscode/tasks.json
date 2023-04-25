@@ -1,26 +1,60 @@
 {
-  // See https://go.microsoft.com/fwlink/?LinkId=733558
-  // for the documentation about the tasks.json format
-  "version": "2.0.0",
-  "tasks": [
-    {
-        "label": "Compose Up",
-        "type": "docker-compose",
-        "dockerCompose": {
-            "up": {
-                "detached": true,
-                "build": true
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker-build-api",
+            "type": "docker-build",
+            "dockerBuild": {
+                "context": "${workspaceFolder}",
+                "dockerfile": "${workspaceFolder}/Dockerfile",
+                "tag": "openecoe/api:debug"
+            },
+        },
+        {
+            "type": "docker-run",
+            "label": "docker-run: debug",
+            "dependsOn": ["docker-build"],
+            "dockerRun": {
+                "image": "openecoe/api:debug",
+                "envFiles": ["${workspaceFolder}/environments/dev.env"],
+                "volumes": [
+                    {
+                      "containerPath": "/app/api",
+                      "localPath": "${workspaceFolder}"
+                    }
+                  ],
+                "ports": [
+                    {
+                        "containerPort": 5000,
+                        "hostPort": 5000
+                    }
+                ]
+            },
+            "python": {
+                "module": "flask",
+                "args": ["run", "--host", "0.0.0.0", "--port", "5000"]
             }
-        }
-    },
-    {
-        "label": "Compose Down",
-        "type": "docker-compose",
-        "dockerCompose": {
-            "down": {
-                "removeVolumes": false
+        },
+        {
+            "label": "Compose Up",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "up": {
+                    "detached": true,
+                    "build": true
+                }
             }
-        }
-    },
-]
+        },
+        {
+            "label": "Compose Down",
+            "type": "docker-compose",
+            "dockerCompose": {
+                "down": {
+                    "removeVolumes": false
+                }
+            }
+        },
+    ]
 }

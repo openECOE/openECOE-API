@@ -5,37 +5,98 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "name": "Attach to Docker",
+      "type": "python",
+      "request": "attach",
+      "port": 5678,
+      "host": "0.0.0.0",
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app/api"
+        }
+      ]
+    },
+    {
       "name": "Launch openECOE API",
       "type": "python",
       "request": "launch",
-
       "module": "flask",
-      "env": { 
-        "FLASK_APP": "openECOE-API.py", 
-        "FLASK_ENV": "development",
-        "FLASK_DEBUG": "0",
-      },
-      "args": ["run", "--no-debugger"],
-      "jinja": false,
-      "justMyCode": true,
       "envFile": "${workspaceFolder}/environments/dev.env",
-      "autoReload": {"enable": false}
+      "env": {
+        "FLASK_APP": "openecoe-api.py",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "run",
+        "-h",
+        "localhost",
+        "-p",
+        "5000"
+      ],
+      "jinja": false,
+      "justMyCode": true
     },
     {
-      "name": "Launch RQ Worker",
+      "name": "Launch openECOE CHRONO",
       "type": "python",
       "request": "launch",
       "module": "flask",
-      "env": { 
-        "FLASK_APP": "openECOE-API.py", 
-        "FLASK_ENV": "development",
-        "FLASK_DEBUG": "0",
-      },
-      "args": ["rq", "worker"],
-      "jinja": false,
-      "justMyCode": true,
       "envFile": "${workspaceFolder}/environments/dev.env",
-      "autoReload": {"enable": false}
+      "env": {
+        "FLASK_APP": "manager:chrono",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "run",
+        "-h", "localhost",
+        "-p", "5001",
+      ],
+      "jinja": true,
+      "justMyCode": true
+    },
+    {
+      "name": "Launch openECOE API (Gunicorn)",
+      "type": "python",
+      "request": "launch",
+      "module": "gunicorn",
+      "args": [
+        "--reload",
+        "-c","${workspaceFolder}/configs/gunicorn_conf.py",
+        "openecoe-api:app"
+      ],
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "env": {
+        "PORT": "5000",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+      "name": "Launch openECOE Chrono (Gunicorn)",
+      "type": "python",
+      "request": "launch",
+      "module": "gunicorn",
+      "args": [
+        "--reload",
+        "-c","${workspaceFolder}/configs/gunicorn_conf.py",
+        "--workers","1",
+        "-k","eventlet",
+        "openecoe-chrono:app"
+      ],
+      "gevent": true,
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "env": {
+        "PORT": "5001",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      }
     },
     {"name": "Migrate DB",
       "type": "python",
@@ -64,7 +125,7 @@
       "args": ["db", "upgrade"],
       "jinja": false,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/environments/dev.env",
+      "envFile": "${workspaceFolder}/environments/local.env",
       "autoReload": {"enable": false}
     },
     {"name": "Downgrade DB",

@@ -2,11 +2,11 @@ version: '3'
 services:
   db:
     extends:
-      file: .docker/docker-compose.persistence.yml
+      file: docker-compose.persistence.yml
       service: db
   redis:
     extends:
-      file: .docker/docker-compose.persistence.yml
+      file: docker-compose.persistence.yml
       service: redis
   api:
     build: 
@@ -20,11 +20,12 @@ services:
       OPENECOE_DB_HOST: db
       OPENECOE_DB_PORT: 3306
       OPENECOE_DB_USER: openecoe
-      OPENECOE_DB_PASSWORD: openecoe
-      OPENECOE_DB_NAME: openECOE_dev
+      OPENECOE_DB_PASSWORD: openecoe_pass
+      OPENECOE_DB_NAME: openECOE
       OPENECOE_REDIS_HOST: redis
       OPENECOE_REDIS_PORT: 6379
       OPENECOE_REDIS_DB: 0
+      RQ_REDIS_URL: 'redis://redis:6379/0'
       
       # Usuario por defecto creado la primera vez
       EMAIL: ecoe@umh.es
@@ -36,7 +37,7 @@ services:
 
       # Configruación debug
       DEBUG: "True"
-      LOG_TO_STDOUT: "True"
+      LOG_TO_STDOUT: "False"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
       interval: 30s

@@ -131,6 +131,7 @@ class ECOE(db.Model):
 
     def load_config(self):
         self.chrono_token = base64.b64encode(os.urandom(250)).decode("utf-8")[:250]
+        db.session.commit()
         config = self.configuration
         endpoint = current_app.config["CHRONO_ROUTE"] + "/load"
 

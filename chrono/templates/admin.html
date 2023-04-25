@@ -1,0 +1,64 @@
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+
+    $(document).ready(function() {
+
+        {% for e in ecoes %}
+
+            {% for r in e.rounds %}
+
+                var socket{{ r.id }} = io.connect('http://' + document.domain + ':' + location.port + '/round{{ r.id }}', { reconnectionDelayMax : 1000 });
+
+                socket{{ r.id }}.on('connect', function () {
+                    $("#log").append('Conectado para monitorizacion de rueda {{ r.id }}<br>');
+                });
+
+                socket{{ r.id }}.on('end_round', function(msg) {
+                    $('#clock{{ r.id }}').css("color", "green");
+                    $('#log').append("<span style='color:blue'>"+msg.data+"</span><br>");
+                });
+
+                socket{{ r.id }}.on('init_stage', function(msg) {
+                    $('#clock{{ r.id }}').fadeOut('fast').fadeIn('fast', function () {
+                        $('#vuelta{{ r.id }}').text(msg.num_rerun + "/" + msg.total_reruns);
+                    });
+                });
+
+                socket{{ r.id }}.on('aborted', function(msg) {
+                    $('#clock{{ r.id }}').css("color", "red");
+                    $('#clock{{ r.id }}').text("EVALUACIÓN ABORTADA");
+                });
+
+                socket{{ r.id }}.on('tic_tac', function(msg) {
+                    $('#clock{{ r.id }}').text(msg.stage.name + " " + msg.minutes + ":" + msg.seconds);
+                    $('#vuelta{{ r.id }}').text(msg.num_rerun + "/" + msg.total_reruns);
+
+                    if (msg.stopped == 'S') {
+                        $('#clock{{ r.id }}').css("color", "red");
+                        $('#log').append("<span style='color:red'>[" + msg.minutes + ":" + msg.seconds + "] Crono parado</span><br>");
+                    }
+                    else
+                        $('#clock{{ r.id }}').css("color", "black");
+                });
+
+            {% endfor %}
+
+        {% endfor %}
+    });
+</script>
+
+<body>
+    {% for e in ecoes %}
+        <div><h1>{{ e.name }}</h1></div>
+        {% for r in e.rounds %}
+            <div>
+                <h2>
+                    ID Rueda {{ r.id }} (vuelta <span id="vuelta{{ r.id }}"></span>): <span id="clock{{ r.id }}">--:--</span>
+                </h2>
+            </div>
+        {% endfor %}
+    {% endfor %}
+    <br>
+    <div id="log"></div>
+</body>

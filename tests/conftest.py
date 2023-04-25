@@ -23,7 +23,7 @@ from alembic.command import upgrade
 from alembic.config import Config
 
 import app as flask_app
-from config import TestConfig
+from configs import TestConfig
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 ALEMBIC_CONFIG = os.path.join(basedir, "..", "migrations", "alembic.ini")

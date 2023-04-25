@@ -22,31 +22,31 @@ import click
 from flask import Flask, current_app
 from flask_cors import CORS
 
-from config import BaseConfig
+from configs import BaseConfig
 
 flask_app = Flask(__name__)
-flask_app.config.from_object(BaseConfig)
-
 
 def create_app(config_class=BaseConfig):
     flask_app.config.from_object(config_class)
     CORS(flask_app)
 
     from app.status import bp as status_bp
+    
+    app_root = "/backend"
 
-    status_bp.url_prefix = "/status"
+    status_bp.url_prefix = app_root + "/status"
     flask_app.register_blueprint(status_bp)
 
     from app.auth import bp as auth_bp
 
-    auth_bp.url_prefix = "/auth"
+    auth_bp.url_prefix = app_root + "/auth"
     flask_app.register_blueprint(auth_bp)
 
     from app.api import bp as api_bp
 
-    api_bp.url_prefix = "/api"
+    api_bp.url_prefix = app_root + "/api"
     flask_app.register_blueprint(api_bp)
-
+    
     if not flask_app.debug and not flask_app.testing:
         if flask_app.config["LOG_TO_STDOUT"]:
             stream_handler = logging.StreamHandler()
@@ -68,8 +68,8 @@ def create_app(config_class=BaseConfig):
             flask_app.logger.addHandler(file_handler)
 
         flask_app.logger.setLevel(logging.INFO)
-        flask_app.logger.info("openECOE-API startup")
-
+        flask_app.logger.info("openECOE API startup")
+        
     return flask_app
 
 
@@ -163,10 +163,27 @@ def create_user(email, password, name, surname, admin, organization, organizatio
             db.session.commit()
 
             if admin:
-                role = Role()
-                role.id_user = user.id
-                role.name = RoleType.ADMIN
-                db.session.add(role)
+                roleAdmin = Role()
+                roleAdmin.id_user = user.id
+                roleAdmin.name = RoleType.ADMIN
+                db.session.add(roleAdmin)
+                db.session.commit()
+                
+                roleSuperAdmin = Role()
+                roleSuperAdmin.id_user = user.id
+                roleSuperAdmin.name = RoleType.SUPERADMIN
+                db.session.add(roleSuperAdmin)
                 db.session.commit()
 
-            click.echo("User {} created in organization {}".format(email, organization))
+            click.echo('User {} created in organization {}'.format(email, organization))
+
+@flask_app.cli.command()
+def virgin():
+    with current_app.app_context():
+        from app.api.organization import Organization
+        from app.model import db
+        import sys
+
+        count = db.session.query(Organization).count()
+        click.echo('Number of organizations: {}'.format(count))
+        sys.exit(count)
