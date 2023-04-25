@@ -117,9 +117,9 @@ class EcoeResource(OpenECOEResource):
         permissions = {
             "read": ["manage", "read", "evaluate"],
             "create": "update",
-            "update": "manage",
+            "update": [RoleType.ADMIN, "manage"],
             "delete": "manage",
-            "manage": [PermissionType.MANAGE, RoleType.ADMIN, RoleType.SUPERADMIN, "user:user"],
+            "manage": [PermissionType.MANAGE, RoleType.SUPERADMIN, "user:user"],
             "evaluate": [PermissionType.EVALUATE, "manage"],
         }
 
