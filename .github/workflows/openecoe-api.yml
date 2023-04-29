@@ -96,9 +96,8 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Launch Webhook to trigger openecoe/one-for-all build
-        uses: jasongitmail/fast-webhook@v1.1.4
+        uses: joelwmale/webhook-action@master
         with:
-          # The webhook URL to send the request to.
-          url: https://hub.docker.com/api/build/v1/source/d89befc7-e718-4ef2-a77c-a176d66454f6/trigger/388fe256-3224-4a0c-be30-7800511123f0/call/
-          # The stringified JSON body to be sent, if any.
-          #json: # optional, default is {}
+          url: ${{ secrets.WEBHOOK_BUILD_ONE_FOR_ALL }}
+          headers: '{"repository": "${{ github.repository }}"}'
+          body: '{"event": "build", "repository": "${{ github.repository_owner }}"}'
