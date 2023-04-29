@@ -95,7 +95,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Launch Webhook to trigger openecoe/one-for-all build
+      - name: Trigger build "openecoe/one-for-all"
         uses: joelwmale/webhook-action@master
         with:
           url: ${{ secrets.WEBHOOK_BUILD_ONE_FOR_ALL }}
