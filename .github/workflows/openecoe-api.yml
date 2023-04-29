@@ -98,6 +98,7 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Trigger build "openecoe/one-for-all"
+        if: steps.meta.outputs.tags =~ 'latest'
         uses: joelwmale/webhook-action@master
         with:
           url: ${{ secrets.WEBHOOK_BUILD_ONE_FOR_ALL }}
