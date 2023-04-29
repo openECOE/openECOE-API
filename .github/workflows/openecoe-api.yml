@@ -82,6 +82,9 @@ jobs:
         with:
           images: | 
             ${{ env.IMAGE_NAME }}
+          tags: |
+            type=pep440,pattern={{version}},event=tag
+            type=ref,event=branch
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
