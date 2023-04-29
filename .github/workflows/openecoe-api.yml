@@ -78,12 +78,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            # set latest tag for default branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # tag version event
-            # type=semver,pattern={{version}},event=tag
+          images: | 
+            ${{ env.IMAGE_NAME }}
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -95,9 +91,14 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-# Temporary remove
-#    - name: Test with pytest
-#      run: |
-#        pytest
+
+      - name: Launch Webhook to trigger openecoe/one-for-all build
+        uses: jasongitmail/fast-webhook@v1.1.4
+        with:
+          # The webhook URL to send the request to.
+          url: https://hub.docker.com/api/build/v1/source/d89befc7-e718-4ef2-a77c-a176d66454f6/trigger/388fe256-3224-4a0c-be30-7800511123f0/call/
+          # The stringified JSON body to be sent, if any.
+          #json: # optional, default is {}
