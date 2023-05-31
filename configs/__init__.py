@@ -67,6 +67,11 @@ class BaseConfig:
     DEFAULT_TEMPLATE_ROUTE = "template"
     CHRONO_ROUTE = "http://localhost:5001"
     
+    
+    """Potion configuration."""
+    POTION_DEFAULT_PER_PAGE = 50
+    POTION_MAX_PER_PAGE = 200
+    
     """SQLAlchemy config"""
     OPENECOE_DB_HOST = os.environ.get("OPENECOE_DB_HOST")
     OPENECOE_DB_PORT = os.environ.get("OPENECOE_DB_PORT")
