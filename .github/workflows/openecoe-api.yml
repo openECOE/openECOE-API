@@ -100,10 +100,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Trigger build "openecoe/one-for-all"
-        if: contains(steps.meta.outputs.tags, 'latest')
-        uses: joelwmale/webhook-action@master
-        with:
-          url: ${{ secrets.WEBHOOK_BUILD_ONE_FOR_ALL }}
-          headers: '{"repository": "${{ github.repository }}"}'
-          body: '{"event": "build", "repository": "${{ github.repository_owner }}", "tag": "api-${{ steps.meta.outputs.tags }}"}'
+      #- name: Trigger build "openecoe/one-for-all"
+      #  if: contains(steps.meta.outputs.tags, 'latest')
+      #  uses: joelwmale/webhook-action@master
+      #  with:
+      #    url: ${{ secrets.WEBHOOK_BUILD_ONE_FOR_ALL }}
+      #    headers: '{"repository": "${{ github.repository }}"}'
+      #    body: '{"event": "build", "repository": "${{ github.repository_owner }}", "tag": "api-${{ steps.meta.outputs.tags }}"}'
