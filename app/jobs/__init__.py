@@ -34,11 +34,7 @@ class OpenECOEQueue(RQ):
         flask_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
     
     if not os.path.exists(ARCHIVE_ROUTE):
-        os.mkdir(ARCHIVE_ROUTE)
-
-    def start_service(self):
-        worker = self.get_worker()
-        worker.work()
+        os.mkdir(ARCHIVE_ROUTE)        
 
     def clear_crons(self):
         scheduler = self.get_scheduler()
@@ -68,9 +64,11 @@ class OpenECOEQueue(RQ):
             db.session.commit()
 
 
-rq = OpenECOEQueue(flask_app)
+rq = OpenECOEQueue()
 #flask_app.config.get('RQ_DEFAULT_QUEUE') es 'openecoe_jobs'
 rq.default_queue = flask_app.config.get('RQ_DEFAULT_QUEUE')
+
+rq.init_app(flask_app)
 
 @rq.exception_handler
 def failed_job(job, *exc_info):

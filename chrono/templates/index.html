@@ -1,0 +1,55 @@
+<script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+<script type="text/javascript" charset="utf-8">
+
+    function instant(minutes, seconds) {
+        return "[" + minutes + ":" + seconds + "]"
+    }
+
+    $(document).ready(function() {
+
+        var namespace = '/round{{ round_id }}';
+        var socket = io.connect('http://' + document.domain + ':' + location.port + namespace, { reconnectionDelayMax : 1000 });
+
+        socket.on('connect', function () {
+            $("#log").append('Estación {{ station_id }}: conectada a rueda {{ round_id }}<br>');
+        });
+
+        socket.on('end_round', function(msg) {
+            $('#clock').css("color", "green").show('slow');
+            $('#log').append("<span style='color:blue'>"+msg.data+"</span><br>");
+        });
+
+        socket.on('init_stage', function(msg) {
+            $('#clock').fadeOut('fast').fadeIn('fast');
+        });
+
+        socket.on('evento', function(msg) {
+            if (jQuery.inArray({{ station_id }}+"", msg.target.split(",")) >= 0) {
+                $('#log').append("<span style='color:green'>[" + msg.stage.name + "] " + msg.data + " => " + msg.target + "</span><br>");
+            }
+        });
+
+        socket.on('aborted', function(msg) {
+            $('#clock').css("color", "red");
+            $('#clock').text("EVALUACIÓN ABORTADA");
+        });
+
+        socket.on('tic_tac', function(msg) {
+            $('#clock').text(msg.stage.name + " " + msg.minutes + ":" + msg.seconds);
+
+            if (msg.stopped == 'S') {
+                $('#clock').css("color", "red");
+                $('#log').append("<span style='color:red'>"+instant(msg.minutes, msg.seconds)+" Crono parado</span><br>");
+            }
+            else
+                $('#clock').css("color", "black");
+        });
+    });
+</script>
+
+<body>
+    <div><h1 id="clock">--:--</h1></div>
+    <br>
+    <div id="log"></div>
+</body>
