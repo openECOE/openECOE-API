@@ -1,5 +1,5 @@
-#FROM python:3.8.16 as build
-FROM nginx as base
+#FROM python:3.9 as base
+FROM nginx:1.24 as base
 RUN apt-get update && \
     apt-get install -y python3-pip python3-venv  && \
     python3 -m pip install --upgrade pip && \
