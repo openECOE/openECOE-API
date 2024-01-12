@@ -138,15 +138,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: | 
-            ${{ env.IMAGE_NAME }}
+          images: openecoe/one-for-all
           tags: |
             type=pep440,pattern={{version}},event=tag
             type=ref,event=branch
-
-      - name: Determine Tags
-        id: prep
-        run: echo "{version}={${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -159,7 +154,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: | 
             openecoe/one-for-all:latest
-            openecoe/one-for-all:api-${{ steps.prep.outputs.version }}
+            openecoe/one-for-all:api-${GITHUB_REF#refs/tags/}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
