@@ -166,8 +166,7 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: | 
-            openecoe/one-for-all:latest
-            openecoe/one-for-all:api-${{ env.tag }}
+            openecoe/one-for-all:api-${{ steps.set_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
