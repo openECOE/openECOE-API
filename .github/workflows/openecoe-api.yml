@@ -143,6 +143,19 @@ jobs:
             type=pep440,pattern={{version}},event=tag
             type=ref,event=branch
 
+      - name: Set Tag Name
+        id: set_tag
+        shell: bash
+        run: |
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            TAG="api-${GITHUB_REF#refs/tags/}"
+          elif [[ $GITHUB_REF == refs/heads/master ]]; then
+            TAG="latest"
+          else
+            TAG=${GITHUB_REF#refs/heads/}
+          fi
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
@@ -154,7 +167,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
           tags: | 
             openecoe/one-for-all:latest
-            openecoe/one-for-all:api-${GITHUB_REF#refs/tags/}
+            openecoe/one-for-all:api-${{ env.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
