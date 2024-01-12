@@ -146,21 +146,7 @@ jobs:
 
       - name: Determine Tags
         id: prep
-        run: |
-          echo "::set-output name=version::$(echo ${GITHUB_REF#refs/*/})"
-          echo "::set-output name=sha::$(echo ${GITHUB_SHA::8})"
-
-      - name: Extract branch or tag name
-        id: ref_name
-        shell: bash
-        run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            echo "::set-output name=type::tag"
-            echo "::set-output name=name::${GITHUB_REF#refs/tags/}"
-          else
-            echo "::set-output name=type::branch"
-            echo "::set-output name=name::${GITHUB_REF#refs/heads/}"
-          fi
+        run: echo "{version}={${GITHUB_REF#refs/*/}" >> $GITHUB_OUTPUT
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
@@ -174,8 +160,6 @@ jobs:
           tags: | 
             openecoe/one-for-all:latest
             openecoe/one-for-all:api-${{ steps.prep.outputs.version }}
-            openecoe/one-for-all:api-${{ steps.prep.outputs.sha }}
-            openecoe/one-for-all:api-${{ steps.ref_name.outputs.name }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
