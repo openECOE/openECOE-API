@@ -102,7 +102,7 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
             filename = "resultados_ecoe_" + ecoe + "." + datatype
             _archiveroute = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
             absolutefilepath = os.path.join(_archiveroute, filename)
-            df_final.to_csv(absolutefilepath,index=False,encoding='utf_8_sig',sep=';',quoting=1)
+            df_final.to_csv(absolutefilepath,index=False,encoding='utf_8_sig',sep=';',quoting=1, decimal=',')
 
             return filename
         #TODO:: Add more export methods by comparing datatype with other strings
