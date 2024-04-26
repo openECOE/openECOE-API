@@ -9,12 +9,14 @@ on:
     branches: 
       - "master"
       - "develop"
-      
+      - "uat"
     # Publish semver tags as releases.
     tags:
       - 'v*'
   pull_request:
-    branches: ["master"]
+    branches: 
+      - "master"
+      - "uat"
 
 permissions:
   contents: read
@@ -48,7 +50,7 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   docker_image:
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -104,6 +106,7 @@ jobs:
 
   one_for_all_image:
     needs: docker_image
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -125,7 +128,6 @@ jobs:
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
         uses: docker/login-action@v2
         with:
           #registry: ${{ env.REGISTRY }}
@@ -166,7 +168,6 @@ jobs:
           file: ./Dockerfile
           push: ${{ github.event_name != 'pull_request' }}
           tags: | 
-            openecoe/one-for-all:latest
             openecoe/one-for-all:${{ steps.set_tag.outputs.tag }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
