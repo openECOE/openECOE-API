@@ -108,23 +108,29 @@ jobs:
     # needs: docker
     runs-on: ubuntu-latest
     env:
-      PROJECT: webui
+      PROJECT: api
       BRANCH: ${{ github.head_ref }}
     steps:
       - name: INIT WORKFLOW - Dispatch init event to REMOTE repository
         run: |
-          repo_owner="openECOE"
-          repo_name="docker"
-          event_type="build-one-for-all"
-          project=${{ env.PROJECT }}"
-          branch=${{ env.BRANCH }}"
+          org="openECOE"
+          repo="docker"
+          workflow_id="build-one-for-all"
+          project="${{ env.PROJECT }}"
+          branch="${{ env.BRANCH }}"
 
           curl -L \
           -X POST \
-          -H "Accept: application/vnd.github+json" \
-          -H "Authorization: Bearer ${{ secrets.PAT }}" \
-          https://api.github.com/repos/$repo_owner/$repo_name/dispatches \
-          -d "{\"event_type\": \"$event_type\", \"client_payload\": {\"project\": \"$project\", \"branch\": \"$branch\"}}"  
+          -H "Authorization: token ${{ secrets.PAT}}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          https://api.github.com/repos/${ORG}/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches \
+          -d '{
+            "ref": "'${branch}'",
+            "inputs": {
+              "project": "'${project}'",
+              "branch": "'${branch}'"
+            }
+          }'
 
   # one_for_all_image:
   #   needs: docker_image
