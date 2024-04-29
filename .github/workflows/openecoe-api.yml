@@ -105,7 +105,7 @@ jobs:
           cache-to: type=gha,mode=max
 
   one_for_all:
-    # needs: docker
+    needs: docker
     runs-on: ubuntu-latest
     env:
       PROJECT: api
