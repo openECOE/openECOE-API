@@ -109,7 +109,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PROJECT: api
-      BRANCH: ${{ github.head_ref }}
+      BRANCH: uat
     steps:
       - name: INIT WORKFLOW - Dispatch init event to REMOTE repository
         run: |
@@ -123,7 +123,7 @@ jobs:
           -X POST \
           -H "Authorization: token ${{ secrets.PAT}}" \
           -H "Accept: application/vnd.github.v3+json" \
-          https://api.github.com/repos/${ORG}/${REPO}/actions/workflows/${WORKFLOW_ID}/dispatches \
+          https://api.github.com/repos/${org}/${repo}/actions/workflows/${workflow_id}/dispatches \
           -d '{
             "ref": "'${branch}'",
             "inputs": {
