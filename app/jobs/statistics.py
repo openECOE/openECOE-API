@@ -163,7 +163,7 @@ def export_csv(identidad, ecoe="", organization=""):
         absolutefilepath = os.path.join(_archiveroute, filenamezip)
         
         compression_options = dict(method='zip',archive_name=filename)
-        df_answer.to_csv(absolutefilepath,index=False,encoding='utf-8',compression=compression_options)
+        df_answer.to_csv(absolutefilepath,index=False,encoding='utf_8_sig',sep=';',quoting=1, decimal=',',compression=compression_options)
 
         rq.finish_job(file="%s" % filenamezip)
         return filenamezip

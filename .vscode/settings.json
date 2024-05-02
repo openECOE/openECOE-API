@@ -1,8 +1,5 @@
 {
-  "python.pythonPath": "/usr/bin/python",
   "git.ignoreSubmodules": true,
-  "python.linting.enabled": false,
-  "python.linting.flake8Enabled": true,
   "python.envFile": "${workspaceFolder}/environments/local.env",
   "terminal.integrated.env.linux": {
     "FLASK_APP": "openecoe-api.py", 
@@ -18,5 +15,6 @@
     "FLASK_APP": "openecoe-api.py", 
     "FLASK_ENV": "development",
     "FLASK_DEBUG": "1"
-  }
+  },
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python"
 }

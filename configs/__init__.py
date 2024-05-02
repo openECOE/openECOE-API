@@ -31,6 +31,7 @@ os.environ.setdefault("OPENECOE_DB_PORT", "3306")
 os.environ.setdefault("OPENECOE_DB_USER", "openecoe")
 os.environ.setdefault("OPENECOE_DB_PASSWORD", "openecoe_pass")
 os.environ.setdefault("OPENECOE_DB_NAME", "openECOE")
+os.environ.setdefault("OPENECOE_DB_PARAMS", "")
 
 os.environ.setdefault("OPENECOE_REDIS_HOST", "redis")
 os.environ.setdefault("OPENECOE_REDIS_PORT", "6379")
@@ -78,8 +79,9 @@ class BaseConfig:
     OPENECOE_DB_USER = os.environ.get("OPENECOE_DB_USER")
     OPENECOE_DB_PASSWORD = os.environ.get("OPENECOE_DB_PASSWORD")
     OPENECOE_DB_NAME = os.environ.get("OPENECOE_DB_NAME")
+    OPENECOE_DB_PARAMS = os.environ.get("OPENECOE_DB_PARAMS")
     
-    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{OPENECOE_DB_USER}:{OPENECOE_DB_PASSWORD}@{OPENECOE_DB_HOST}:{OPENECOE_DB_PORT}/{OPENECOE_DB_NAME}"
+    SQLALCHEMY_DATABASE_URI = f"mysql+pymysql://{OPENECOE_DB_USER}:{OPENECOE_DB_PASSWORD}@{OPENECOE_DB_HOST}:{OPENECOE_DB_PORT}/{OPENECOE_DB_NAME}{OPENECOE_DB_PARAMS}"
     SQLALCHEMY_TRACK_MODIFICATIONS = literal_eval(
         os.environ.get("SQLALCHEMY_TRACK_MODIFICATIONS")
     )
