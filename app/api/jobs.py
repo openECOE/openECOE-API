@@ -33,7 +33,7 @@ class JobResource(OpenECOEResource):
         id_field_class = fields.String
 
         permissions = {
-            'read': 'manage',
+            'read': ['manage', RoleType.EVAL],
             'create': 'manage',
             'update': 'manage',
             'delete': 'manage',
