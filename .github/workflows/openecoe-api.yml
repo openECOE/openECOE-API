@@ -9,12 +9,14 @@ on:
     branches: 
       - "master"
       - "develop"
-      
+      - "uat"
     # Publish semver tags as releases.
     tags:
       - 'v*'
   pull_request:
-    branches: ["master"]
+    branches: 
+      - "master"
+      - "uat"
 
 permissions:
   contents: read
@@ -30,9 +32,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Set up Python 3.9
-      uses: actions/setup-python@v3
+      uses: actions/setup-python@v5
       with:
         python-version: "3.9"
     - name: Install dependencies
@@ -47,8 +49,8 @@ jobs:
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-  docker_image:
-    if: startsWith(github.ref, 'refs/tags/v')
+  docker:
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions:
@@ -60,17 +62,17 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # Workaround: https://github.com/docker/build-push-action/issues/461
       - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       # Login against a Docker registry except on PR
       # https://github.com/docker/login-action
       - name: Log into registry ${{ env.REGISTRY }}
         if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           #registry: ${{ env.REGISTRY }}
           username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -80,7 +82,7 @@ jobs:
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: | 
             ${{ env.IMAGE_NAME }}
@@ -92,7 +94,7 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: .
           file: ./Dockerfile
@@ -102,72 +104,26 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  one_for_all_image:
-    needs: docker_image
+  one_for_all:
+    if: github.event_name == 'push' && !startsWith(github.ref, 'refs/tags/')
+    needs: docker
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      # This is used to complete the identity challenge
-      # with sigstore/fulcio when running outside of PRs.
-      id-token: write
-
+    env:
+      BRANCH: ${{ github.ref_name }}
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          repository: 'openecoe/docker'
-
-      # Workaround: https://github.com/docker/build-push-action/issues/461
-      - name: Setup Docker buildx
-        uses: docker/setup-buildx-action@v2
-
-      # Login against a Docker registry except on PR
-      # https://github.com/docker/login-action
-      - name: Log into registry ${{ env.REGISTRY }}
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v2
-        with:
-          #registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # Extract metadata (tags, labels) for Docker
-      # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
-        id: meta
-        uses: docker/metadata-action@v4
-        with:
-          images: openecoe/one-for-all
-          tags: |
-            type=pep440,pattern={{version}},event=tag
-            type=ref,event=branch
-
-      - name: Set Tag Name
-        id: set_tag
-        shell: bash
+      - name: Dispatch one-for-all build
         run: |
-          if [[ $GITHUB_REF == refs/tags/* ]]; then
-            TAG="${GITHUB_REF#refs/tags/}"
-          elif [[ $GITHUB_REF == refs/heads/master ]]; then
-            TAG="latest"
-          else
-            TAG=${GITHUB_REF#refs/heads/}
-          fi
-          echo "tag=api-$TAG" >> $GITHUB_OUTPUT
+          org="openECOE"
+          repo="docker"
+          workflow_id="build-one-for-all.yml"
+          branch="${{ env.BRANCH }}"
 
-      # Build and push Docker image with Buildx (don't push on PR)
-      # https://github.com/docker/build-push-action
-      - name: Build and push Docker image
-        id: build-and-push
-        uses: docker/build-push-action@v4
-        with:
-          context: .
-          file: ./Dockerfile
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: | 
-            openecoe/one-for-all:latest
-            openecoe/one-for-all:${{ steps.set_tag.outputs.tag }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          curl -L \
+          -X POST \
+          -H "Authorization: Bearer ${{ secrets.WORKFLOW_TOKEN}}" \
+          -H "Accept: application/vnd.github.v3+json" \
+          -H "X-GitHub-Api-Version: 2022-11-28" \
+          https://api.github.com/repos/${org}/${repo}/actions/workflows/${workflow_id}/dispatches \
+          -d '{
+            "ref": "'${branch}'"
+          }'
