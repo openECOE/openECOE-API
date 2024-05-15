@@ -19,6 +19,7 @@ from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.api.user import PermissionResource, UserResource
 from app.model.Station import Station
+from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 from flask_potion.exceptions import BadRequest
@@ -65,16 +66,20 @@ def check_parent_stations_order(station, order):
         return True
     return order > station.parent_station.order 
 
-def order_station(item, new_order):
-    order_correction = 0
-
+def order_station(item, new_order, operation='add'):
     stations_ecoe = len(item.ecoe.stations)
-    if not item.order or item.order > stations_ecoe or item.order < 1:
+    if item.order > stations_ecoe or item.order < 1:
         item.order = stations_ecoe
     else:
-       stations_ecoe = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
-       stations_ecoe[new_order - 1].order = item.order
-       item.order = new_order 
+        stations_ecoe = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        station_idx = item.order - 1
+        if operation == 'add': 
+            stations_ecoe.insert(new_order - 1, stations_ecoe.pop(station_idx))
+        else: # operation is delete
+            stations_ecoe.pop(station_idx)
+
+        for idx, station in enumerate(stations_ecoe):
+            station.order = idx + 1
 
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
@@ -97,7 +102,11 @@ def before_create_station(sender, item):
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
-    order_station(item, 'del')
+    Question.query.filter(Question.id_station == item.id).delete()
+    Block.query.filter(Block.id_station == item.id).delete()
+
+    if len(item.ecoe.stations) > 1:
+        order_station(item, item.order, 'del')
     
     
 @signals.before_create.connect_via(PermissionResource)
