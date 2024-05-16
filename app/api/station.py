@@ -23,6 +23,7 @@ from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 from flask_potion.exceptions import BadRequest
+from app.shared import order_items
 
 class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
@@ -88,7 +89,8 @@ def before_update_station(sender, item, changes):
             not check_parent_stations_order(item, changes['order']):
             raise BadRequest(description="Orden de estacion no valido")
 
-        order_station(item, changes['order'])
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        order_items(item, stations, changes['order'], 'add')
 
 
 # TODO: Review Create Station Order
@@ -102,11 +104,11 @@ def before_create_station(sender, item):
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
-    Question.query.filter(Question.id_station == item.id).delete()
     Block.query.filter(Block.id_station == item.id).delete()
 
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
     if len(item.ecoe.stations) > 1:
-        order_station(item, item.order, 'del')
+        order_items(item, stations, item.order, 'del')
     
     
 @signals.before_create.connect_via(PermissionResource)
