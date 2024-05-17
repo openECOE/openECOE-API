@@ -67,21 +67,6 @@ def check_parent_stations_order(station, order):
         return True
     return order > station.parent_station.order 
 
-def order_station(item, new_order, operation='add'):
-    stations_ecoe = len(item.ecoe.stations)
-    if item.order > stations_ecoe or item.order < 1:
-        item.order = stations_ecoe
-    else:
-        stations_ecoe = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
-        station_idx = item.order - 1
-        if operation == 'add': 
-            stations_ecoe.insert(new_order - 1, stations_ecoe.pop(station_idx))
-        else: # operation is delete
-            stations_ecoe.pop(station_idx)
-
-        for idx, station in enumerate(stations_ecoe):
-            station.order = idx + 1
-
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
     if 'order' in changes.keys():
