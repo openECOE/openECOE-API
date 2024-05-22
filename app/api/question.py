@@ -74,7 +74,11 @@ def before_update_block(sender, item, changes):
 
 @signals.before_delete.connect_via(BlockResource)
 def before_delete_block(sender, item):
-    Question.query.filter(Question.id_station == item.id).delete()
+    try:
+        db.session.query(Question).filter(Question.id_block == item.id).delete()
+        db.session.commit()
+    except:
+        db.session.rollback()
     blocks = Block.query.filter(Block.id_station == item.id_station).order_by(Block.order).all()
 
     if len(blocks) > 1:
