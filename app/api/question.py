@@ -19,6 +19,7 @@ from flask_potion.routes import Relation
 from app.model.Question import Block, Question
 from app.api._mainresource import OpenECOEResource
 from app.shared import order_items, calculate_order
+from app.model import db
 
 station_permissions = {
             'read': 'read:station',
@@ -61,7 +62,7 @@ def recalculate_question_order(id_station):
     unordered_questions = []
     for block in blocks:
         questions_by_block = [question for question in Question.query.filter(Question.id_block == block.id).order_by(Question.order).all()]
-        unordered_questions.extend()
+        unordered_questions.extend(questions_by_block)
 
     calculate_order(unordered_questions)
 
