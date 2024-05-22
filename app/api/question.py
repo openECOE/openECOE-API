@@ -85,6 +85,10 @@ def before_delete_block(sender, item):
         order_items(item, blocks, item.order, 'del')
         recalculate_question_order(item.id_station)
 
+@signals.before_create.connect_via(QuestionResource)
+def before_create_question(sender, item):
+    recalculate_question_order(item.station.id)
+
 @signals.before_update.connect_via(QuestionResource)
 def before_update_question(sender, item, changes):
     if 'order' in changes.keys():
