@@ -93,6 +93,8 @@ def before_create_question(sender, item):
 @signals.before_update.connect_via(QuestionResource)
 def before_update_question(sender, item, changes):
     if 'order' in changes.keys():
+        if item.order == changes['order']:
+            return
         questions = Question.query.filter(Question.id_station == item.id_station).order_by(Question.order).all()
         order_items(item, questions, changes['order'], 'add')
 

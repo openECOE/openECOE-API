@@ -14,7 +14,7 @@ def order_items(item, items, new_order, operation):
         else:
             items.pop(item_idx)
         
-        calculate_order(items)
+    calculate_order(items)
 
 def calculate_order(items):
     for idx, current_item in enumerate(items):
