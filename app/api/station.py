@@ -19,9 +19,11 @@ from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.api.user import PermissionResource, UserResource
 from app.model.Station import Station
+from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
-
+from flask_potion.exceptions import BadRequest
+from app.shared import order_items
 
 class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
@@ -52,29 +54,28 @@ class StationResource(EcoeChildResource):
         children_stations = fields.ToMany('stations', nullable=True)
 
 
-def order_station(item, op='add'):
-    order_correction = 0
+def check_child_stations_order(station, order):
+    if(len(station.children_stations) > 0):
+        for child_station in station.children_stations:
+            if order >= child_station.order:
+                    return False
+    
+    return True
 
-    stations_ecoe = len(item.ecoe.stations)
-    if not item.order or item.order > stations_ecoe or item.order < 1:
-        item.order = stations_ecoe
-    else:
-        stations_ecoe = Station.query \
-            .filter(Station.id_ecoe == item.ecoe.id).filter(Station.order >= item.order) \
-            .filter(Station.id != item.id).order_by(Station.order).all()
-
-        if op == 'add':
-            order_correction = 1
-
-        for order, station_ecoe in enumerate(stations_ecoe):
-            station_ecoe.order = order + item.order + order_correction
-
+def check_parent_stations_order(station, order):
+    if station.parent_station is None:
+        return True
+    return order > station.parent_station.order 
 
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
     if 'order' in changes.keys():
-        item.order = changes['order']
-        order_station(item)
+        if not check_child_stations_order(item, changes['order']) or \
+            not check_parent_stations_order(item, changes['order']):
+            raise BadRequest(description="Orden de estacion no valido")
+
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        order_items(item, stations, changes['order'], 'add')
 
 
 # TODO: Review Create Station Order
@@ -88,7 +89,11 @@ def before_create_station(sender, item):
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
-    order_station(item, 'del')
+    Block.query.filter(Block.id_station == item.id).delete()
+
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+    if len(item.ecoe.stations) > 1:
+        order_items(item, stations, item.order, 'del')
     
     
 @signals.before_create.connect_via(PermissionResource)
