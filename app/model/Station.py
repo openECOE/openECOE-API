@@ -28,7 +28,7 @@ class Station(db.Model):
     id_manager = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     schedules = db.relationship('Schedule', backref='station')
-    blocks = db.relationship('Block', backref='station')
+    blocks = db.relationship('Block', backref='station', cascade="all, delete")
     questions = db.relationship('Question', backref='station')
     answers = db.relationship('Answer', backref='station')
 

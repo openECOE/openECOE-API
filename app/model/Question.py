@@ -29,7 +29,7 @@ class Question(db.Model):
     question_schema = db.Column(mysql.LONGTEXT(), nullable=False)
     max_points = db.Column(db.DECIMAL(precision=10, scale=2), nullable=False)
 
-    answers = db.relationship('Answer', backref='question')
+    answers = db.relationship('Answer', backref='question', cascade="all, delete")
 
 
 class Block(db.Model):
@@ -40,4 +40,4 @@ class Block(db.Model):
     name = db.Column(db.String(300))
     order = db.Column(db.Integer, nullable=False)
 
-    questions = db.relationship('Question', backref='block')
+    questions = db.relationship('Question', backref='block', cascade="all, delete")
