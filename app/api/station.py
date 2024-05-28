@@ -87,10 +87,8 @@ def before_create_station(sender, item):
         item.user = current_user
 
 
-@signals.before_delete.connect_via(StationResource)
-def before_delete_station(sender, item):
-    Block.query.filter(Block.id_station == item.id).delete()
-
+@signals.after_delete.connect_via(StationResource)
+def after_delete_station(sender, item):
     stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
     if len(item.ecoe.stations) > 1:
         order_items(item, stations, item.order, 'del')
