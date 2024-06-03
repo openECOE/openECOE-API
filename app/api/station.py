@@ -18,11 +18,13 @@ from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.api.user import PermissionResource, UserResource
+from app.api.question import BlockResource
 from app.model.Station import Station
 from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 from flask_potion.exceptions import BadRequest
+from flask_potion.exceptions import Conflict
 from app.shared import order_items
 
 class StationResource(EcoeChildResource):
@@ -69,10 +71,15 @@ def check_parent_stations_order(station, order):
 
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
+    if 'name' in changes.keys():
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        for station in stations:
+            if changes['name'] == station.name:
+                raise BadRequest(description="El nombre de la estación ya existe")
     if 'order' in changes.keys():
         if not check_child_stations_order(item, changes['order']) or \
             not check_parent_stations_order(item, changes['order']):
-            raise BadRequest(description="Orden de estacion no valido")
+            raise BadRequest(description="El orden de la estación padre debe ser menor que la de la subestación")
 
         stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
         order_items(item, stations, changes['order'], 'add')
@@ -89,8 +96,9 @@ def before_create_station(sender, item):
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
-    Block.query.filter(Block.id_station == item.id).delete()
-
+    blocks = Block.query.filter(Block.id_station == item.id).all()
+    for block in blocks:
+        BlockResource.manager.delete_by_id(block.id)
     stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
     if len(item.ecoe.stations) > 1:
         order_items(item, stations, item.order, 'del')
