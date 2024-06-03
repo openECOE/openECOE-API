@@ -24,6 +24,7 @@ from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 from flask_potion.exceptions import BadRequest
+from flask_potion.exceptions import Conflict
 from app.shared import order_items
 
 class StationResource(EcoeChildResource):
@@ -70,10 +71,15 @@ def check_parent_stations_order(station, order):
 
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
+    if 'name' in changes.keys():
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        for station in stations:
+            if changes['name'] == station.name:
+                raise BadRequest(description="El nombre de la estación ya existe")
     if 'order' in changes.keys():
         if not check_child_stations_order(item, changes['order']) or \
             not check_parent_stations_order(item, changes['order']):
-            raise BadRequest(description="Orden de estacion no valido")
+            raise BadRequest(description="El orden de la estación padre debe ser menor que la de la subestación")
 
         stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
         order_items(item, stations, changes['order'], 'add')
