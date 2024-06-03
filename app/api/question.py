@@ -17,9 +17,15 @@
 from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.model.Question import Block, Question
+from app.model.Student import Answer
+from app.api.student import AnswerResource
 from app.api._mainresource import OpenECOEResource
 from app.shared import order_items, calculate_order
 from app.model import db
+
+from flask_potion.contrib.alchemy import SQLAlchemyManager
+from flask_potion.contrib.principals import principals
+
 
 station_permissions = {
             'read': 'read:station',
@@ -36,7 +42,6 @@ class QuestionResource(OpenECOEResource):
     class Meta:
         name = 'questions'
         model = Question
-
         permissions = station_permissions
 
     class Schema:
@@ -51,7 +56,6 @@ class BlockResource(OpenECOEResource):
     class Meta:
         name = 'blocks'
         model = Block
-
         permissions = station_permissions
 
     class Schema:
@@ -75,11 +79,10 @@ def before_update_block(sender, item, changes):
 
 @signals.before_delete.connect_via(BlockResource)
 def before_delete_block(sender, item):
-    try:
-        db.session.query(Question).filter(Question.id_block == item.id).delete()
-        db.session.commit()
-    except:
-        db.session.rollback()
+    questions = Question.query.filter(Question.id_block == item.id).all()
+    for question in questions:
+        QuestionResource.manager.delete_by_id(question.id)
+
     blocks = Block.query.filter(Block.id_station == item.id_station).order_by(Block.order).all()
 
     if len(blocks) > 1:
@@ -100,6 +103,10 @@ def before_update_question(sender, item, changes):
 
 @signals.before_delete.connect_via(QuestionResource)
 def before_delete_question(sender, item):
+    answers = Answer.query.filter(Answer.id_question == item.id).all()
+    for answer in answers:
+        AnswerResource.manager.delete_by_id(answer.id)
+
     questions = Question.query.filter(Question.id_station == item.id_station).order_by(Question.order).all()
     if len(questions) > 1:
         order_items(item, questions, item.order, 'del')
