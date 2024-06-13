@@ -390,11 +390,7 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
-        variables, descriptions = get_variables(ecoe.id)
-        data = {}
-        data['variables'] = variables
-        data['descriptions'] = descriptions
-        return data
+        return get_variables(ecoe.id)
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

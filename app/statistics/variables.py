@@ -1,27 +1,49 @@
 from app.model.Station import Station
 from app.model.Area import Area
 
-def get_variables(ecoe_id: int):
-    variables =  {}
-    descriptions = {}
+def get_variables(ecoe_id: int) -> dict:
+    area_variables = {}
+    area_descriptions = {}
 
-    variables.update(get_variables_student(0))
-    descriptions.update(get_variables_student(1))
+    stations_variables = {}
+    stations_descriptions = {}
 
-    variables.update(get_variables_ecoe(0))
-    descriptions.update(get_variables_ecoe(1))
+    student_variables = get_variables_student(0)
+    student_descriptions = get_variables_student(1)
+
+    ecoe_variables = get_variables_ecoe(0)
+    ecoe_descriptions = get_variables_ecoe(1)    
 
     areas = Area.query.filter(Area.id_ecoe == ecoe_id)
     for area in areas:
-        variables.update(get_variables_area(area.code, area.name, 0))
-        descriptions.update(get_variables_area(area.code, area.name, 1))
+        area_variables.update(get_variables_area(area.code, area.name, 0))
+        area_descriptions.update(get_variables_area(area.code, area.name, 1))
 
     stations = Station.query.filter(Station.id_ecoe == ecoe_id)
     for station in stations:
-        variables.update(get_variables_station(station.order, station.name, 0))
-        descriptions.update(get_variables_station(station.order,station.name, 1))
+        stations_variables.update(get_variables_station(station.order, station.name, 0))
+        stations_descriptions.update(get_variables_station(station.order,station.name, 1))
     
-    return variables, descriptions
+    variables = {
+        'ecoe_variables': ecoe_variables, 
+        'student_variables': student_variables,
+        'area_variables': area_variables,
+        'stations_variables': stations_variables
+    }
+
+    descriptions = {
+        'ecoe_descriptions': ecoe_descriptions, 
+        'student_descriptions': student_descriptions,
+        'area_descriptions': area_descriptions,
+        'stations_descriptions': stations_descriptions
+    }
+
+    d = {
+        'variables': variables,
+        'descriptions': descriptions
+    }
+
+    return d
 
 def get_variables_area(code: str, name: str, option: int) -> dict:
     if option == 0:
