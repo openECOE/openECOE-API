@@ -64,7 +64,7 @@ def get_global_results_variables(option:str):
         "global_median": "Mediana global",
         "global_percentile": "Percentil global",
         "global_position": "Posición global",
-        "global_punctuation": "Resultado global",
+        "global_punctuation": "Puntuación global",
     }
     return descriptions
 
