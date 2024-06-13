@@ -65,6 +65,7 @@ class ECOE(db.Model):
     rounds = db.relationship("Round", backref="ecoe")
     shifts = db.relationship("Shift", backref="ecoe", order_by="Shift.time_start")
     stages = db.relationship("Stage", backref="ecoe")
+    report_templates = db.relationship("ReportTemplate", backref="ecoe")
     job_reports = db.relationship("Job", foreign_keys=[id_job_reports])
     job_csv = db.relationship("Job",foreign_keys=[id_job_csv])
 
