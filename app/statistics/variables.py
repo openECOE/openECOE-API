@@ -15,7 +15,7 @@ def get_variables(ecoe_id: int) -> dict:
     ecoe_descriptions = get_variables_ecoe(1)    
 
     global_results_variables = get_global_results_variables(0)
-    global_results_description = get_global_results_variables(1)
+    global_results_descriptions = get_global_results_variables(1)
 
     areas = Area.query.filter(Area.id_ecoe == ecoe_id)
     for area in areas:
@@ -40,7 +40,7 @@ def get_variables(ecoe_id: int) -> dict:
         'student_descriptions': student_descriptions,
         'area_descriptions': area_descriptions,
         'stations_descriptions': stations_descriptions,
-        'global_results_description': global_results_description
+        'global_results_descriptions': global_results_descriptions
     }
 
     d = {
