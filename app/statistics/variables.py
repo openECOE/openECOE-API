@@ -14,6 +14,9 @@ def get_variables(ecoe_id: int) -> dict:
     ecoe_variables = get_variables_ecoe(0)
     ecoe_descriptions = get_variables_ecoe(1)    
 
+    global_results_variables = get_global_results_variables(0)
+    global_results_description = get_global_results_variables(1)
+
     areas = Area.query.filter(Area.id_ecoe == ecoe_id)
     for area in areas:
         area_variables.update(get_variables_area(area.code, area.name, 0))
@@ -28,14 +31,16 @@ def get_variables(ecoe_id: int) -> dict:
         'ecoe_variables': ecoe_variables, 
         'student_variables': student_variables,
         'area_variables': area_variables,
-        'stations_variables': stations_variables
+        'stations_variables': stations_variables,
+        'global_results_variables': global_results_variables
     }
 
     descriptions = {
         'ecoe_descriptions': ecoe_descriptions, 
         'student_descriptions': student_descriptions,
         'area_descriptions': area_descriptions,
-        'stations_descriptions': stations_descriptions
+        'stations_descriptions': stations_descriptions,
+        'global_results_description': global_results_description
     }
 
     d = {
@@ -44,6 +49,24 @@ def get_variables(ecoe_id: int) -> dict:
     }
 
     return d
+
+def get_global_results_variables(option:str):
+    if option == 0:
+        variables = {
+            "global_median": "glob_med",
+            "global_percentile": "glob_perc",
+            "global_position": "glob_pos",
+            "global_punctuation": "glob_punt",
+        }
+        return variables
+
+    descriptions = {
+        "global_median": "Mediana global",
+        "global_percentile": "Percentil global",
+        "global_position": "Posición global",
+        "global_punctuation": "Resultado global",
+    }
+    return descriptions
 
 def get_variables_area(code: str, name: str, option: int) -> dict:
     if option == 0:
