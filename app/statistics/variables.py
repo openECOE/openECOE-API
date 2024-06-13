@@ -26,7 +26,7 @@ def get_variables(ecoe_id: int):
 def get_variables_area(code: str, name: str, option: int) -> dict:
     if option == 0:
         variables = {
-            f"a{code}_mediana": f"a{code}_med",
+            f"a{code}_median": f"a{code}_med",
             f"a{code}_percentile": f"a{code}_perc",
             f"a{code}_position": f"a{code}_pos",
             f"a{code}_punctuation": f"a{code}_punt"
@@ -34,7 +34,7 @@ def get_variables_area(code: str, name: str, option: int) -> dict:
         return variables
     
     descriptions = {
-            f"a{code}_mediana": f"{name} (Mediana)",
+            f"a{code}_median": f"{name} (Mediana)",
             f"a{code}_percentile": f"{name} (Percentil)",
             f"a{code}_position": f"{name} (Posición)",
             f"a{code}_punctuation": f"{name} (Puntuación)",
@@ -53,7 +53,7 @@ def get_variables_station(order: int, name: str, option: int) -> dict:
         return variables
 
     descriptions = {
-            f"e{order}_mediana": f"{name} (Mediana)",
+            f"e{order}_median": f"{name} (Mediana)",
             f"e{order}_percentile": f"{name} (Percentil)",
             f"e{order}_position": f"{name} (Posición)",
             f"e{order}_punctuation": f"{name} (Puntuación)",
