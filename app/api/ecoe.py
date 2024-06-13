@@ -34,6 +34,7 @@ import os
 from flask import send_file, current_app, request
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
 from app.auth import auth
+from app.statistics.variables import get_variables
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -381,6 +382,18 @@ class EcoeResource(OpenECOEResource):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_reports": _job.id})
         return _job  
+
+    @ItemRoute.GET("/results/variables")
+    def get_variables(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        variables, descriptions = get_variables(ecoe.id)
+        data = {}
+        data['variables'] = variables
+        data['descriptions'] = descriptions
+        return data
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():
