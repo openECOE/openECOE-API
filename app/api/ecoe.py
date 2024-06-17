@@ -367,17 +367,11 @@ class EcoeResource(OpenECOEResource):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-                
-        import json
-        cadenajson = request.args['cadenaJSON']
-        static_parameters = json.loads(cadenajson)
  
         _job = current_user.launch_job(
             func=jobs_statistics.generate_reports,
-            custom_args="id_ecoe=" + str(ecoe.id),
             description="Generación de Notas ECOE = %s" % ecoe.name,
-            id_ecoe=str(ecoe.id),
-            static_parameters=static_parameters,
+            id_ecoe=ecoe.id,
         )
         #We save the job.id into the database
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
