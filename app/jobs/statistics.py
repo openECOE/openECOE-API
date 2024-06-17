@@ -22,7 +22,7 @@ import pandas as pd
 from app.model import db
 import json
 import datetime
-from app.model.ReportTemplate import ReportTemplate
+
 
 @rq.job(timeout=300)
 def export_csv(identidad, ecoe="", organization=""):
