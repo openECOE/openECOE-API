@@ -22,7 +22,7 @@ import pandas as pd
 from app.model import db
 import json
 import datetime
-
+from app.model.ReportTemplate import ReportTemplate
 
 @rq.job(timeout=300)
 def export_csv(identidad, ecoe="", organization=""):
@@ -174,120 +174,72 @@ def export_csv(identidad, ecoe="", organization=""):
             error = error + arg
         return "ko - Error: " + error
 
-    
-
-
 @rq.job(timeout=300)
-def generate_reports(id_ecoe, static_parameters):
-    import pandas as pd
-    from app.statistics.ResultsForArea import results_by_area, get_areas_list
-    from app.statistics.Resultados import get_results_for_area_total
-    from app.statistics import get_students
-    from collections import defaultdict
+def generate_reports(id_ecoe: int):
     import pdfkit
-    import jinja2
     import os
     from flask import current_app
-    
+    from app.statistics.calculations import get_report_data
+    from app.statistics.export_ecoe import get_ecoe_data
+    import shutil
+
     try:
         rq.set_task_progress(0)
+
+        df = get_ecoe_data(id_ecoe)
+
+        try:
+            student_data = get_report_data(df)
+        except Exception as err:
+            print(err)
         
-        df_students = get_students(id_ecoe)
-        df_results = results_by_area(id_ecoe)
-        areas = get_areas_list(id_ecoe)
-        df_results_total = get_results_for_area_total(id_ecoe)
-        _med = df_results_total['med'][0]/df_results_total['absolute_score'][0]*100
-        df_results_total['med'] = _med
-        df_results_total = df_results_total.loc[:,['id_student','punt','pos','med','perc','absolute_score']]
-
-        df_grades = pd.merge(left=df_results, right=df_results_total, on=['id_student'])
-        df_final = pd.merge(left=df_students, right=df_grades, on=['id_student'])
+        if student_data is None:
+            # TODO: Mensaje de error o excepción
+            return None
         
-        dd = defaultdict(list)
-        raw_dict = df_final.to_dict('records',into=dd)
-        listdict = []
-        for dict in raw_dict:
-            diccionario = {
-                'dni':dict['dni'],
-                'surnames':dict['surnames'],
-                'name':dict['name'],
-                'refECOE':str(dict['shift_code']) + str(dict['round_code']) + str(dict['planner_order']),
-            }
-
-            arealist = []
-
-            for area in areas:
-                diccionario_area={
-                    "area":"{}".format(area[1]),
-                    "punt":dict["punt_{}".format(area[1])],
-                    "pos":dict["pos_{}".format(area[1])],
-                    "med":dict["med_{}".format(area[1])],
-                    "perc":dict["perc_{}".format(area[1])]
-                }
-                arealist.append(diccionario_area)
-
-            #Total data
-            diccionario_area={
-                    "area":"Global de la prueba",
-                    "punt":dict["punt"],
-                    "pos":dict["pos"],
-                    "med":dict["med"],
-                    "perc":dict["perc"]
-            }
-            arealist.append(diccionario_area)
-
-            diccionario["areas"] = arealist
-            listdict.append(diccionario)
-
-        templateLoader =jinja2.FileSystemLoader(searchpath=os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")))
-        templateEnv = jinja2.Environment(loader=templateLoader)
-        TEMPLATE_FILE = "results-report.html"
-        template = templateEnv.get_template(TEMPLATE_FILE)
+        try:
+            template = load_template(id_ecoe)
+        except ValueError:
+            # TODO: Mensaje de error o excepción
+            return
         
-        #Static files that stay the same in every PDF
-        img = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/logo-umh.jpg"
-        fondo = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/fondo.jpg"
-        css = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_TEMPLATE_ROUTE")) + "/styles.css"
-        
-        #Formating paragraphs
-        static_parameters["explanation_ECOE"] = static_parameters["explanation_ECOE"].replace("\n","<br>")
-        static_parameters["explanation_results"] = static_parameters["explanation_results"].replace("\n","<br>")
-
-        options = {
-            'page-size': 'Letter',
-            'margin-top': '5px',
-            'margin-right': '20px',
-            'margin-bottom': '5px',
-            'margin-left': '20px',
-            'encoding': "UTF-8",
-            'no-outline': None,
-            'enable-local-file-access': None
-        }
         urlarchive = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-
         urlbase = urlarchive + "/ecoe-" + str(id_ecoe)
         
-        import shutil
         if os.path.exists(urlbase):
             shutil.rmtree(urlbase)
 
         os.makedirs(urlbase)
 
-        for i, informe in enumerate(listdict):
-            #Variables a sustituir
-            outputText = template.render(**informe, **static_parameters, imagen=img, fondo=fondo)
-            url = urlbase + "/grades-" + informe['refECOE'] + ".pdf"
-            pdfkit.from_string(outputText, url, options=options, css=css)
-            rq.set_task_progress(round(i/len(listdict)*99))
+        results_by_student = student_data.transpose().to_dict()
+
+        for i, student in enumerate(results_by_student):
+            ref_ecoe = results_by_student[student]['ref_ecoe'].replace(" ", "_")
+            output_text = template.render(results_by_student[student])
+            url = urlbase + "/grades-" + ref_ecoe + ".pdf"
+            pdfkit.from_string(output_text, url)
+            rq.set_task_progress(round(i/len(student_data)*99))
         
         url_zip_absoluta = urlarchive + "/grades-ecoe" + str(id_ecoe)
         shutil.make_archive( url_zip_absoluta, 'zip', root_dir = urlbase, base_dir = "./")
         shutil.rmtree(urlbase)
         
-        rq.finish_job(file="grades-ecoe%s.zip" % id_ecoe)
+        rq.finish_job(file=f"grades-ecoe{id_ecoe}.zip")
         return True
     except Exception as err:
         for arg in err.args:
             error = ""
             error = error + arg
+        print(error)
         return "ko - Error: " + error
+
+def load_template(id_ecoe: int):
+    from app.model.ReportTemplate import ReportTemplate
+    import jinja2
+    report_template = db.session.query(ReportTemplate).filter_by(id_ecoe=id_ecoe).first()
+    if not report_template:
+        raise ValueError(f"No se encontró una plantilla para el ECOE con id {id_ecoe}")
+
+    templateLoader = jinja2.BaseLoader()
+    templateEnv = jinja2.Environment(loader=templateLoader)
+    return templateEnv.from_string(report_template.html)
