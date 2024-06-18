@@ -225,7 +225,7 @@ def generate_reports(id_ecoe: int):
         shutil.make_archive(absolute_url, 'zip', root_dir = urlbase, base_dir = "./")
         shutil.rmtree(urlbase)
         
-        rq.finish_job(file=filename)
+        rq.finish_job(file=zipped_reports_filename(id_ecoe, True))
         return True
     except Exception as err:
         for arg in err.args:
