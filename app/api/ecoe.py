@@ -20,7 +20,7 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from app.api import export
 from app.api._mainresource import MainManager, OpenECOEResource
@@ -389,6 +389,10 @@ class EcoeResource(OpenECOEResource):
         urlarchive = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
         filename = zipped_reports_filename(ecoe.id, True)
         url = f"{urlarchive}/{filename}"
+
+        if not os.path.exists(url):
+            raise NotFound
+
         with open(url, mode='rb') as file:
             file_content = file.read(-1)
 
