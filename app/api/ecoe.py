@@ -35,6 +35,9 @@ from flask import send_file, current_app, request
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
 from app.auth import auth
 from app.statistics.variables import get_variables
+from app.jobs.statistics import zipped_reports_filename
+import tempfile
+
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -302,7 +305,6 @@ class EcoeResource(OpenECOEResource):
  
     @ItemRoute.GET("/results-csv", rel='results_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
-        import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
@@ -347,7 +349,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
 
-    @ItemRoute.GET("/results-report")
+    @ItemRoute.GET("/results/report")
     def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -361,7 +363,7 @@ class EcoeResource(OpenECOEResource):
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/results-report")
+    @ItemRoute.POST("/results/report")
     def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -377,7 +379,25 @@ class EcoeResource(OpenECOEResource):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_reports": _job.id})
         return _job  
+    
+    @ItemRoute.GET("/results/report/data")
+    def get_results_zip(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
 
+        urlarchive = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        filename = zipped_reports_filename(ecoe.id, True)
+        url = f"{urlarchive}/{filename}"
+        with open(url, mode='rb') as file:
+            file_content = file.read(-1)
+
+        os.remove(url)
+        tmp_file=tempfile.TemporaryFile()
+        tmp_file.write(file_content)
+        tmp_file.seek(0)
+        return send_file(filename_or_fp = tmp_file, attachment_filename=filename, as_attachment=True)
+    
     @ItemRoute.GET("/results/variables")
     def get_variables(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)

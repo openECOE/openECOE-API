@@ -220,11 +220,12 @@ def generate_reports(id_ecoe: int):
             pdfkit.from_string(output_text, url)
             rq.set_task_progress(round(i/len(student_data)*99))
         
-        url_zip_absoluta = urlarchive + "/grades-ecoe" + str(id_ecoe)
-        shutil.make_archive( url_zip_absoluta, 'zip', root_dir = urlbase, base_dir = "./")
+        filename = zipped_reports_filename(id_ecoe, False)
+        absolute_url = f"{urlarchive}/{filename}"
+        shutil.make_archive(absolute_url, 'zip', root_dir = urlbase, base_dir = "./")
         shutil.rmtree(urlbase)
         
-        rq.finish_job(file=f"grades-ecoe{id_ecoe}.zip")
+        rq.finish_job(file=filename)
         return True
     except Exception as err:
         for arg in err.args:
@@ -243,3 +244,6 @@ def load_template(id_ecoe: int):
     templateLoader = jinja2.BaseLoader()
     templateEnv = jinja2.Environment(loader=templateLoader)
     return templateEnv.from_string(report_template.html)
+
+def zipped_reports_filename(id_ecoe: int, extension: bool ) -> str:
+    return f"grades-ecoe{id_ecoe}.zip" if extension else f"grades-ecoe{id_ecoe}"
