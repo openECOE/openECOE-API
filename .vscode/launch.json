@@ -199,23 +199,5 @@
       "jinja": false,
       "justMyCode": true
     },
-    {
-      "name": "vars",
-      "type": "python",
-      "request": "launch",
-      "module": "flask",
-      "envFile": "${workspaceFolder}/environments/dev.env",
-      "env": {
-        "FLASK_APP": "openecoe-api.py",
-        "FLASK_ENV": "development",
-        "FLASK_DEBUG": "1",
-        "PYTHONPATH": "${workspaceFolder}"
-      },
-      "args": [
-        "gen"
-      ],
-      "jinja": false,
-      "justMyCode": true
-    },
   ]
 }
