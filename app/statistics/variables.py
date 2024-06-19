@@ -50,13 +50,15 @@ def get_variables(ecoe_id: int) -> dict:
 
     return d
 
-def get_global_results_variables(option:str):
+
+def get_global_results_variables(option: str) -> dict:
     if option == 0:
         variables = {
             "global_median": "glob_med",
             "global_percentile": "glob_perc",
             "global_position": "glob_pos",
             "global_punctuation": "glob_punt",
+            "relative_grade": "rel_grad"
         }
         return variables
 
@@ -65,6 +67,7 @@ def get_global_results_variables(option:str):
         "global_percentile": "Percentil global",
         "global_position": "Posición global",
         "global_punctuation": "Puntuación global",
+        "relative_grade": "Nota relativa"
     }
     return descriptions
 

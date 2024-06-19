@@ -10,15 +10,10 @@ def get_report_data(ecoe_df: pd.DataFrame) -> pd.DataFrame:
     except KeyError:
         print('All required columns are not present')
         return
-    except Exception as err:
-        print(err)
-        return
 
     # Cuando un estudiante NO haya respondido una pregunta el valor de
     # los puntos de respuesta será 0 (antes NaN)
     ecoe_df['answer_points'].fillna(0)
-
-    # TODO: ver decimales
 
     global_punctuation_df = get_global_punctuation(ecoe_df)
     
@@ -30,6 +25,7 @@ def get_report_data(ecoe_df: pd.DataFrame) -> pd.DataFrame:
     final_df = final_df.merge(stations_statistics_df, left_on='student_id', right_on='student_id')
     final_df['full_name'] = final_df['name'] + ' ' + final_df['surnames']
     final_df['ref_ecoe'] = final_df['shift_code'] + ' ' + final_df['round_code'] + ' ' + final_df['student_planner_order'].astype(str)
+    final_df = final_df.round(2)
     return final_df
 
 def get_question_statistics(ecoe_df: pd.DataFrame) -> pd.DataFrame:
@@ -48,21 +44,25 @@ def get_question_statistics(ecoe_df: pd.DataFrame) -> pd.DataFrame:
     return results_df
     
 def get_global_punctuation(ecoe_df: pd.DataFrame) -> pd.DataFrame:
+    variables = get_global_results_variables(0)
     return ecoe_df.groupby(['student_id', 'dni', 'name', 'surnames', 'shift_code', 'round_code', 'student_planner_order']).apply(
         lambda gpd: pd.Series({
-        'glob_punt': (gpd['answer_points'].sum() / gpd['question_max_points'].sum()) * 100 if gpd['question_max_points'].sum() != 0 else 0
+        variables['global_punctuation']: (gpd['answer_points'].sum() / gpd['question_max_points'].sum()) * 100 if gpd['question_max_points'].sum() != 0 else 0
         })).reset_index()
 
 def calculate_global_statistics(global_punctuation_df: pd.DataFrame) -> pd.DataFrame:
     variables = get_global_results_variables(0)
-    result_df = global_punctuation_df
-    result_df[variables['global_median']] = result_df['glob_punt'].median()
-    result_df[variables['global_percentile']] = result_df['glob_punt'].rank(pct=True).map(lambda x: ceil(x*10)*10)
-    result_df[variables['global_position']] = result_df['glob_punt'].rank(method='min', ascending=False)
-
+    result_df = global_punctuation_df.copy()
+    result_df[variables['global_median']] = result_df[variables['global_punctuation']].median()
+    result_df[variables['global_percentile']] = result_df[variables['global_punctuation']].rank(pct=True).map(lambda x: ceil(x*10)*10)
+    result_df[variables['global_position']] = result_df[variables['global_punctuation']].rank(method='min', ascending=False)
+    
     # TODO: add the relative grades to the variables description
-    max_points = result_df['glob_punt'].max()
-    result_df['relative_grade'] = result_df['glob_punt'] / max_points
+    max_points = result_df[variables['global_punctuation']].max() \
+        if result_df[variables['global_punctuation']].max() != 0 else 0
+    
+    result_df[variables['relative_grade']] = result_df[variables['global_punctuation']] / max_points \
+        if max_points != 0 else 0
     return result_df
 
 def calculate_statistics_by_area(ecoe_df: pd.DataFrame) -> pd.DataFrame:
@@ -82,9 +82,8 @@ def calculate_statistics_by_area(ecoe_df: pd.DataFrame) -> pd.DataFrame:
         variables = get_variables_area(area_code, None, 0)
         results_df[variables[f"a{area_code}_median"]] = results_df[area_code].median()
         results_df[variables[f"a{area_code}_percentile"]] = results_df[area_code].rank(pct=True).map(lambda x: ceil(x*10)*10)
-        results_df[variables[f"a{area_code}_punctuation"]] = results_df[area_code].rank(method='min', ascending=False)
+        results_df[variables[f"a{area_code}_position"]] = results_df[area_code].rank(method='min', ascending=False)
         results_df.rename(columns={area_code: variables[f"a{area_code}_punctuation"]}, inplace=True)
-    
     return results_df
 
 def calculate_statistics_by_station(ecoe_df: pd.DataFrame) -> pd.DataFrame:

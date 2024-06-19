@@ -193,6 +193,9 @@ def generate_reports(id_ecoe: int):
         except Exception as err:
             print(err)
         
+        if(len(student_data) == 0):
+            return
+
         if student_data is None:
             # TODO: Mensaje de error o excepción
             return None
