@@ -22,7 +22,7 @@ import pandas as pd
 from app.model import db
 import json
 import datetime
-
+from app.statistics.export_ecoe import get_ecoe_data
 
 @rq.job(timeout=300)
 def export_csv(identidad, ecoe="", organization=""):
@@ -173,6 +173,19 @@ def export_csv(identidad, ecoe="", organization=""):
             error = ""
             error = error + arg
         return "ko - Error: " + error
+
+@rq.job(timeout=300)
+def get_ecoe_data_csv(ecoe_id: int):
+    df = get_ecoe_data(ecoe_id)
+    rq.set_task_progress(80)
+
+    filename = "ecoe_{id_ecoe}_data.csv"
+    archive_route = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+    file_path =  os.path.join(archive_route, filename)
+
+    df.to_csv(file_path, index=False, encoding='utf_8_sig',sep=';',quoting=1, decimal=',')
+    rq.set_task_progress(99)
+    rq.finish_job(file=filename)
 
 @rq.job(timeout=300)
 def generate_reports(id_ecoe: int):
