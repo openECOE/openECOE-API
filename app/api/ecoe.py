@@ -231,37 +231,6 @@ class EcoeResource(OpenECOEResource):
 
         return _job
     
-    #Antigua función para generar y devolver archivo CSV de forma síncrona
-    # generar_csv devuelve el nombre del fichero generado (relativo a la ruta por defecto de archivos) 
-    #TODO:: Usar de para ver como devolver los ficheros pedidos
-    #Los cambios que se hagan, también tiene que hacerse en api/organizations.py
-    '''
-    @ItemRoute.GET("/csv", rel='getecoe', description="export all ECOE data to file")
-    def send_CSV_ecoe(self, ecoe):
-        import tempfile
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-        
-        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        file_name = generar_csv(ecoe=str(ecoe.id))
-
-        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
-            fileContent = file.read(-1)
-
-        os.remove(os.path.join(file_path, file_name))
-         
-        ficherotemporal=tempfile.TemporaryFile()
-        
-        ficherotemporal.write(fileContent)
-        
-        ficherotemporal.seek(0)
-        
-        return send_file(filename_or_fp = ficherotemporal,
-                                attachment_filename=file_name,
-                                as_attachment=True)
-    '''
-    #Recoge los datos del trabajo
     @ItemRoute.GET("/csv")
     def get_csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
@@ -277,7 +246,6 @@ class EcoeResource(OpenECOEResource):
 
         return job
 
-    #Genera el trabajo y lo lanza en segundo plano
     @ItemRoute.POST("/csv")
     def gen_csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
@@ -285,12 +253,10 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
-        _identidad = str(auth.current_user.id)
         _job = current_user.launch_job(
-            func=jobs_statistics.export_csv,
-            description="CSV_Asinc: ECOE = %s" % ecoe.name,
-            ecoe=str(ecoe.id),
-            identidad=_identidad,
+            func=jobs_statistics.get_ecoe_data_csv,
+            description="Exportar ECOE como csv: ECOE = %s" % ecoe.name,
+            ecoe_id=ecoe.id,
         )
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_csv": _job.id})
@@ -379,29 +345,7 @@ class EcoeResource(OpenECOEResource):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_reports": _job.id})
         return _job  
-    
-    @ItemRoute.GET("/results/report/data")
-    def get_results_zip(self, ecoe):
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-
-        urlarchive = os.path.join(os.path.dirname(current_app.instance_path),  current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        filename = zipped_reports_filename(ecoe.id, True)
-        url = f"{urlarchive}/{filename}"
-
-        if not os.path.exists(url):
-            raise NotFound
-
-        with open(url, mode='rb') as file:
-            file_content = file.read(-1)
-
-        os.remove(url)
-        tmp_file=tempfile.TemporaryFile()
-        tmp_file.write(file_content)
-        tmp_file.seek(0)
-        return send_file(filename_or_fp = tmp_file, attachment_filename=filename, as_attachment=True)
-    
+        
     @ItemRoute.GET("/results/variables")
     def get_variables(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
