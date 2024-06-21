@@ -130,12 +130,10 @@ def get_variables_ecoe(option: int) -> dict:
     if option == 0:
         variables = {
             "ref_ecoe": "ref_ecoe",
-            "date_ecoe": "date_ecoe"
         }
         return variables
 
     descriptions = {
         "ref_ecoe": "Referencia de la ECOE",
-        "date_ecoe": "Fecha de la ECOE"
     }
     return descriptions
