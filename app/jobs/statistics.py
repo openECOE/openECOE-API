@@ -176,6 +176,7 @@ def export_csv(identidad, ecoe="", organization=""):
 
 @rq.job(timeout=300)
 def get_ecoe_data_csv(ecoe_id: int):
+    rq.set_task_progress(1)
     df = get_ecoe_data(ecoe_id)
     rq.set_task_progress(80)
 
@@ -197,8 +198,7 @@ def generate_reports(id_ecoe: int):
     import shutil
 
     try:
-        rq.set_task_progress(0)
-
+        rq.set_task_progress(1)
         df = get_ecoe_data(id_ecoe)
 
         try:
