@@ -30,6 +30,7 @@ bcrypt.init_app(flask_app)
 
 
 from app.model.Area import Area
+from app.model.ReportTemplate import ReportTemplate
 from app.model.ECOE import ECOE
 from app.model.Event import Event
 from app.model.Job import Job

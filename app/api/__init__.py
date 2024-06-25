@@ -26,6 +26,7 @@ from app.api.ecoe import EcoeResource
 from app.api.event import EventResource
 from app.api.organization import OrganizationResource
 from app.api.question import QuestionResource, BlockResource
+from app.api.report_templates import ReportTemplatesResource
 from app.api.schedule import ScheduleResource
 from app.api.shift import ShiftResource
 from app.api.stage import StageResource
@@ -61,6 +62,7 @@ api.add_resource(AnswerResource)
 api.add_resource(QuestionResource)
 api.add_resource(BlockResource)
 api.add_resource(AreaResource)
+api.add_resource(ReportTemplatesResource)
 api.add_resource(StudentResource)
 api.add_resource(PlannerResource)
 api.add_resource(RoundResource)

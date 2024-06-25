@@ -20,7 +20,7 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from app.api import export
 from app.api._mainresource import MainManager, OpenECOEResource
@@ -34,6 +34,10 @@ import os
 from flask import send_file, current_app, request
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
 from app.auth import auth
+from app.statistics.variables import get_variables
+from app.jobs.statistics import zipped_reports_filename
+import tempfile
+
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -106,6 +110,7 @@ class EcoeResource(OpenECOEResource):
     rounds = Relation("rounds")
     shifts = Relation("shifts")
     stages = Relation("stages")
+    templates = Relation("templates")
 
     class Meta:
         manager = ArchiveManager
@@ -226,37 +231,6 @@ class EcoeResource(OpenECOEResource):
 
         return _job
     
-    #Antigua función para generar y devolver archivo CSV de forma síncrona
-    # generar_csv devuelve el nombre del fichero generado (relativo a la ruta por defecto de archivos) 
-    #TODO:: Usar de para ver como devolver los ficheros pedidos
-    #Los cambios que se hagan, también tiene que hacerse en api/organizations.py
-    '''
-    @ItemRoute.GET("/csv", rel='getecoe', description="export all ECOE data to file")
-    def send_CSV_ecoe(self, ecoe):
-        import tempfile
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
-        
-        file_path = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
-        file_name = generar_csv(ecoe=str(ecoe.id))
-
-        with open(file_path + "/" + file_name, mode='rb') as file: # b is important -> binary
-            fileContent = file.read(-1)
-
-        os.remove(os.path.join(file_path, file_name))
-         
-        ficherotemporal=tempfile.TemporaryFile()
-        
-        ficherotemporal.write(fileContent)
-        
-        ficherotemporal.seek(0)
-        
-        return send_file(filename_or_fp = ficherotemporal,
-                                attachment_filename=file_name,
-                                as_attachment=True)
-    '''
-    #Recoge los datos del trabajo
     @ItemRoute.GET("/csv")
     def get_csv_asinc_ecoe(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
@@ -272,7 +246,6 @@ class EcoeResource(OpenECOEResource):
 
         return job
 
-    #Genera el trabajo y lo lanza en segundo plano
     @ItemRoute.POST("/csv")
     def gen_csv_asinc_ecoe(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
@@ -280,12 +253,10 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
-        _identidad = str(auth.current_user.id)
         _job = current_user.launch_job(
-            func=jobs_statistics.export_csv,
-            description="CSV_Asinc: ECOE = %s" % ecoe.name,
-            ecoe=str(ecoe.id),
-            identidad=_identidad,
+            func=jobs_statistics.get_ecoe_data_csv,
+            description="Exportar ECOE como csv: ECOE = %s" % ecoe.name,
+            ecoe_id=ecoe.id,
         )
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_csv": _job.id})
@@ -300,7 +271,6 @@ class EcoeResource(OpenECOEResource):
  
     @ItemRoute.GET("/results-csv", rel='results_csv')
     def send_evaluativo_ecoe_en_csv(self, ecoe):
-        import tempfile
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
@@ -345,7 +315,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
         return get_items_score(id_ecoe=str(ecoe.id))
 
-    @ItemRoute.GET("/results-report")
+    @ItemRoute.GET("/results/report")
     def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
@@ -359,28 +329,30 @@ class EcoeResource(OpenECOEResource):
         return job
 
     #Genera el trabajo y lo lanza en segundo plano
-    @ItemRoute.POST("/results-report")
+    @ItemRoute.POST("/results/report")
     def gen_results_report(self, ecoe) -> fields.Inline(JobResource):
         # Only can get data if have manage permissions
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-                
-        import json
-        cadenajson = request.args['cadenaJSON']
-        static_parameters = json.loads(cadenajson)
  
         _job = current_user.launch_job(
             func=jobs_statistics.generate_reports,
-            custom_args="id_ecoe=" + str(ecoe.id),
             description="Generación de Notas ECOE = %s" % ecoe.name,
-            id_ecoe=str(ecoe.id),
-            static_parameters=static_parameters,
+            id_ecoe=ecoe.id,
         )
         #We save the job.id into the database
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
         self.manager.update(item, {"id_job_reports": _job.id})
         return _job  
+        
+    @ItemRoute.GET("/results/variables")
+    def get_variables(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        return get_variables(ecoe.id)
 
     @ItemRoute.GET("/configuration", rel="chronoSchema")
     def configuration(self, ecoe) -> fields.String():

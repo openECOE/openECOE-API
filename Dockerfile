@@ -1,7 +1,7 @@
 #FROM python:3.9 as base
 FROM nginx:1.24 as base
 RUN apt-get update && \
-    apt-get install -y python3-pip python3-venv  && \
+    apt-get install -y python3-pip python3-venv wkhtmltopdf && \
     python3 -m pip install --upgrade pip && \
     pip3 install wheel
 
