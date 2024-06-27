@@ -17,7 +17,7 @@ socketio = SocketIO(chrono_app,
                     logger = chrono_app.config["DEBUG"],
                     engineio_logger=chrono_app.config["DEBUG"],
                     cors_allowed_origins="*")
-cors = CORS()
+CORS(chrono_app, expose_headers='Content-Length, X-Total-Count')
 
 def create_chrono(config_class=BaseConfig):
     chrono_app.config.from_object(config_class)
@@ -45,7 +45,6 @@ def create_chrono(config_class=BaseConfig):
         chrono_app.logger.setLevel(logging.INFO)
         chrono_app.logger.info("openECOE Chrono startup")
         
-        cors.init_app(chrono_app)
         socketio.init_app(chrono_app)
         
     return chrono_app
