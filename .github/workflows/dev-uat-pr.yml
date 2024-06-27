@@ -15,15 +15,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Set up Git
-        run: |
-          git config --global user.name 'github-actions'
-          git config --global user.email 'github-actions@github.com'
+      - uses: tibdex/github-app-token@v1
+        id: generate-token
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v3
         with:
-          token: ${{ secrets.WORKFLOW_TOKEN }}
+          token: ${{ steps.generate-token.outputs.token }}
           title: 'Sync develop with uat'
           body: 'Automated PR to sync changes from develop to uat'
           branch: 'uat'
