@@ -20,7 +20,7 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import Forbidden, NotFound, Conflict
 
 from app.api import export
 from app.api._mainresource import MainManager, OpenECOEResource
@@ -386,6 +386,10 @@ class EcoeResource(OpenECOEResource):
     @ItemRoute.POST("/draft", rel="draft")
     def draft(self, ecoe) -> fields.Inline("self"):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        rounds_status = ecoe.chrono_status()
+        for status in rounds_status.values():
+            if status == 'RUNNING' or status == 'PAUSED':
+                raise Conflict(description=f"No se puede poner la ecoe {ecoe.id} en borrador mientras hay un cronometro activo")
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
     @Route.GET("/<int:id>", rel="self", attribute="instance")

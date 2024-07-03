@@ -200,6 +200,31 @@ class ECOE(db.Model):
         endpoint = "abort/%d" % self.id
         return self.__call_chrono(endpoint)
 
+    def chrono_status(self):
+        endpoint = "rounds-status/%d" % self.id
+        chrono_route = current_app.config["CHRONO_ROUTE"]
+        url = f"{chrono_route}/rounds-status/{self.id}"
+
+        try:
+            r = requests.get(url=url)
+        except (
+            requests.exceptions.ConnectionError,
+            requests.exceptions.ConnectTimeout,
+        ):
+            raise ChronoNotFound(url=endpoint)
+        
+        if r.status_code != 200:
+            raise BackendConflict(
+                err_chrono={
+                    "url": r.url,
+                    "status_code": r.status_code,
+                    "reason": r.reason,
+                    "text": r.text,
+                }
+            )
+        else:
+            return r.json()
+        
     def __call_chrono(self, endpoint):
 
         endpoint = "%s/%s" % (current_app.config["CHRONO_ROUTE"], endpoint)
