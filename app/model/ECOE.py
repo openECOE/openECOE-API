@@ -111,7 +111,7 @@ class ECOE(db.Model):
             "ecoe": {
                 "id": self.id,
                 "name": self.name,
-                "time_start": time_start.__str__(),
+                "time_start": time_start.__str__() + " GMT+0000",
             },
             "rounds": [{"id": r.id, "name": r.description} for r in self.rounds],
             "rounds_id": [r.id for r in self.rounds],
