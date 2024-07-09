@@ -183,11 +183,13 @@ class Round:
             idx_schedule = 0
 
             if self.is_aborted():
-                socketio.emit('aborted', {}, namespace=self.namespace)
+                socketio.emit('aborted', {'id': self.id}, namespace=self.namespace)
                 break
 
         if not self.is_aborted():
-            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id}, namespace=self.namespace)
+            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id, 'id': self.id}, namespace=self.namespace)
+            if self.chrono.loop:
+                self.start()
 
         Manager.delete_file(self.status_filename)
 
