@@ -201,6 +201,7 @@ class Chrono:
         self.minutes = minutes
         self.seconds = seconds
         self.state = Status.CREATED
+        self.loop = False
 
     def reset(self):
 
@@ -232,7 +233,10 @@ class Chrono:
             'stopped': 'S' if self.is_paused() else 'N',
             'num_rerun': current_rerun,
             'total_reruns': total_reruns,
-            'stage': schedule
+            'stage': schedule,
+            'id': self.id,
+            'state': f"{self.state}",
+            'loop': self.loop
         }
 
     def play(self, schedule, current_rerun, total_reruns):
