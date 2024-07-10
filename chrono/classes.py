@@ -267,6 +267,7 @@ class Chrono:
             self.dump()
 
             while self.is_paused():
+                tic_tac = self._create_tic_tac_dict(t, current_rerun, total_reruns, schedule)
                 socketio.emit('tic_tac', tic_tac, namespace=self.namespace)
                 socketio.sleep(0.5)
 
