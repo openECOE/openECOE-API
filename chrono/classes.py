@@ -183,11 +183,13 @@ class Round:
             idx_schedule = 0
 
             if self.is_aborted():
-                socketio.emit('aborted', {}, namespace=self.namespace)
+                socketio.emit('aborted', {'id': self.id}, namespace=self.namespace)
                 break
 
         if not self.is_aborted():
-            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id}, namespace=self.namespace)
+            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id, 'id': self.id}, namespace=self.namespace)
+            if self.chrono.loop:
+                self.start()
 
         Manager.delete_file(self.status_filename)
 
@@ -199,6 +201,7 @@ class Chrono:
         self.minutes = minutes
         self.seconds = seconds
         self.state = Status.CREATED
+        self.loop = False
 
     def reset(self):
 
@@ -230,7 +233,10 @@ class Chrono:
             'stopped': 'S' if self.is_paused() else 'N',
             'num_rerun': current_rerun,
             'total_reruns': total_reruns,
-            'stage': schedule
+            'stage': schedule,
+            'id': self.id,
+            'state': f"{self.state}",
+            'loop': self.loop
         }
 
     def play(self, schedule, current_rerun, total_reruns):
@@ -261,6 +267,7 @@ class Chrono:
             self.dump()
 
             while self.is_paused():
+                tic_tac = self._create_tic_tac_dict(t, current_rerun, total_reruns, schedule)
                 socketio.emit('tic_tac', tic_tac, namespace=self.namespace)
                 socketio.sleep(0.5)
 

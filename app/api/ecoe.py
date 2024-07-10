@@ -392,6 +392,10 @@ class EcoeResource(OpenECOEResource):
                 raise Conflict(description=f"No se puede poner la ecoe {ecoe.id} en borrador mientras hay un cronometro activo")
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
+    @ItemRoute.POST("/loop", rel="loop")
+    def loop(self, ecoe, loop: fields.Boolean()) -> fields.String():
+        return ecoe.loop(loop)
+
     @Route.GET("/<int:id>", rel="self", attribute="instance")
     def read(self, id) -> fields.Inline("self"):
         return self.manager.read(id, source=Location.BOTH)
