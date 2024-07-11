@@ -32,7 +32,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
+from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
 from app.auth import auth
 from app.statistics.variables import get_variables
 from app.jobs.statistics import zipped_reports_filename
@@ -308,12 +308,15 @@ class EcoeResource(OpenECOEResource):
         cadena = dataFrame.to_dict('records',into=dd)
         return cadena   
 
-    @ItemRoute.GET("/item-score", rel='items_score_by_ecoe')
+    @ItemRoute.GET("/results/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-        return get_items_score(id_ecoe=str(ecoe.id))
+        
+        questions_df = get_questions_data(ecoe.id)
+        statistics_df = get_items_score(questions_df)
+        return statistics_df.to_dict('records')
 
     @ItemRoute.GET("/results/report")
     def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
