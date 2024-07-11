@@ -106,3 +106,9 @@ def calculate_statistics_by_station(ecoe_df: pd.DataFrame) -> pd.DataFrame:
         results_df.rename(columns={station_order: variables[f"e{station_order}_punctuation"]}, inplace=True)
     
     return results_df
+
+def get_items_score(questions_df: pd.DataFrame) -> pd.DataFrame:
+    questions_df['answer_points'].fillna(0)
+    item_score_df = get_question_statistics(questions_df)
+    item_score_df = item_score_df.round(2)
+    return item_score_df
