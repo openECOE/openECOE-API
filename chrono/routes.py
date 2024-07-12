@@ -173,6 +173,18 @@ def play_chrono_on_loop(ecoe_id=None):
     
     return 'OK', 200
 
+@chrono_app.route('/rounds-status/<int:ecoe_id>')
+def get_status(ecoe_id=None):
+    ecoe = Manager.find_ecoe(ecoe_id)
+    if ecoe is None:
+        return 'ECOE %d not found' % ecoe_id, 404
+
+    status = {}
+    for e_round in ecoe.rounds:
+        status[str(e_round.id)] = f"{e_round.chrono.state}"
+
+    return json.dumps(status), 200
+
 ###############################
 
 @socketio.on('connect')
