@@ -121,6 +121,7 @@ class ECOE:
 
         self.id = ecoe_config['id']
         self.name = ecoe_config['name']
+        self.organization = ecoe_config['organization']
         self.time_start = ecoe_config['time_start']
         self.tfc = config['tfc']
         self.rounds = []
