@@ -459,9 +459,6 @@ class EcoeResource(OpenECOEResource):
             except ItemNotFound as e:
                 raise NotFound(description=f"Estacion con id {station} no encontrada")
 
-        current_user.id_organization
-
-
         try: 
             ecoe.clone_stations(stations_to_clone)
         except SQLAlchemyError as e:
