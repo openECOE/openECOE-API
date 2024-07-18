@@ -25,8 +25,7 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.exc import SQLAlchemyError
 from app.model import db
 from app.model.Station import Station
-from app.model.Question import Question, Block
-from app.model.Area import Area
+from app.shared import calculate_order
 
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
@@ -288,6 +287,18 @@ class ECOE(db.Model):
                 "text": r.text,
             }
 
+    def reorder_clonned_stations(self):
+        ecoe_stations = Station.query.filter(Station.id_ecoe == self.id).order_by(Station.id).all()
+        if len(ecoe_stations) > 1:
+            calculate_order(ecoe_stations)
+            try:
+                for station in ecoe_stations: 
+                    db.session.add(station)
+
+                db.session.commit()
+            except SQLAlchemyError:
+                raise
+
     def get_clonned_parent_station(self, original_station: Station) -> int:
         if original_station.id_parent_station is None:
             return None
@@ -300,28 +311,37 @@ class ECOE(db.Model):
 
         return clonned_parent_station.id if clonned_parent_station else None
 
-    def clone_stations(self, stations: list[Station]):
-        # TODO: ajustar el orden
-        stations.sort(key=lambda s: s.order, reverse=False)
+    def get_clonned_station_name(self, original_station: Station):
+        stations = Station.query.filter(Station.id_ecoe == self.id).order_by(Station.id).all()
+        suffix = "_copia"
 
+        clonned_station_name = original_station.name
+        while any(s.name == clonned_station_name for s in stations):
+            clonned_station_name = clonned_station_name + suffix 
+        
+        return clonned_station_name
+
+    def clone_stations(self, stations: list[Station]):
+        stations.sort(key=lambda s: s.order, reverse=False)
+        
         try:
             for original_station in stations:
+                clonned_station_name = self.get_clonned_station_name(original_station)
                 id_parent_station = self.get_clonned_parent_station(original_station)
 
-                clonned_station = Station(name = original_station.name, 
+                clonned_station = Station(name = clonned_station_name, 
                                         id_ecoe = self.id,
-                                        # order = original_station.order if not has_stations else self.stations[-1].order + 1 + idx, 
                                         order = original_station.order,
                                         id_parent_station = id_parent_station,
                                         id_manager=current_user.id)
 
                 db.session.add(clonned_station)
                 db.session.flush()
-                
-                
                 clonned_station.clone_blocks(original_station.blocks)
 
             db.session.commit()
+            self.reorder_clonned_stations()
+               
         except SQLAlchemyError:
             db.session.rollback()
             raise
