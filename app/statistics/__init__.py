@@ -17,7 +17,6 @@
 from app.statistics.calculations import *
 from app.statistics.export_ecoe import *
 from app.statistics.Functions import introducir_key_id
-from app.statistics.ItemScore import get_items_score
 from app.statistics.Resultados import resultados_evaluativo_ecoe
 from app.statistics.ResultsForArea import get_results_for_area
 from app.statistics.variables import *

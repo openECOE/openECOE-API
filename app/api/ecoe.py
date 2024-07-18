@@ -20,7 +20,8 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden, NotFound
+from werkzeug.exceptions import Forbidden, NotFound, Conflict, InternalServerError
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import export
 from app.api._mainresource import MainManager, OpenECOEResource
@@ -32,7 +33,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score
+from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
 from app.auth import auth
 from app.statistics.variables import get_variables
 from app.jobs.statistics import zipped_reports_filename
@@ -308,12 +309,15 @@ class EcoeResource(OpenECOEResource):
         cadena = dataFrame.to_dict('records',into=dd)
         return cadena   
 
-    @ItemRoute.GET("/item-score", rel='items_score_by_ecoe')
+    @ItemRoute.GET("/results/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
-        return get_items_score(id_ecoe=str(ecoe.id))
+        
+        questions_df = get_questions_data(ecoe.id)
+        statistics_df = get_items_score(questions_df)
+        return statistics_df.to_dict('records')
 
     @ItemRoute.GET("/results/report")
     def get_results_report(self, ecoe) -> fields.List(fields.Inline(JobResource)):
@@ -386,7 +390,15 @@ class EcoeResource(OpenECOEResource):
     @ItemRoute.POST("/draft", rel="draft")
     def draft(self, ecoe) -> fields.Inline("self"):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
+        rounds_status = ecoe.chrono_status()
+        for status in rounds_status.values():
+            if status == 'RUNNING' or status == 'PAUSED':
+                raise Conflict(description=f"No se puede poner la ecoe {ecoe.id} en borrador mientras hay un cronometro activo")
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
+
+    @ItemRoute.POST("/loop", rel="loop")
+    def loop(self, ecoe, loop: fields.Boolean()) -> fields.String():
+        return ecoe.loop(loop)
 
     @Route.GET("/<int:id>", rel="self", attribute="instance")
     def read(self, id) -> fields.Inline("self"):
@@ -423,6 +435,38 @@ class EcoeResource(OpenECOEResource):
         item = self.manager.read(id, source=Location.ARCHIVE_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
+
+    @ItemRoute.POST("/stations/clone")
+    def clone_stations(self, ecoe, stations: fields.List(fields.Integer)):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        from app.api.station import StationResource
+
+        # Check that the stations exists
+        # Check that the stations are from the same organization as the user
+        stations_to_clone = []
+        for station in stations:
+            try:
+                s = StationResource.manager.read(station)
+                stations_to_clone.append(s)
+
+                station_ecoe = ECOE.query.get(s.id_ecoe)
+                if station_ecoe.id_organization != current_user.id_organization:
+                    raise Forbidden
+
+            except ItemNotFound as e:
+                raise NotFound(description=f"Estacion con id {station} no encontrada")
+
+        try: 
+            ecoe.clone_stations(stations_to_clone)
+        except SQLAlchemyError as e:
+            raise InternalServerError(description=str(e))
+        except Exception as e:
+            raise InternalServerError(description=str(e))
+
+        return 'OK', 200
 
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)

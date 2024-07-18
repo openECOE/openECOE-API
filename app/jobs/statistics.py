@@ -180,7 +180,7 @@ def get_ecoe_data_csv(ecoe_id: int):
     df = get_ecoe_data(ecoe_id)
     rq.set_task_progress(80)
 
-    filename = "ecoe_{id_ecoe}_data.csv"
+    filename = f"ecoe_{ecoe_id}_data.csv"
     archive_route = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
     file_path =  os.path.join(archive_route, filename)
 
