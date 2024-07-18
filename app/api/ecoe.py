@@ -444,8 +444,26 @@ class EcoeResource(OpenECOEResource):
 
         from app.api.station import StationResource
 
+        # Check that the stations exists
+        # Check that the stations are from the same organization as the user
+        stations_to_clone = []
+        for station in stations:
+            try:
+                s = StationResource.manager.read(station)
+                stations_to_clone.append(s)
+
+                station_ecoe = ECOE.query.get(s.id_ecoe)
+                if station_ecoe.id_organization != current_user.id_organization:
+                    raise Forbidden
+
+            except ItemNotFound as e:
+                raise NotFound(description=f"Estacion con id {station} no encontrada")
+
+        current_user.id_organization
+
+
         try: 
-            ecoe.clone_stations([StationResource.manager.read(station) for station in stations])
+            ecoe.clone_stations(stations_to_clone)
         except SQLAlchemyError as e:
             raise InternalServerError(description=str(e))
         except Exception as e:
