@@ -25,7 +25,9 @@ from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
 from flask_potion.exceptions import BadRequest
 from flask_potion.exceptions import Conflict
-from app.shared import order_items
+from app.shared import order_items, calculate_order
+from werkzeug.exceptions import Forbidden
+from app.model import db
 
 class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
@@ -93,15 +95,33 @@ def before_create_station(sender, item):
     if not item.user:
         item.user = current_user
 
+@signals.after_create.connect_via(StationResource)
+def after_create_station(sender, item):
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.id).all()
+    if len(stations) > 1:
+        calculate_order(stations)
+        for station in stations: db.session.add(station)
+        db.session.commit()       
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
+    # Si tiene estaciones hijo no se puede borrar
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+    for station in stations:
+        if station.id_parent_station == item.id:
+            raise Forbidden(description="No se ha podido borrar la estación debido a que es padre de otras estaciones")
+
     blocks = Block.query.filter(Block.id_station == item.id).all()
     for block in blocks:
         BlockResource.manager.delete_by_id(block.id)
-    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
-    if len(item.ecoe.stations) > 1:
-        order_items(item, stations, item.order, 'del')
+
+@signals.after_delete.connect_via(StationResource)
+def after_delete_station(sender, item):
+    stations = Station.query.filter(Station.id_ecoe == item.id_ecoe).order_by(Station.order).all()
+    if len(stations) > 1:
+        calculate_order(stations)
+        for station in stations: db.session.add(station)
+        db.session.commit()
     
     
 @signals.before_create.connect_via(PermissionResource)
