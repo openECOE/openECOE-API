@@ -20,7 +20,8 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden, NotFound, Conflict
+from werkzeug.exceptions import Forbidden, NotFound, Conflict, InternalServerError
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import export
 from app.api._mainresource import MainManager, OpenECOEResource
@@ -434,6 +435,38 @@ class EcoeResource(OpenECOEResource):
         item = self.manager.read(id, source=Location.ARCHIVE_ONLY)
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
+
+    @ItemRoute.POST("/stations/clone")
+    def clone_stations(self, ecoe, stations: fields.List(fields.Integer)):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        from app.api.station import StationResource
+
+        # Check that the stations exists
+        # Check that the stations are from the same organization as the user
+        stations_to_clone = []
+        for station in stations:
+            try:
+                s = StationResource.manager.read(station)
+                stations_to_clone.append(s)
+
+                station_ecoe = ECOE.query.get(s.id_ecoe)
+                if station_ecoe.id_organization != current_user.id_organization:
+                    raise Forbidden
+
+            except ItemNotFound as e:
+                raise NotFound(description=f"Estacion con id {station} no encontrada")
+
+        try: 
+            ecoe.clone_stations(stations_to_clone)
+        except SQLAlchemyError as e:
+            raise InternalServerError(description=str(e))
+        except Exception as e:
+            raise InternalServerError(description=str(e))
+
+        return 'OK', 200
 
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)

@@ -16,7 +16,8 @@
 
 from app.model import db
 from sqlalchemy.dialects import mysql
-
+from app.model.Area import Area
+from sqlalchemy.exc import SQLAlchemyError
 
 class Question(db.Model):
     __tablename__ = 'question'
@@ -41,3 +42,42 @@ class Block(db.Model):
     order = db.Column(db.Integer, nullable=False)
 
     questions = db.relationship('Question', backref='block')
+
+    def get_or_create_area(self, id_ecoe: int, original_area: Area) -> Area:
+        # If the area of the question exists in the 
+        # ecoe use that, else create a new one with the same name
+        area = Area.query.filter(
+            (Area.id_ecoe == id_ecoe) & 
+            ((Area.name == original_area.name) | (Area.code == original_area.code))
+        ).first()
+        
+        if area is None:
+            area = Area(name = original_area.name, id_ecoe = id_ecoe, code = original_area.code)
+            db.session.add(area)
+            db.session.flush()
+        
+        return area
+
+    def clone_questions(self, questions: list[Question]):
+        from app.model.Station import Station
+        id_ecoe = Station.query.get(self.id_station).id_ecoe
+        
+        try:
+            for original_question in questions:
+                original_area = Area.query.get(original_question.id_area)
+                area = self.get_or_create_area(id_ecoe, original_area)
+
+                clonned_question = Question(id_area = area.id, order = original_question.order,
+                                        id_block = self.id, id_station = self.id_station,
+                                        question_schema = original_question.question_schema, 
+                                        max_points = original_question.max_points)
+            
+                db.session.add(clonned_question)
+
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        except Exception:
+            db.session.rollback()
+            raise
