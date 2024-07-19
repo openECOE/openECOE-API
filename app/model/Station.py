@@ -50,7 +50,8 @@ class Station(db.Model):
         station_json = {
             "name": self.name,
             "order": self.order,
-            "blocks": [block.export() for block in self.blocks]
+            "blocks": [block.export() for block in self.blocks],
+            "children": [child.export() for child in self.children_stations]
         }
         return station_json
 
