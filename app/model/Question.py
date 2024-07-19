@@ -18,6 +18,8 @@ from app.model import db
 from sqlalchemy.dialects import mysql
 from app.model.Area import Area
 from sqlalchemy.exc import SQLAlchemyError
+from flask import jsonify
+from flask import json
 
 class Question(db.Model):
     __tablename__ = 'question'
@@ -32,6 +34,18 @@ class Question(db.Model):
 
     answers = db.relationship('Answer', backref='question')
 
+    def export(self) -> str:
+        # TODO: ver lo del _ en options
+
+        area = Area.query.get(self.id_area)
+        question_json = json.loads(self.question_schema)
+        question_json['area'] = {
+            "name": area.name,
+            "code": area.code
+        }
+
+        return question_json
+
 
 class Block(db.Model):
     __tablename__ = 'block'
@@ -42,6 +56,15 @@ class Block(db.Model):
     order = db.Column(db.Integer, nullable=False)
 
     questions = db.relationship('Question', backref='block')
+
+    def export(self) -> str:
+        block_json = {
+            "name": self.name,
+            "order": self.order,
+            "questions": [question.export() for question in self.questions]
+        }
+
+        return block_json
 
     def get_or_create_area(self, id_ecoe: int, original_area: Area) -> Area:
         # If the area of the question exists in the 

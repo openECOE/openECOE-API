@@ -15,8 +15,9 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app.model import db
-from app.model.Question import Block
+from app.model.Question import Question, Block
 from sqlalchemy.exc import SQLAlchemyError
+from flask import jsonify
 
 class Station(db.Model):
     __tablename__ = 'station'
@@ -44,6 +45,14 @@ class Station(db.Model):
 
     # @ItemRoute.GET('/student/<int:student>/answers')
     # def get_student_answers:
+    
+    def export(self):
+        station_json = {
+            "name": self.name,
+            "order": self.order,
+            "blocks": [block.export() for block in self.blocks]
+        }
+        return station_json
 
     def clone_blocks(self, blocks: list[Block]):
         try:
