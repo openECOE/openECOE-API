@@ -18,7 +18,6 @@ from app.model import db
 from sqlalchemy.dialects import mysql
 from app.model.Area import Area
 from sqlalchemy.exc import SQLAlchemyError
-from flask import jsonify
 from flask import json
 
 class Question(db.Model):

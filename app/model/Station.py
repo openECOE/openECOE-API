@@ -15,9 +15,8 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app.model import db
-from app.model.Question import Question, Block
+from app.model.Question import Block
 from sqlalchemy.exc import SQLAlchemyError
-from flask import jsonify
 
 class Station(db.Model):
     __tablename__ = 'station'
