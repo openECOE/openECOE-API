@@ -1,4 +1,8 @@
 # openECOE-API
+## How to contribute
+
+If you want to contribute, you can [read the contributing guide](CONTRIBUTING.md).
+
 ## License
 Copyright (c) 2019 Universidad Miguel Hernandez de Elche
 
