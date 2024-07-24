@@ -39,6 +39,9 @@ from app.statistics.variables import get_variables
 from app.jobs.statistics import zipped_reports_filename
 import tempfile
 
+from flask_potion.contrib.alchemy.fields import InlineModel
+from app.model.Station import Station
+
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
     INSTANCES_ONLY = 2
@@ -444,8 +447,6 @@ class EcoeResource(OpenECOEResource):
 
         from app.api.station import StationResource
 
-        # Check that the stations exists
-        # Check that the stations are from the same organization as the user
         stations_to_clone = []
         for station in stations:
             try:
@@ -467,7 +468,31 @@ class EcoeResource(OpenECOEResource):
             raise InternalServerError(description=str(e))
 
         return 'OK', 200
+    
+    @ItemRoute.POST("/stations/import")
+    def import_station(self, ecoe, name: fields.String(), order: fields.Integer(minimum=1), blocks: fields.Any(), children: fields.Any()):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        
+        station = {
+            "name": name,
+            "order": order,
+            "blocks": blocks,
+            "children": children
+        }
 
+        try: 
+            ecoe.import_station(station, None)
+        except SQLAlchemyError as e:
+            raise InternalServerError(description=str(e))
+        except KeyError as e:
+            raise InternalServerError(description=f"Archivo corrupto. Propiedad {e} no encontrada en el archivo")
+        except Exception as e:
+            raise InternalServerError(description=str(e))
+
+        return 'OK', 200
+        
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
 def before_create_ecoe(sender, item):

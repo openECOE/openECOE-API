@@ -69,3 +69,19 @@ class Station(db.Model):
         except Exception:
             db.session.rollback()
             raise
+    
+    def import_blocks(self, blocks):
+        try:
+            for block in blocks:
+                imported_block = Block(id_station = self.id, name = block['name'],
+                                       order = block['order'])
+                db.session.add(imported_block)
+                imported_block.import_questions(block['questions'])
+
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        except Exception:
+            db.session.rollback()
+            raise
