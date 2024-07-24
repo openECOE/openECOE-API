@@ -388,7 +388,8 @@ class ECOE(db.Model):
 
             imported_station.import_blocks(station['blocks'])
 
-            return imported_station
+            db.session.commit()
+            self.reorder_created_stations()
         except SQLAlchemyError:
             db.session.rollback()
             raise
