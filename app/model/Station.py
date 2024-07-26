@@ -44,6 +44,15 @@ class Station(db.Model):
 
     # @ItemRoute.GET('/student/<int:student>/answers')
     # def get_student_answers:
+    
+    def export(self):
+        station_json = {
+            "name": self.name,
+            "order": self.order,
+            "blocks": [block.export() for block in self.blocks],
+            "children": [child.export() for child in self.children_stations]
+        }
+        return station_json
 
     def clone_blocks(self, blocks: list[Block]):
         try:
@@ -52,6 +61,22 @@ class Station(db.Model):
                                     order = original_block.order)
                 db.session.add(clonned_block)
                 clonned_block.clone_questions(original_block.questions)
+
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        except Exception:
+            db.session.rollback()
+            raise
+    
+    def import_blocks(self, blocks):
+        try:
+            for block in blocks:
+                imported_block = Block(id_station = self.id, name = block['name'],
+                                       order = block['order'])
+                db.session.add(imported_block)
+                imported_block.import_questions(block['questions'])
 
             db.session.commit()
         except SQLAlchemyError:

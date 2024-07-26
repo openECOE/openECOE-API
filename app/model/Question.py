@@ -18,6 +18,8 @@ from app.model import db
 from sqlalchemy.dialects import mysql
 from app.model.Area import Area
 from sqlalchemy.exc import SQLAlchemyError
+from flask import json
+from app.shared import DecimalEncoder
 
 class Question(db.Model):
     __tablename__ = 'question'
@@ -32,6 +34,22 @@ class Question(db.Model):
 
     answers = db.relationship('Answer', backref='question')
 
+    def export(self) -> str:
+        # TODO: ver lo del _ en options
+
+        area = Area.query.get(self.id_area)
+        question_json = {
+            "area": {
+                "name": area.name,
+                "code": area.code
+            },
+            "max_points": json.dumps(self.max_points, cls=DecimalEncoder),
+            "order": self.order,
+            "question_schema": json.loads(self.question_schema)
+        }
+
+        return question_json
+
 
 class Block(db.Model):
     __tablename__ = 'block'
@@ -43,16 +61,25 @@ class Block(db.Model):
 
     questions = db.relationship('Question', backref='block')
 
-    def get_or_create_area(self, id_ecoe: int, original_area: Area) -> Area:
+    def export(self) -> str:
+        block_json = {
+            "name": self.name,
+            "order": self.order,
+            "questions": [question.export() for question in self.questions]
+        }
+
+        return block_json
+
+    def get_or_create_area(self, id_ecoe: int, original_area_name: str, original_area_code: str) -> Area:
         # If the area of the question exists in the 
         # ecoe use that, else create a new one with the same name
         area = Area.query.filter(
             (Area.id_ecoe == id_ecoe) & 
-            ((Area.name == original_area.name) | (Area.code == original_area.code))
+            ((Area.name == original_area_name) | (Area.code == original_area_code))
         ).first()
         
         if area is None:
-            area = Area(name = original_area.name, id_ecoe = id_ecoe, code = original_area.code)
+            area = Area(name = original_area_name, id_ecoe = id_ecoe, code = original_area_code)
             db.session.add(area)
             db.session.flush()
         
@@ -65,7 +92,7 @@ class Block(db.Model):
         try:
             for original_question in questions:
                 original_area = Area.query.get(original_question.id_area)
-                area = self.get_or_create_area(id_ecoe, original_area)
+                area = self.get_or_create_area(id_ecoe, original_area.name, original_area.code)
 
                 clonned_question = Question(id_area = area.id, order = original_question.order,
                                         id_block = self.id, id_station = self.id_station,
@@ -74,6 +101,26 @@ class Block(db.Model):
             
                 db.session.add(clonned_question)
 
+            db.session.commit()
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        except Exception:
+            db.session.rollback()
+            raise
+    
+    def import_questions(self, questions):
+        from app.model.Station import Station
+        id_ecoe = Station.query.get(self.id_station).id_ecoe
+        try:
+            for question in questions:
+                area = self.get_or_create_area(id_ecoe, question['area']['name'], question['area']['code'])
+    
+                imported_question = Question(id_area = area.id, order = question['order'], id_block = self.id,
+                                             id_station = self.id_station, question_schema = json.dumps(question['question_schema'], cls=DecimalEncoder),
+                                             max_points = question['max_points'])
+                db.session.add(imported_question)
+            
             db.session.commit()
         except SQLAlchemyError:
             db.session.rollback()

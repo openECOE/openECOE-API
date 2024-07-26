@@ -287,7 +287,7 @@ class ECOE(db.Model):
                 "text": r.text,
             }
 
-    def reorder_clonned_stations(self):
+    def reorder_created_stations(self):
         ecoe_stations = Station.query.filter(Station.id_ecoe == self.id).order_by(Station.id).all()
         if len(ecoe_stations) > 1:
             calculate_order(ecoe_stations)
@@ -311,11 +311,11 @@ class ECOE(db.Model):
 
         return clonned_parent_station.id if clonned_parent_station else None
 
-    def get_clonned_station_name(self, original_station: Station):
+    def get_clonned_station_name(self, original_station_name: str):
         stations = Station.query.filter(Station.id_ecoe == self.id).order_by(Station.id).all()
         suffix = "_copia"
 
-        clonned_station_name = original_station.name
+        clonned_station_name = original_station_name
         while any(s.name == clonned_station_name for s in stations):
             clonned_station_name = clonned_station_name + suffix 
         
@@ -326,7 +326,7 @@ class ECOE(db.Model):
         
         try:
             for original_station in stations:
-                clonned_station_name = self.get_clonned_station_name(original_station)
+                clonned_station_name = self.get_clonned_station_name(original_station.name)
                 id_parent_station = self.get_clonned_parent_station(original_station)
 
                 clonned_station = Station(name = clonned_station_name, 
@@ -340,8 +340,56 @@ class ECOE(db.Model):
                 clonned_station.clone_blocks(original_station.blocks)
 
             db.session.commit()
-            self.reorder_clonned_stations()
+            self.reorder_created_stations()
                
+        except SQLAlchemyError:
+            db.session.rollback()
+            raise
+        except Exception:
+            db.session.rollback()
+            raise
+    
+    def import_station(self, station, id_parent_station):
+        # Para importar las estaciones hijo lo que se va a hacer
+        # es que las estaciones hijo no estarán al mismo nivel que 
+        # el padre, siempre estarán dentro de la propiedad children
+        # Ejemplo:
+        # {
+        #   "name": "Estación Padre",
+        #   "order": 1,
+        #   "blocks": [...],
+        #   "children": [
+        #       "name": "Estación Hija",
+        #       "order": 2,
+        #       "blocks": [...],
+        #       "children": [ ]
+        #   ],
+        # }
+        #
+        # En este caso se está importando solo una estación,
+        # pero como tiene una estacíon hijo se importará también.
+        # Si una estación es hija de otra, solo podrá estar
+        # dentro de la propiedad children, y no al nivel de stations
+
+        try:
+            imported_station_name = self.get_clonned_station_name(station['name'])
+
+            imported_station = Station(name = imported_station_name, 
+                                        id_ecoe = self.id,
+                                        order = station['order'],
+                                        id_parent_station = id_parent_station,
+                                        id_manager=current_user.id)
+            
+            db.session.add(imported_station)
+            db.session.flush()
+
+            if len(station['children']) != 0:
+                for child in station['children']: self.import_station(child, imported_station.id)
+
+            imported_station.import_blocks(station['blocks'])
+
+            db.session.commit()
+            self.reorder_created_stations()
         except SQLAlchemyError:
             db.session.rollback()
             raise
