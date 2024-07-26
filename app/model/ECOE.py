@@ -25,7 +25,12 @@ from sqlalchemy.dialects import mysql
 from sqlalchemy.exc import SQLAlchemyError
 from app.model import db
 from app.model.Station import Station
+from app.model.Area import Area
+from app.model.Shift import Shift
+from app.model.Round import Round
+from app.model.Stage import Stage
 from app.shared import calculate_order
+import datetime
 
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
@@ -287,18 +292,6 @@ class ECOE(db.Model):
                 "text": r.text,
             }
 
-    def reorder_created_stations(self):
-        ecoe_stations = Station.query.filter(Station.id_ecoe == self.id).order_by(Station.id).all()
-        if len(ecoe_stations) > 1:
-            calculate_order(ecoe_stations)
-            try:
-                for station in ecoe_stations: 
-                    db.session.add(station)
-
-                db.session.commit()
-            except SQLAlchemyError:
-                raise
-
     def get_clonned_parent_station(self, original_station: Station) -> int:
         if original_station.id_parent_station is None:
             return None
@@ -321,35 +314,33 @@ class ECOE(db.Model):
         
         return clonned_station_name
 
-    def clone_stations(self, stations: list[Station]):
-        stations.sort(key=lambda s: s.order, reverse=False)
-        
+    def clone_station(self, station: Station, order_correction: bool):
         try:
-            for original_station in stations:
-                clonned_station_name = self.get_clonned_station_name(original_station.name)
-                id_parent_station = self.get_clonned_parent_station(original_station)
+            clonned_station_name = self.get_clonned_station_name(station.name)
+            id_parent_station = self.get_clonned_parent_station(station)
 
-                clonned_station = Station(name = clonned_station_name, 
+            order = station.order
+            if order_correction:
+                order = Station.query.filter(Station.id_ecoe == self.id).count() + 1
+
+            clonned_station = Station(name = clonned_station_name, 
                                         id_ecoe = self.id,
-                                        order = original_station.order,
+                                        order = order,
                                         id_parent_station = id_parent_station,
                                         id_manager=current_user.id)
 
-                db.session.add(clonned_station)
-                db.session.flush()
-                clonned_station.clone_blocks(original_station.blocks)
+            db.session.add(clonned_station)
+            db.session.flush()
+            for block in station.blocks:
+                clonned_station.clone_block(block)
 
             db.session.commit()
-            self.reorder_created_stations()
-               
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
+            return clonned_station
         except Exception:
             db.session.rollback()
             raise
     
-    def import_station(self, station, id_parent_station):
+    def import_station(self, station, id_parent_station, order_correction: bool):
         # Para importar las estaciones hijo lo que se va a hacer
         # es que las estaciones hijo no estarán al mismo nivel que 
         # el padre, siempre estarán dentro de la propiedad children
@@ -374,25 +365,110 @@ class ECOE(db.Model):
         try:
             imported_station_name = self.get_clonned_station_name(station['name'])
 
+            order = station['order']
+            if order_correction:
+                order = Station.query.filter(Station.id_ecoe == self.id).count() + 1
+
             imported_station = Station(name = imported_station_name, 
                                         id_ecoe = self.id,
-                                        order = station['order'],
+                                        order = order,
                                         id_parent_station = id_parent_station,
                                         id_manager=current_user.id)
             
             db.session.add(imported_station)
             db.session.flush()
 
-            if len(station['children']) != 0:
-                for child in station['children']: self.import_station(child, imported_station.id)
 
-            imported_station.import_blocks(station['blocks'])
+            if len(station['children']) != 0:
+                for child in station['children']: self.import_station(child, imported_station.id, order_correction)
+
+            for block in station["blocks"]:
+                imported_station.import_block(block)
 
             db.session.commit()
-            self.reorder_created_stations()
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
         except Exception:
             db.session.rollback()
             raise
+    
+    def import_area(self, area):
+        try:
+            imported_area = Area(id_ecoe = self.id, name = area['name'], code = area['code'])
+            db.session.add(imported_area)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+    
+    def import_shift(self, shift):
+        try:
+            time_start = datetime.datetime.strptime(shift['time_start'], '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d %H:%M:%S')
+            imported_shift = Shift(id_ecoe = self.id, shift_code = shift['shift_code'], time_start = time_start)
+            db.session.add(imported_shift)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+
+    def import_round(self, round):
+        try:
+            imported_round = Round(id_ecoe = self.id, round_code = round['round_code'], description = round['description'])
+            db.session.add(imported_round)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+    
+    def import_stage(self, stage):
+        try:
+            imported_stage = Stage(id_ecoe = self.id, duration = stage['duration'], order = stage['order'], name = stage['name'])
+            db.session.add(imported_stage)
+            db.session.flush()
+            
+            for schedule in stage["schedules"]:
+                imported_stage.import_schedule(schedule)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+
+    @staticmethod
+    def import_ecoe(ecoe, name):
+        try:
+            imported_ecoe = ECOE(name = name, id_organization = current_user.id_organization, id_coordinator = current_user.id)
+            db.session.add(imported_ecoe)
+            db.session.flush()
+
+            for area in ecoe['areas']:
+                imported_ecoe.import_area(area)
+
+            for station in ecoe['stations']:
+                imported_ecoe.import_station(station, None, False)
+
+            for shift in ecoe['shifts']:
+                imported_ecoe.import_shift(shift)
+
+            for round in ecoe['rounds']:
+                imported_ecoe.import_round(round)
+
+            for stage in ecoe['stages']:
+                imported_ecoe.import_stage(stage)
+
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+
+    def export(self) -> dict:
+        # Las estaciones hijas estarán con el padre, entonces
+        # no hará falta añadirlas fuera
+        stations = filter(lambda s: s.id_parent_station is None, self.stations)
+
+        ecoe_json = {
+            "areas": [area.export() for area in self.areas],
+            "stations": [station.export() for station in stations],
+            "shifts": [shift.export() for shift in self.shifts],
+            "rounds": [round.export() for round in self.rounds],
+            "stages": [stage.export() for stage in self.stages]
+        }
+
+        return ecoe_json

@@ -20,7 +20,7 @@ from flask_potion import fields, signals
 from flask_potion.exceptions import BackendConflict, ItemNotFound
 from flask_potion.instances import Instances
 from flask_potion.routes import ItemRoute, Relation, Route
-from werkzeug.exceptions import Forbidden, NotFound, Conflict, InternalServerError
+from werkzeug.exceptions import Forbidden, NotFound, Conflict, InternalServerError, BadRequest
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.api import export
@@ -32,15 +32,10 @@ from app.jobs import statistics as jobs_statistics
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
-from flask import send_file, current_app, request
+from flask import send_file, current_app, request, jsonify
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
-from app.auth import auth
 from app.statistics.variables import get_variables
-from app.jobs.statistics import zipped_reports_filename
 import tempfile
-
-from flask_potion.contrib.alchemy.fields import InlineModel
-from app.model.Station import Station
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -458,16 +453,25 @@ class EcoeResource(OpenECOEResource):
                     raise Forbidden
 
             except ItemNotFound as e:
-                raise NotFound(description=f"Estacion con id {station} no encontrada")
+                raise NotFound(description=f"Estación con id {station} no encontrada")
 
-        try: 
-            ecoe.clone_stations(stations_to_clone)
-        except SQLAlchemyError as e:
-            raise InternalServerError(description=str(e))
+        try:
+            stations_to_clone.sort(key=lambda s: s.order, reverse=False)
+            for station in stations_to_clone:
+                ecoe.clone_station(station, True)
+            
         except Exception as e:
             raise InternalServerError(description=str(e))
 
         return 'OK', 200
+    
+    @ItemRoute.GET("/export", rel="exportItem", description="export data to file")
+    def export_ecoe(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        
+        return jsonify(ecoe.export())
     
     @ItemRoute.POST("/stations/import")
     def import_station(self, ecoe, name: fields.String(), order: fields.Integer(minimum=1), blocks: fields.Any(), children: fields.Any()):
@@ -482,13 +486,40 @@ class EcoeResource(OpenECOEResource):
             "children": children
         }
 
-        try: 
-            ecoe.import_station(station, None)
-        except SQLAlchemyError as e:
-            raise InternalServerError(description=str(e))
+        try:
+            ecoe.import_station(station, None, True)
         except KeyError as e:
             raise InternalServerError(description=f"Archivo corrupto. Propiedad {e} no encontrada en el archivo")
-        except Exception as e:
+        except (SQLAlchemyError, Exception) as e:
+            raise InternalServerError(description=str(e))
+
+        return 'OK', 200
+    
+    @Route.POST("/import", rel="import", description="Import ECOE from file")
+    def import_ecoe(self, areas: fields.Any(), stations: fields.Any(), shifts: fields.Any(), rounds: fields.Any(), stages: fields.Any()):
+        object_permissions = self.manager.get_permissions_for_item(self)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+        
+        name = request.args["name"]
+
+        if name is None:
+            raise BadRequest
+        
+        ecoe = {
+            "areas": areas,
+            "stations": stations,
+            "rounds": rounds,
+            "shifts": shifts,
+            "rounds": rounds,
+            "stages": stages
+        }
+
+        try:
+            ECOE.import_ecoe(ecoe, name)
+        except KeyError as e:
+            raise InternalServerError(description=f"Archivo corrupto. Propiedad {e} no encontrada en el archivo")
+        except (SQLAlchemyError, Exception) as e:
             raise InternalServerError(description=str(e))
 
         return 'OK', 200

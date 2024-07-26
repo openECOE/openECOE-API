@@ -15,7 +15,8 @@
 #      along with openECOE-API.  If not, see <https://www.gnu.org/licenses/>.
 
 from app.model import db
-
+from app.model.Station import Station
+from app.model.Event import Event
 
 class Schedule(db.Model):
     __tablename__ = 'schedule'
@@ -30,3 +31,23 @@ class Schedule(db.Model):
     __table_args__ = (
         db.UniqueConstraint(id_ecoe, id_stage, id_station, name='ecoe_stage_station_uk'),
     )
+
+    def import_event(self, event):
+        try:
+            imported_event = Event(id_schedule = self.id, time = event["time"], sound = event["sound"], text = event["text"])
+            db.session.add(imported_event)
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise
+
+    def export(self) -> dict:
+        station_order = None
+        if self.id_station is not None:
+            station_order = Station.query.get(self.id_station).order
+
+        schedule_json = {
+            "events": [event.export() for event in self.events],
+            "station": station_order
+        }
+        return schedule_json

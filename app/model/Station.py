@@ -16,7 +16,6 @@
 
 from app.model import db
 from app.model.Question import Block
-from sqlalchemy.exc import SQLAlchemyError
 
 class Station(db.Model):
     __tablename__ = 'station'
@@ -45,7 +44,7 @@ class Station(db.Model):
     # @ItemRoute.GET('/student/<int:student>/answers')
     # def get_student_answers:
     
-    def export(self):
+    def export(self) -> dict:
         station_json = {
             "name": self.name,
             "order": self.order,
@@ -54,34 +53,28 @@ class Station(db.Model):
         }
         return station_json
 
-    def clone_blocks(self, blocks: list[Block]):
+    def clone_block(self, block: Block):
         try:
-            for original_block in blocks:
-                clonned_block = Block(id_station = self.id, name = original_block.name, 
-                                    order = original_block.order)
-                db.session.add(clonned_block)
-                clonned_block.clone_questions(original_block.questions)
-
+            clonned_block = Block(id_station = self.id, name = block.name, order = block.order)
+            db.session.add(clonned_block)
+            db.session.flush()
+            for question in block.questions:
+                clonned_block.clone_question(question)
             db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
         except Exception:
             db.session.rollback()
             raise
     
-    def import_blocks(self, blocks):
+    def import_block(self, block):
         try:
-            for block in blocks:
-                imported_block = Block(id_station = self.id, name = block['name'],
+            imported_block = Block(id_station = self.id, name = block['name'],
                                        order = block['order'])
-                db.session.add(imported_block)
-                imported_block.import_questions(block['questions'])
+            db.session.add(imported_block)
+            db.session.flush()
+            for question in block['questions']:
+                imported_block.import_question(question)
 
             db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
         except Exception:
             db.session.rollback()
             raise

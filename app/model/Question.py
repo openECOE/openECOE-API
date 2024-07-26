@@ -17,7 +17,6 @@
 from app.model import db
 from sqlalchemy.dialects import mysql
 from app.model.Area import Area
-from sqlalchemy.exc import SQLAlchemyError
 from flask import json
 from app.shared import DecimalEncoder
 
@@ -34,15 +33,10 @@ class Question(db.Model):
 
     answers = db.relationship('Answer', backref='question')
 
-    def export(self) -> str:
-        # TODO: ver lo del _ en options
-
+    def export(self) -> dict:
         area = Area.query.get(self.id_area)
         question_json = {
-            "area": {
-                "name": area.name,
-                "code": area.code
-            },
+            "area": area.export(),
             "max_points": json.dumps(self.max_points, cls=DecimalEncoder),
             "order": self.order,
             "question_schema": json.loads(self.question_schema)
@@ -61,7 +55,7 @@ class Block(db.Model):
 
     questions = db.relationship('Question', backref='block')
 
-    def export(self) -> str:
+    def export(self) -> dict:
         block_json = {
             "name": self.name,
             "order": self.order,
@@ -85,46 +79,35 @@ class Block(db.Model):
         
         return area
 
-    def clone_questions(self, questions: list[Question]):
+    def clone_question(self, question: Question):
         from app.model.Station import Station
         id_ecoe = Station.query.get(self.id_station).id_ecoe
         
         try:
-            for original_question in questions:
-                original_area = Area.query.get(original_question.id_area)
-                area = self.get_or_create_area(id_ecoe, original_area.name, original_area.code)
-
-                clonned_question = Question(id_area = area.id, order = original_question.order,
+            original_area = Area.query.get(question.id_area)
+            area = self.get_or_create_area(id_ecoe, original_area.name, original_area.code)
+            clonned_question = Question(id_area = area.id, order = question.order,
                                         id_block = self.id, id_station = self.id_station,
-                                        question_schema = original_question.question_schema, 
-                                        max_points = original_question.max_points)
+                                        question_schema = question.question_schema, 
+                                        max_points = question.max_points)
             
-                db.session.add(clonned_question)
-
+            db.session.add(clonned_question)
             db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
         except Exception:
             db.session.rollback()
             raise
     
-    def import_questions(self, questions):
+    def import_question(self, question):
         from app.model.Station import Station
+
         id_ecoe = Station.query.get(self.id_station).id_ecoe
         try:
-            for question in questions:
-                area = self.get_or_create_area(id_ecoe, question['area']['name'], question['area']['code'])
-    
-                imported_question = Question(id_area = area.id, order = question['order'], id_block = self.id,
+            area = self.get_or_create_area(id_ecoe, question['area']['name'], question['area']['code'])
+            imported_question = Question(id_area = area.id, order = question['order'], id_block = self.id,
                                              id_station = self.id_station, question_schema = json.dumps(question['question_schema'], cls=DecimalEncoder),
                                              max_points = question['max_points'])
-                db.session.add(imported_question)
-            
+            db.session.add(imported_question)
             db.session.commit()
-        except SQLAlchemyError:
-            db.session.rollback()
-            raise
         except Exception:
             db.session.rollback()
             raise
