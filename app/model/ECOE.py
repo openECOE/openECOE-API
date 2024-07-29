@@ -456,6 +456,13 @@ class ECOE(db.Model):
         except Exception:
             db.session.rollback()
             raise
+    
+    @staticmethod
+    def clone_ecoe(ecoe):
+        try:
+            ECOE.import_ecoe(ecoe.export(), ecoe.name + " Copia")
+        except Exception:
+            raise
 
     def export(self) -> dict:
         # Las estaciones hijas estarán con el padre, entonces

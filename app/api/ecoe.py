@@ -523,7 +523,20 @@ class EcoeResource(OpenECOEResource):
             raise InternalServerError(description=str(e))
 
         return 'OK', 200
+    
+    @ItemRoute.POST("/clone")
+    def clone_ecoe(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(self)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
         
+        try:
+            ECOE.clone_ecoe(ecoe)
+        except Exception as e:
+            raise InternalServerError(description=str(e))
+        
+        return 'OK', 200
+
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
 def before_create_ecoe(sender, item):
