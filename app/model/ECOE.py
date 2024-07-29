@@ -461,7 +461,7 @@ class ECOE(db.Model):
     def clone_ecoe(ecoe_to_clone):
         try:
             ecoes = ECOE.query \
-                .filter((ECOE.id_organization == ecoe_to_clone.id_organization) & (ECOE.id != ecoe_to_clone.id)) \
+                .filter(ECOE.id_organization == ecoe_to_clone.id_organization) \
                 .all()
             suffix = " Copia"
 
