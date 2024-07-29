@@ -458,9 +458,18 @@ class ECOE(db.Model):
             raise
     
     @staticmethod
-    def clone_ecoe(ecoe):
+    def clone_ecoe(ecoe_to_clone):
         try:
-            ECOE.import_ecoe(ecoe.export(), ecoe.name + " Copia")
+            ecoes = ECOE.query \
+                .filter((ECOE.id_organization == ecoe_to_clone.id_organization) & (ECOE.id != ecoe_to_clone.id)) \
+                .all()
+            suffix = " Copia"
+
+            clonned_ecoe_name = ecoe_to_clone.name
+            while any(clonned_ecoe_name == ecoe.name for ecoe in ecoes):
+                clonned_ecoe_name = clonned_ecoe_name + suffix 
+
+            ECOE.import_ecoe(ecoe_to_clone.export(), clonned_ecoe_name)
         except Exception:
             raise
 
