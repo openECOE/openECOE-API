@@ -401,8 +401,7 @@ class ECOE(db.Model):
     
     def import_shift(self, shift):
         try:
-            time_start = datetime.datetime.strptime(shift['time_start'], '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d %H:%M:%S')
-            imported_shift = Shift(id_ecoe = self.id, shift_code = shift['shift_code'], time_start = time_start)
+            imported_shift = Shift(id_ecoe = self.id, shift_code = shift['shift_code'], time_start = shift['time_start'])
             db.session.add(imported_shift)
             db.session.commit()
         except Exception:

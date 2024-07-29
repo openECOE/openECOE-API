@@ -34,7 +34,7 @@ class Shift(db.Model):
     def export(self) -> dict:
         shift_json = {
             "shift_code": self.shift_code,
-            "time_start": self.time_start
+            "time_start": self.time_start.strftime('%Y-%m-%d %H:%M:%S')
         }
 
         return shift_json
