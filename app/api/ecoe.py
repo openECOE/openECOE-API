@@ -32,7 +32,7 @@ from app.jobs import statistics as jobs_statistics
 from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
-from flask import send_file, current_app, request, jsonify
+from flask import send_file, current_app, request
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
 from app.statistics.variables import get_variables
 import tempfile
@@ -471,7 +471,7 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
         
-        return jsonify(ecoe.export())
+        return ecoe.export()
     
     @ItemRoute.POST("/stations/import")
     def import_station(self, ecoe, name: fields.String(), order: fields.Integer(minimum=1), blocks: fields.Any(), children: fields.Any()):
