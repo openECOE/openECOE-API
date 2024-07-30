@@ -401,8 +401,7 @@ class ECOE(db.Model):
     
     def import_shift(self, shift):
         try:
-            time_start = datetime.datetime.strptime(shift['time_start'], '%a, %d %b %Y %H:%M:%S %Z').strftime('%Y-%m-%d %H:%M:%S')
-            imported_shift = Shift(id_ecoe = self.id, shift_code = shift['shift_code'], time_start = time_start)
+            imported_shift = Shift(id_ecoe = self.id, shift_code = shift['shift_code'], time_start = shift['time_start'])
             db.session.add(imported_shift)
             db.session.commit()
         except Exception:
@@ -456,6 +455,22 @@ class ECOE(db.Model):
             db.session.commit()
         except Exception:
             db.session.rollback()
+            raise
+    
+    @staticmethod
+    def clone_ecoe(ecoe_to_clone):
+        try:
+            ecoes = ECOE.query \
+                .filter(ECOE.id_organization == ecoe_to_clone.id_organization) \
+                .all()
+            suffix = " Copia"
+
+            clonned_ecoe_name = ecoe_to_clone.name
+            while any(clonned_ecoe_name == ecoe.name for ecoe in ecoes):
+                clonned_ecoe_name = clonned_ecoe_name + suffix 
+
+            ECOE.import_ecoe(ecoe_to_clone.export(), clonned_ecoe_name)
+        except Exception:
             raise
 
     def export(self) -> dict:
