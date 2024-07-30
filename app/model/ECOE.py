@@ -22,15 +22,12 @@ from flask import current_app
 from flask_login import current_user
 from flask_potion.exceptions import BackendConflict, PageNotFound
 from sqlalchemy.dialects import mysql
-from sqlalchemy.exc import SQLAlchemyError
 from app.model import db
 from app.model.Station import Station
 from app.model.Area import Area
 from app.model.Shift import Shift
 from app.model.Round import Round
 from app.model.Stage import Stage
-from app.shared import calculate_order
-import datetime
 
 class ChronoNotFound(PageNotFound):
     def __init__(self, **kwargs):
