@@ -28,3 +28,11 @@ class Event(db.Model):
 
     is_countdown = db.Column(db.Boolean(), nullable=False, default=False)
 
+    def export(self) -> dict:
+        event_json = {
+            "time": self.time,
+            "sound": self.sound,
+            "text": self.text,
+        }
+
+        return event_json
