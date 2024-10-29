@@ -32,5 +32,10 @@ class Area(db.Model):
         db.UniqueConstraint(code, id_ecoe, name='code_area_uk'),
     )
 
+    def export(self) -> dict:
+        area_json = {
+            "name": self.name,
+            "code": self.code,
+        }
 
-
+        return area_json

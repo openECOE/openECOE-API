@@ -16,7 +16,7 @@
 
 from flask_login import current_user
 from flask_potion import fields, signals
-from flask_potion.routes import Relation
+from flask_potion.routes import Relation, ItemRoute, Route
 from app.api.user import PermissionResource, UserResource
 from app.api.question import BlockResource
 from app.model.Station import Station
@@ -28,6 +28,7 @@ from flask_potion.exceptions import Conflict
 from app.shared import order_items, calculate_order
 from werkzeug.exceptions import Forbidden
 from app.model import db
+from flask import jsonify
 
 class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
@@ -49,7 +50,8 @@ class StationResource(EcoeChildResource):
             'manage': [PermissionType.MANAGE + ':ecoe', PermissionType.MANAGE, RoleType.ADMIN],
             'evaluate': [PermissionType.EVALUATE + ':ecoe', PermissionType.EVALUATE, 'manage']
         }
-        
+    
+
 
     class Schema:
         ecoe = fields.ToOne('ecoes')
@@ -57,6 +59,15 @@ class StationResource(EcoeChildResource):
         parent_station = fields.ToOne('stations', nullable=True)
         children_stations = fields.ToMany('stations', nullable=True)
 
+    @ItemRoute.GET("/export", rel="exportItem", description="export all ECOE data to file")
+    def export(self, station):
+        object_permissions = self.manager.get_permissions_for_item(station)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        station = self.manager.read(station.id)
+        exported = station.export()
+        return jsonify(exported)
 
 def check_child_stations_order(station, order):
     if(len(station.children_stations) > 0):

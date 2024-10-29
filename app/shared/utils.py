@@ -1,3 +1,12 @@
+from decimal import Decimal
+from flask import json
+
+class DecimalEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, Decimal):
+            return float(o)
+        super(DecimalEncoder, self).default(o)
+
 def order_items(item, items, new_order, operation):
     # Posibles operaciones add y del (añadir y borrar)
     # Los items del array tienen que tener la propiedad order

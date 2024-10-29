@@ -31,3 +31,10 @@ class Round(db.Model):
         db.UniqueConstraint(round_code, id_ecoe, name='round_ecoe_uk'),
     )
 
+    def export(self) -> dict:
+        round_json = {
+            "round_code": self.round_code,
+            "description": self.description
+        }
+
+        return round_json

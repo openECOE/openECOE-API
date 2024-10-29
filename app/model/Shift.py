@@ -30,3 +30,11 @@ class Shift(db.Model):
     __table_args__ = (
         db.UniqueConstraint(shift_code, id_ecoe, name='shift_ecoe_uk'),
     )
+
+    def export(self) -> dict:
+        shift_json = {
+            "shift_code": self.shift_code,
+            "time_start": self.time_start.strftime('%Y-%m-%d %H:%M:%S')
+        }
+
+        return shift_json
