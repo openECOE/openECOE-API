@@ -18,10 +18,16 @@ from flask_login import current_user
 from flask_potion import fields, signals
 from flask_potion.routes import Relation
 from app.api.user import PermissionResource, UserResource
+from app.api.question import BlockResource
 from app.model.Station import Station
+from app.model.Question import Question, Block
 from app.model.User import PermissionType, RoleType
 from .ecoe import EcoeChildResource
-
+from flask_potion.exceptions import BadRequest
+from flask_potion.exceptions import Conflict
+from app.shared import order_items, calculate_order
+from werkzeug.exceptions import Forbidden
+from app.model import db
 
 class StationResource(EcoeChildResource):
     schedules = Relation('schedules')
@@ -52,29 +58,33 @@ class StationResource(EcoeChildResource):
         children_stations = fields.ToMany('stations', nullable=True)
 
 
-def order_station(item, op='add'):
-    order_correction = 0
+def check_child_stations_order(station, order):
+    if(len(station.children_stations) > 0):
+        for child_station in station.children_stations:
+            if order >= child_station.order:
+                    return False
+    
+    return True
 
-    stations_ecoe = len(item.ecoe.stations)
-    if not item.order or item.order > stations_ecoe or item.order < 1:
-        item.order = stations_ecoe
-    else:
-        stations_ecoe = Station.query \
-            .filter(Station.id_ecoe == item.ecoe.id).filter(Station.order >= item.order) \
-            .filter(Station.id != item.id).order_by(Station.order).all()
-
-        if op == 'add':
-            order_correction = 1
-
-        for order, station_ecoe in enumerate(stations_ecoe):
-            station_ecoe.order = order + item.order + order_correction
-
+def check_parent_stations_order(station, order):
+    if station.parent_station is None:
+        return True
+    return order > station.parent_station.order 
 
 @signals.before_update.connect_via(StationResource)
 def before_update_station(sender, item, changes):
+    if 'name' in changes.keys():
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        for station in stations:
+            if changes['name'] == station.name:
+                raise BadRequest(description="El nombre de la estación ya existe")
     if 'order' in changes.keys():
-        item.order = changes['order']
-        order_station(item)
+        if not check_child_stations_order(item, changes['order']) or \
+            not check_parent_stations_order(item, changes['order']):
+            raise BadRequest(description="El orden de la estación padre debe ser menor que la de la subestación")
+
+        stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+        order_items(item, stations, changes['order'], 'add')
 
 
 # TODO: Review Create Station Order
@@ -85,10 +95,33 @@ def before_create_station(sender, item):
     if not item.user:
         item.user = current_user
 
+@signals.after_create.connect_via(StationResource)
+def after_create_station(sender, item):
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.id).all()
+    if len(stations) > 1:
+        calculate_order(stations)
+        for station in stations: db.session.add(station)
+        db.session.commit()       
 
 @signals.before_delete.connect_via(StationResource)
 def before_delete_station(sender, item):
-    order_station(item, 'del')
+    # Si tiene estaciones hijo no se puede borrar
+    stations = Station.query.filter(Station.id_ecoe == item.ecoe.id).order_by(Station.order).all()
+    for station in stations:
+        if station.id_parent_station == item.id:
+            raise Forbidden(description="No se ha podido borrar la estación debido a que es padre de otras estaciones")
+
+    blocks = Block.query.filter(Block.id_station == item.id).all()
+    for block in blocks:
+        BlockResource.manager.delete_by_id(block.id)
+
+@signals.after_delete.connect_via(StationResource)
+def after_delete_station(sender, item):
+    stations = Station.query.filter(Station.id_ecoe == item.id_ecoe).order_by(Station.order).all()
+    if len(stations) > 1:
+        calculate_order(stations)
+        for station in stations: db.session.add(station)
+        db.session.commit()
     
     
 @signals.before_create.connect_via(PermissionResource)

@@ -68,7 +68,7 @@
       "module": "flask",
       "envFile": "${workspaceFolder}/environments/dev.env",
       "env": {
-        "FLASK_APP": "manager:chrono",
+        "FLASK_APP": "openecoe-chrono.py",
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "1",
         "PYTHONPATH": "${workspaceFolder}"
@@ -125,9 +125,9 @@
       "request": "launch",
       "module": "flask",
       "env": { 
-        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_APP": "openecoe-api.py", 
         "FLASK_ENV": "development",
-        "FLASK_DEBUG": "0",
+        "FLASK_DEBUG": "1",
       },
       "args": ["db", "migrate"],
       "jinja": false,
@@ -140,14 +140,14 @@
       "request": "launch",
       "module": "flask",
       "env": { 
-        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_APP": "openecoe-api.py", 
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "0",
       },
       "args": ["db", "upgrade"],
       "jinja": false,
       "justMyCode": true,
-      "envFile": "${workspaceFolder}/environments/local.env",
+      "envFile": "${workspaceFolder}/environments/dev.env",
       "autoReload": {"enable": false}
     },
     {"name": "Downgrade DB",
@@ -155,7 +155,7 @@
       "request": "launch",
       "module": "flask",
       "env": { 
-        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_APP": "openecoe-api.py", 
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "0",
       },
@@ -170,7 +170,7 @@
       "request": "launch",
       "module": "flask",
       "env": { 
-        "FLASK_APP": "openECOE-API.py", 
+        "FLASK_APP": "openecoe-api.py", 
         "FLASK_ENV": "development",
         "FLASK_DEBUG": "0",
       },
@@ -179,6 +179,25 @@
       "justMyCode": true,
       "envFile": "${workspaceFolder}/environments/dev.env",
       "autoReload": {"enable": false}
-    }
+    },
+    {
+      "name": "Launch worker",
+      "type": "python",
+      "request": "launch",
+      "module": "flask",
+      "envFile": "${workspaceFolder}/environments/dev.env",
+      "env": {
+        "FLASK_APP": "openecoe-api.py",
+        "FLASK_ENV": "development",
+        "FLASK_DEBUG": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": [
+        "rq",
+        "worker"
+      ],
+      "jinja": false,
+      "justMyCode": true
+    },
   ]
 }

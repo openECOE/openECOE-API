@@ -41,6 +41,7 @@ def get_results_for_area_total(ecoe):
         #perc:: Percentil de la columna punt
         df_answer['perc'] = df_answer['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
 
+        df_answer['max_points'] = total_points
         return df_answer
     except Exception as err:
         for arg in err.args:
@@ -61,7 +62,7 @@ def resultados_evaluativo_ecoe(ecoe, datatype="dict") -> dict:
         
         if datatype == "dict":  
             df_final = df_final.loc[
-                :,['id_student','dni','name','surnames','points','absolute_score','relative_score','pos','med','perc']].rename(columns={'med':'median'}).round(values_to_round)
+                :,['id_student','dni','name','surnames','points','absolute_score','relative_score','pos','med','perc', 'max_points']].rename(columns={'med':'median'}).round(values_to_round)
 
             dd = defaultdict(list)
             return  df_final.to_dict('records',into=dd)

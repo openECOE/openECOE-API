@@ -1,8 +1,17 @@
 from . import socketio, chrono_app
+from enum import Enum
 import json
 import os
 
+class Status(Enum):
+    CREATED = 1
+    RUNNING = 2
+    PAUSED = 3
+    FINISHED = 4
+    ABORTED = 5
 
+    def __format__(self, spec):
+        return f'{self.name}'
 
 class Manager:
     path = '/tmp/'
@@ -112,6 +121,7 @@ class ECOE:
 
         self.id = ecoe_config['id']
         self.name = ecoe_config['name']
+        self.organization = ecoe_config['organization']
         self.time_start = ecoe_config['time_start']
         self.tfc = config['tfc']
         self.rounds = []
@@ -120,28 +130,24 @@ class ECOE:
             self.rounds.append(Round(r['id'], config['schedules'], config['reruns']))
 
 class Round:
-    CREATED = 0
-    RUNNING = 1
-    ABORTED = 2
-
     def __init__(self, id, schedules, num_reruns):
         self.id = id
         self.namespace = '/round%d' % id
         self.chrono = Chrono(id, self.namespace)
         self.schedules = schedules
         self.num_reruns = num_reruns
-        self.state = Round.CREATED
+        self.state = Status.CREATED
 
     def abort(self):
-        self.state = Round.ABORTED
+        self.state = Status.ABORTED
 
     def is_aborted(self):
-        return self.state == Round.ABORTED
+        return self.state == Status.ABORTED
 
     def dump(self, current_rerun, current_idx_schedule):
 
         status = {
-            'state': self.state,
+            'state': f"{self.state}",
             'current_rerun': current_rerun,
             'current_idx_schedule': current_idx_schedule
         }
@@ -153,7 +159,7 @@ class Round:
     def status_filename(self):
         return '/tmp/round.%d.status' % self.id
 
-    def start(self, state=RUNNING, current_rerun=1, idx_schedule=0):
+    def start(self, state=Status.RUNNING, current_rerun=1, idx_schedule=0):
 
         self.state = state
 
@@ -178,31 +184,29 @@ class Round:
             idx_schedule = 0
 
             if self.is_aborted():
-                socketio.emit('aborted', {}, namespace=self.namespace)
+                socketio.emit('aborted', {'id': self.id}, namespace=self.namespace)
                 break
 
         if not self.is_aborted():
-            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id}, namespace=self.namespace)
+            socketio.emit('end_round', {'data': 'Fin rueda %s' % self.id, 'id': self.id}, namespace=self.namespace)
+            if self.chrono.loop:
+                self.start()
 
         Manager.delete_file(self.status_filename)
 
 
 class Chrono:
-    CREATED = 0
-    RUNNING = 1
-    PAUSED = 2
-    FINISHED = 3
-
     def __init__(self, id, namespace, minutes=0, seconds=0):
         self.id = id
         self.namespace = namespace
         self.minutes = minutes
         self.seconds = seconds
-        self.state = Chrono.CREATED
+        self.state = Status.CREATED
+        self.loop = False
 
     def reset(self):
 
-        self.state = Chrono.CREATED
+        self.state = Status.CREATED
         self.minutes = 0
         self.seconds = 0
 
@@ -211,7 +215,7 @@ class Chrono:
         status = {
             'minutes': self.minutes,
             'seconds': self.seconds,
-            'state': self.state
+            'state': f"{self.state}"
         }
 
         with open(self.status_filename, 'w') as f:
@@ -230,7 +234,10 @@ class Chrono:
             'stopped': 'S' if self.is_paused() else 'N',
             'num_rerun': current_rerun,
             'total_reruns': total_reruns,
-            'stage': schedule
+            'stage': schedule,
+            'id': self.id,
+            'state': f"{self.state}",
+            'loop': self.loop
         }
 
     def play(self, schedule, current_rerun, total_reruns):
@@ -239,14 +246,14 @@ class Chrono:
         events = schedule['events']
         stage_name = schedule['name']
 
-        if self.state == Chrono.CREATED:
+        if self.state == Status.CREATED:
             self.activate()
 
         start_second = self.minutes * 60 + self.seconds
 
         for t in range(start_second, duration + 1):
 
-            if self.state == Chrono.FINISHED:
+            if self.state ==Status.FINISHED:
                 break
 
             if t % 60 == 0 and self.seconds == 59:
@@ -261,6 +268,7 @@ class Chrono:
             self.dump()
 
             while self.is_paused():
+                tic_tac = self._create_tic_tac_dict(t, current_rerun, total_reruns, schedule)
                 socketio.emit('tic_tac', tic_tac, namespace=self.namespace)
                 socketio.sleep(0.5)
 
@@ -285,14 +293,14 @@ class Chrono:
             socketio.sleep(1)
 
     def activate(self):
-        self.state = Chrono.RUNNING
+        self.state = Status.RUNNING
 
     def stop(self):
-        self.state = Chrono.FINISHED
+        self.state = Status.FINISHED
         Manager.delete_file(self.status_filename)
 
     def pause(self):
-        self.state = Chrono.PAUSED
+        self.state = Status.PAUSED
 
     def is_paused(self):
-        return self.state == Chrono.PAUSED
+        return self.state == Status.PAUSED

@@ -155,6 +155,35 @@ def get_configurations(ecoe_id=None):
 
     return json.dumps(configs), 200
 
+@chrono_app.route('/loop/<int:ecoe_id>', methods=['POST'])
+@requires_tfc
+def play_chrono_on_loop(ecoe_id=None):
+    ecoe = Manager.find_ecoe(ecoe_id)
+    if ecoe is None:
+        return 'ECOE %d not found' % ecoe_id, 404
+    
+    body = request.get_json()
+    if 'loop' not in body:
+        return 'Request body error', 500
+    
+    loop = body['loop']
+
+    for e_round in ecoe.rounds:
+        e_round.chrono.loop = loop
+    
+    return 'OK', 200
+
+@chrono_app.route('/rounds-status/<int:ecoe_id>')
+def get_status(ecoe_id=None):
+    ecoe = Manager.find_ecoe(ecoe_id)
+    if ecoe is None:
+        return 'ECOE %d not found' % ecoe_id, 404
+
+    status = {}
+    for e_round in ecoe.rounds:
+        status[str(e_round.id)] = f"{e_round.chrono.state}"
+
+    return json.dumps(status), 200
 
 ###############################
 
