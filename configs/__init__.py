@@ -19,6 +19,8 @@ from ast import literal_eval
 
 from dotenv import load_dotenv
 
+import urllib.parse
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -97,8 +99,8 @@ class BaseConfig:
     OPENECOE_REDIS_HOST = os.environ.get("OPENECOE_REDIS_HOST")
     OPENECOE_REDIS_PORT = os.environ.get("OPENECOE_REDIS_PORT")
     OPENECOE_REDIS_DB = os.environ.get("OPENECOE_REDIS_DB")
-    OPENECOE_REDIS_USER = os.environ.get("OPENECOE_REDIS_USER")
-    OPENECOE_REDIS_PASSWORD = os.environ.get("OPENECOE_REDIS_PASSWORD") or None
+    OPENECOE_REDIS_USER = urllib.parse.quote(os.environ.get("OPENECOE_REDIS_USER"))
+    OPENECOE_REDIS_PASSWORD = urllib.parse.quote(os.environ.get("OPENECOE_REDIS_PASSWORD")) or None
     OPENECOE_REDIS_TLS = literal_eval(os.environ.get("OPENECOE_REDIS_TLS"))
 
     REDIS_URL_SCHEMA = "rediss" if OPENECOE_REDIS_TLS else "redis"
