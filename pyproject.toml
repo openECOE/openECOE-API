@@ -5,9 +5,6 @@ description = ""
 authors = ["Alberto Moreno <amoreno@umh.es>"]
 readme = "README.md"
 
-[tool.poetry.requires-plugins]
-poetry-plugin-export = ">=1.8"
-
 [tool.poetry.dependencies]
 python = "^3.8"
 alembic = "1.8.1"
