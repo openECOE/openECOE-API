@@ -21,8 +21,10 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 ### Variables de entorno para la conexión con el servidor de Redis
 * OPENECOE_REDIS_HOST: Dirección del servidor de Redis
 * OPENECOE_REDIS_PORT: Puerto del servidor de Redis
+* OPENECOE_REDIS_USER: Usuario del servidor de Redis
 * OPENECOE_REDIS_PASSWORD: Contraseña del servidor de Redis
 * OPENECOE_REDIS_DB: Base de datos de servidor de Redis
+* OPENECOE_REIDS_TLS: Si se activa, se activa el protocolo TLS (True o False)
 
 ### Variables de entorno adicionales
 * BCRYPT_LOG_ROUNDS: Número de rondas de encriptación de la contraseña
