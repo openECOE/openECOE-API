@@ -24,7 +24,7 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 * OPENECOE_REDIS_USER: Usuario del servidor de Redis
 * OPENECOE_REDIS_PASSWORD: Contraseña del servidor de Redis
 * OPENECOE_REDIS_DB: Base de datos de servidor de Redis
-* OPENECOE_REIDS_TLS: Si se activa, se activa el protocolo TLS (True o False)
+* OPENECOE_REDIS_TLS: Si se activa, se activa el protocolo TLS (True o False)
 
 ### Variables de entorno adicionales
 * BCRYPT_LOG_ROUNDS: Número de rondas de encriptación de la contraseña
