@@ -19,6 +19,8 @@ from ast import literal_eval
 
 from dotenv import load_dotenv
 
+import urllib.parse
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 
@@ -36,6 +38,10 @@ os.environ.setdefault("OPENECOE_DB_PARAMS", "")
 os.environ.setdefault("OPENECOE_REDIS_HOST", "redis")
 os.environ.setdefault("OPENECOE_REDIS_PORT", "6379")
 os.environ.setdefault("OPENECOE_REDIS_DB", "0")
+os.environ.setdefault("OPENECOE_REDIS_DB", "0")
+os.environ.setdefault("OPENECOE_REDIS_USER", "")
+os.environ.setdefault("OPENECOE_REDIS_PASSWORD", "")
+os.environ.setdefault("OPENECOE_REDIS_TLS", "False")
 
 os.environ.setdefault("SERVER_NAME", "localhost")
 
@@ -92,12 +98,20 @@ class BaseConfig:
     """Redis configuration"""
     OPENECOE_REDIS_HOST = os.environ.get("OPENECOE_REDIS_HOST")
     OPENECOE_REDIS_PORT = os.environ.get("OPENECOE_REDIS_PORT")
-    OPENECOE_REDIS_DB = os.environ.get("OPENECOE_REDIS_DB") 
+    OPENECOE_REDIS_DB = os.environ.get("OPENECOE_REDIS_DB")
+    OPENECOE_REDIS_USER = urllib.parse.quote(os.environ.get("OPENECOE_REDIS_USER"))
+    OPENECOE_REDIS_PASSWORD = urllib.parse.quote(os.environ.get("OPENECOE_REDIS_PASSWORD")) or None
+    OPENECOE_REDIS_TLS = literal_eval(os.environ.get("OPENECOE_REDIS_TLS"))
+
+    REDIS_URL_SCHEMA = "rediss" if OPENECOE_REDIS_TLS else "redis"
     
-    RQ_REDIS_URL = f"redis://{OPENECOE_REDIS_HOST}:{OPENECOE_REDIS_PORT}/{OPENECOE_REDIS_DB}"
+    if OPENECOE_REDIS_PASSWORD:
+        RQ_REDIS_URL = f"{REDIS_URL_SCHEMA}://{OPENECOE_REDIS_USER}:{OPENECOE_REDIS_PASSWORD}@{OPENECOE_REDIS_HOST}:{OPENECOE_REDIS_PORT}/{OPENECOE_REDIS_DB}"
+    else:
+        RQ_REDIS_URL = f"{REDIS_URL_SCHEMA}://{OPENECOE_REDIS_HOST}:{OPENECOE_REDIS_PORT}/{OPENECOE_REDIS_DB}"
+
     RQ_DEFAULT_QUEUE = "openecoe_jobs"
     RQ_QUEUES = ["openecoe_jobs"]
-
 
 class TestConfig(BaseConfig):
     """Test configuration"""
