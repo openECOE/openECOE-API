@@ -42,7 +42,7 @@ class OrganizationResource(OpenECOEResource):
         natural_key = 'name'
 
         permissions = {
-            'read': ['__anonymous__','update', 'read'],
+            'read': 'anybody',
             'create': 'delete',
             'update': ['manage', 'delete'],
             'delete': RoleType.SUPERADMIN,
