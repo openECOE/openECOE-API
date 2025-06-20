@@ -33,7 +33,7 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
+from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data, get_students_planners
 from app.statistics.variables import get_variables
 import tempfile
 
@@ -537,6 +537,15 @@ class EcoeResource(OpenECOEResource):
         
         return 'OK', 200
 
+    @ItemRoute.GET("/export/planners")
+    def export_planners(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
+
+        planners_df = get_students_planners(ecoe.id)
+        return planners_df.to_csv
+    
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
 def before_create_ecoe(sender, item):
