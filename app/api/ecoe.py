@@ -544,7 +544,7 @@ class EcoeResource(OpenECOEResource):
             raise Forbidden
 
         planners_df = get_students_planners(ecoe.id)
-        return planners_df.to_csv
+        return planners_df.to_excel("PlanificadorAlumnos.xlsx")
     
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
