@@ -543,8 +543,12 @@ class EcoeResource(OpenECOEResource):
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden
 
+        archive_route = os.path.join(os.path.dirname(current_app.instance_path), current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
+        file_name = f"PlanificadorAlumnos_ecoe_{ecoe.id}.xlsx"
+        file_path =  os.path.join(archive_route, file_name)
         planners_df = get_students_planners(ecoe.id)
-        return planners_df.to_excel("PlanificadorAlumnos.xlsx")
+
+        return planners_df.to_excel(file_path)
     
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
