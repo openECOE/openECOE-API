@@ -35,6 +35,7 @@ import os
 from flask import send_file, current_app, request
 from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data, get_students_planners
 from app.statistics.variables import get_variables
+from app.statistics.import_planners import get_student_rows_number, get_shift_rows_number, get_round_rows_number, get_assigned_planners_rows_number, set_student_in_planner, add_planner, bulk_import_planners
 import tempfile
 
 class Location(int, Enum):
@@ -563,6 +564,68 @@ class EcoeResource(OpenECOEResource):
         return send_file(filename_or_fp = fichero_temporal,
                                 attachment_filename=file_name,
                                 as_attachment=True)
+    # Importing XLSX file data in order to add planners to DB
+    @ItemRoute.POST("/import/planners")
+    def import_planners(self, ecoe):
+        # print("Has llamado a la función import_planners")
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden("No tienes permisos para gestionar este elemento.")
+
+        file = request.files.get("file")
+        if not file:
+            raise BadRequest(description = "No se ha recibido archivo")
+        import pandas as pd    
+        try:
+            df = pd.read_excel(file, engine="openpyxl")
+            required_columns = {"dni", "shift_code", "round_code", "id_planner", "planner_order"}
+            if not required_columns.issubset(df.columns):
+                missing_cols = required_columns - set(df.columns)
+                raise BadRequest(f"Columnas requeridas faltantes: {', '.join(missing_cols)}")
+        except Exception as e:
+            raise BadRequest(f"Error al leer el archivo Excel: {e}")
+    
+        planners_to_import = []
+        errors = []
+        n_rows_students=0
+        n_rows_shift=0
+        n_rows_round=0
+        n_assigned_planner=0
+
+        for index, row in df.iterrows():
+            try:
+                xlsx_data={
+                    "shift_code": row["shift_code"],
+                    "time_start": row["time_start"], # Idealmente, aquí se valida y convierte el formato de hora
+                    "round_code": row["round_code"],
+                    "name": row["name"],
+                    "surnames": row["surnames"],
+                    "dni": str(row["dni"]), # Convertimos a string para asegurar consistencia
+                    "id_planner": int(row["id_planner"]), # Validamos que sea un entero
+                    "planner_order": int(row["planner_order"]) # Validamos que sea un entero
+                }
+
+                # print(f"SHIFT: {xlsx_data['shift_code']} ROUND: {xlsx_data['round_code']} DNI: {xlsx_data['dni']}")
+
+                if not all([xlsx_data["name"], xlsx_data["shift_code"], xlsx_data["round_code"], xlsx_data["id_planner"], xlsx_data["planner_order"]]):
+                    raise ValueError("Las columnas 'name', 'surnames' y 'dni' no pueden estar vacías.")
+
+                n_rows_students=get_student_rows_number (xlsx_data["dni"],ecoe.id)
+                n_rows_shift=get_shift_rows_number (xlsx_data["shift_code"], ecoe.id)
+                n_rows_round=get_round_rows_number (xlsx_data["round_code"], ecoe.id)
+
+                n_assigned_planner=get_assigned_planners_rows_number(xlsx_data["id_planner"], xlsx_data["planner_order"], ecoe.id)
+
+                if n_rows_students>0 and n_rows_shift>0 and n_rows_round>0 and n_assigned_planner==0:
+                    planners_to_import.append(xlsx_data)
+            except (KeyError, ValueError, TypeError) as e:
+            # Agregamos el error a una lista para informar al usuario al final
+                errors.append(f"Error en la fila {index + 2}: {e}") # +2 porque la indexación es 0 y la fila 1 es la cabecera
+
+        bulk_import_planners(ecoe, planners_to_import)
+
+        return "OK", 200
+       
     
 # Add permissions to manage to creator
 @signals.before_create.connect_via(EcoeResource)
