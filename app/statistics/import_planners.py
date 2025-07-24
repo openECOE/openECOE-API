@@ -96,71 +96,61 @@ def add_planner(ecoe_id: int,id_planner: int, id_shift: int, id_round: int) -> p
     return df
 
 def bulk_import_planners(self, planners_to_import: list[dict]):
-        """
-        Crea nuevos estudiantes y los asocia a planificadores de forma masiva.
-        Si un planificador (combinación de turno y ronda) no existe, lo crea.
-        La operación es atómica: o todos se crean o no se crea ninguno.
+    """
+    Crea nuevos estudiantes y los asocia a planificadores de forma masiva.
+    Si un planificador (combinación de turno y ronda) no existe, lo crea.
+    La operación es atómica: o todos se crean o no se crea ninguno.
 
-        :param planners_to_import: Lista de diccionarios validados.
-        """
+    :param planners_to_import: Lista de diccionarios validados.
+    """
+    if not planners_to_import:
+        return
 
-        # print ("Has entrado en bulk_import_planners()")
-        if not planners_to_import:
-            return
+    try:
+        # 1. PRE-CARGA de datos relevantes
+        planner_ids = {p['id_planner'] for p in planners_to_import}
+        shift_codes = {p['shift_code'] for p in planners_to_import}
+        round_codes = {p['round_code'] for p in planners_to_import}
+        student_dnis = {p['dni'] for p in planners_to_import}
 
-        try:
-            # 1. PRE-CARGA: Para evitar consultas en el bucle (muy eficiente).
-            # Obtenemos todos los turnos y rondas necesarios en una sola consulta.
-            planner_ids= {p['id_planner'] for p in planners_to_import}
-            shift_codes = {p['shift_code'] for p in planners_to_import}
-            round_codes = {p['round_code'] for p in planners_to_import}
-            student_dnis = {p['dni'] for p in planners_to_import}
-            
-            planner_map = {p.id: p for p in db.session.query(Planner).filter(Planner.id.in_(planner_ids))}
-            shifts_map = {s.shift_code: s for s in db.session.query(Shift).filter(Shift.shift_code.in_(shift_codes))}
-            rounds_map = {r.round_code: r for r in db.session.query(Round).filter(Round.round_code.in_(round_codes))}
-            students_map = {st.dni: st for st in db.session.query(Student).filter(Student.dni.in_(student_dnis))}
+        # Mapeamos por shift_code y round_code (¡no por ID!)
+        shifts_map = {s.shift_code: s for s in db.session.query(Shift).filter(Shift.shift_code.in_(shift_codes))}
+        rounds_map = {r.round_code: r for r in db.session.query(Round).filter(Round.round_code.in_(round_codes))}
+        students_map = {st.dni: st for st in db.session.query(Student).filter(Student.dni.in_(student_dnis))}
 
-            # Obtenemos los planificadores que ya existen para este ECOE y los mapeamos.
-            # La clave será una tupla (id_shift, id_round) para una búsqueda rápida.
-            existing_planners = db.session.query(Planner).filter(Planner.id == self.id).all()
-            planners_map = {(p.id_shift, p.id_round): p for p in existing_planners}
+        # Mapeo de planificadores existentes (clave: (id_shift, id_round))
+        existing_planners = db.session.query(Planner).all()
+        planners_map = {(p.id_shift, p.id_round): p for p in existing_planners}
 
-            # 2. CREACIÓN DE OBJETOS EN MEMORIA
-            for data in planners_to_import:
-                shift_obj = shifts_map.get(data['shift_code'])
-                round_obj = rounds_map.get(data['round_code'])
-                planner_obj = planners_map.get(data['id_planner'])
+        # 2. CREACIÓN EN MEMORIA
+        for data in planners_to_import:
+            shift_obj = shifts_map.get(data['shift_code'])
+            round_obj = rounds_map.get(data['round_code'])
 
-                # Si no encontramos el turno o la ronda, algo falló en la validación previa.
-                if not shift_obj or not round_obj:
-                    raise ValueError(f"No se encontró el turno '{data['shift_code']}' o la ronda '{data['round_code']}'")
-                    return
+            if not shift_obj or not round_obj:
+                raise ValueError(f"No se encontró el turno '{data['shift_code']}' o la ronda '{data['round_code']}'")
 
-                # Buscamos si el planificador ya existe.
-                planner = planners_map.get((planner_obj, shift_obj, round_obj))
+            planner = planners_map.get((shift_obj.id, round_obj.id))
 
-                # Si no existe, lo creamos en memoria y lo añadimos al mapa.
-                if not planner:
-                    planner = Planner(
-                        id=planner_obj,
-                        id_shift=shift_obj,
-                        id_round=round_obj
-                    )
-                    db.session.add(planner) # El ORM lo añadirá a la transacción.
-                    planners_map[(planner_obj, shift_obj, round_obj)] = planner
+            if not planner:
+                planner = Planner(
+                    id=data['id_planner'],  # Intentamos usar el ID propuesto si no existe
+                    id_shift=shift_obj.id,
+                    id_round=round_obj.id
+                )
+                db.session.add(planner)
+                planners_map[(shift_obj.id, round_obj.id)] = planner
 
-                student=db.session.query(Student).filter(
-                    Student.dni == data['dni']
-                ).first()
-                student.id_planner=data['id_planner']
-                student.planner_order=data['planner_order']
+            student = students_map.get(data['dni'])
+            if not student:
+                raise ValueError(f"No se encontró ningún estudiante con DNI '{data['dni']}'")
 
-            # 3. COMMIT: Guardamos todos los cambios en la base de datos de una sola vez.
-            db.session.commit()
+            student.id_planner = planner.id
+            student.planner_order = data['planner_order']
 
-        except Exception as e:
-            # 4. ROLLBACK: Si algo falla, revertimos todos los cambios.
-            db.session.rollback()
-            # Propagamos la excepción para que la ruta la capture y devuelva un error 500.
-            raise e
+        # 3. COMMIT
+        db.session.commit()
+
+    except Exception as e:
+        db.session.rollback()
+        raise e
