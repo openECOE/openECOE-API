@@ -101,12 +101,11 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
 
     try:
         # 1. PRE-CARGA de datos relevantes
-        planner_ids = {p['id_planner'] for p in planners_to_import}
         shift_codes = {p['shift_code'] for p in planners_to_import}
         round_codes = {p['round_code'] for p in planners_to_import}
         student_dnis = {p['dni'] for p in planners_to_import}
 
-        # Mapeamos por shift_code y round_code (¡no por ID!)
+        # Mapeamos por shift_code y round_code
         shifts_map = {s.shift_code: s for s in db.session.query(Shift).filter(Shift.shift_code.in_(shift_codes))}
         rounds_map = {r.round_code: r for r in db.session.query(Round).filter(Round.round_code.in_(round_codes))}
         students_map = {st.dni: st for st in db.session.query(Student).filter(Student.dni.in_(student_dnis))}
@@ -114,6 +113,12 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
         # Mapeo de planificadores existentes (clave: (id_shift, id_round))
         existing_planners = db.session.query(Planner).all()
         planners_map = {(p.id_shift, p.id_round): p for p in existing_planners}
+        
+        existing_ids = {
+            planner.id for planner in db.session.query(Planner.id).filter(
+                Planner.id.in_({p['id_planner'] for p in planners_to_import})
+            )
+        }
 
         # 2. CREACIÓN EN MEMORIA
         for data in planners_to_import:
@@ -125,12 +130,19 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
 
             planner = planners_map.get((shift_obj.id, round_obj.id))
 
+
             if not planner:
-                planner = Planner(
-                    id=data['id_planner'],  # Intentamos usar el ID propuesto si no existe
-                    id_shift=shift_obj.id,
-                    id_round=round_obj.id
-                )
+                if data['id_planner'] not in existing_ids:
+                    planner = Planner(
+                        id=data['id_planner'],  # Intentamos usar el ID propuesto si no existe
+                        id_shift=shift_obj.id,
+                        id_round=round_obj.id
+                    )
+                else:
+                    planner = Planner(
+                        id_shift=shift_obj.id,
+                        id_round=round_obj.id
+                    )
                 db.session.add(planner)
                 planners_map[(shift_obj.id, round_obj.id)] = planner
 
