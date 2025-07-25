@@ -574,7 +574,9 @@ class EcoeResource(OpenECOEResource):
 
         file = request.files.get("file")
         if not file:
-            raise BadRequest(description = "No se ha recibido archivo")
+            request.files['file']
+            if not file:
+                raise BadRequest(description = "No se ha recibido archivo")
         import pandas as pd    
         try:
             df = pd.read_excel(file, engine="openpyxl")

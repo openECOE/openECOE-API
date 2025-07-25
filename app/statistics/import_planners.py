@@ -96,13 +96,6 @@ def add_planner(ecoe_id: int,id_planner: int, id_shift: int, id_round: int) -> p
     return df
 
 def bulk_import_planners(self, planners_to_import: list[dict]):
-    """
-    Crea nuevos estudiantes y los asocia a planificadores de forma masiva.
-    Si un planificador (combinación de turno y ronda) no existe, lo crea.
-    La operación es atómica: o todos se crean o no se crea ninguno.
-
-    :param planners_to_import: Lista de diccionarios validados.
-    """
     if not planners_to_import:
         return
 
