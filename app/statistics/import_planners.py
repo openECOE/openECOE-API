@@ -100,7 +100,7 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
         return
 
     try:
-        # 1. PRE-CARGA de datos relevantes
+        # PRE-CARGA de datos relevantes
         shift_codes = {p['shift_code'] for p in planners_to_import}
         round_codes = {p['round_code'] for p in planners_to_import}
         student_dnis = {p['dni'] for p in planners_to_import}
@@ -120,7 +120,7 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
             )
         }
 
-        # 2. CREACIÓN EN MEMORIA
+        # CREACIÓN EN MEMORIA
         for data in planners_to_import:
             shift_obj = shifts_map.get(data['shift_code'])
             round_obj = rounds_map.get(data['round_code'])
@@ -153,7 +153,6 @@ def bulk_import_planners(self, planners_to_import: list[dict]):
             student.id_planner = planner.id
             student.planner_order = data['planner_order']
 
-        # 3. COMMIT
         db.session.commit()
 
     except Exception as e:
