@@ -538,7 +538,7 @@ class EcoeResource(OpenECOEResource):
         
         return 'OK', 200
 
-    @ItemRoute.GET("/export/planners")
+    @ItemRoute.GET("/planners/export")
     def export_planners(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
@@ -565,7 +565,7 @@ class EcoeResource(OpenECOEResource):
                                 attachment_filename=file_name,
                                 as_attachment=True)
     # Importing XLSX file data in order to add planners to DB
-    @ItemRoute.POST("/import/planners")
+    @ItemRoute.POST("/planners/import")
     def import_planners(self, ecoe):
         # print("Has llamado a la función import_planners")
         object_permissions = self.manager.get_permissions_for_item(ecoe)
