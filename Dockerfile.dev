@@ -1,0 +1,52 @@
+FROM python:3.9-bullseye as dev
+
+WORKDIR /app/api
+
+# Actualizar repositorios y dependencias del sistema
+RUN apt-get update && apt-get install -y \
+    python3-pip python3-venv vim build-essential gcc g++ \
+    libffi-dev libssl-dev libxml2-dev libxslt1-dev zlib1g-dev \
+    libpcre3-dev curl git apt-transport-https ca-certificates \
+    default-mysql-client \
+    && python3 -m pip install --upgrade pip wheel \
+    && pip install poetry==1.7 \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar dependencias y generar requirements
+COPY poetry.lock pyproject.toml ./
+RUN poetry export --format=requirements.txt --output=requirements.txt --with chrono --with api --without-hashes
+
+# Crear entorno virtual
+RUN python3 -m venv env
+ENV PATH=/app/api/env/bin:$PATH
+
+# Instalar dependencias de Python
+RUN pip install --no-cache -r requirements.txt
+
+# Copiar código (sobrescribible con volumen en dev)
+COPY . /app/api
+
+# Variables de entorno para desarrollo
+ENV FLASK_APP=openecoe-api.py
+ENV FLASK_ENV=development
+ENV FLASK_DEBUG=1
+ENV PYTHONUNBUFFERED=1
+
+# Scripts alembic y creacion de usuarios
+COPY .docker/deploy/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+# Scripts seed insertamos datos por defecto en db
+COPY seed.py /app/api/seed.py
+RUN chmod +x /app/api/seed.py
+
+
+## COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
+COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
+RUN chmod +x /docker-entrypoint.d/90-first-run.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+
+EXPOSE 5000
+
+#CMD ["flask", "run", "--host=0.0.0.0", "--port=5000"]

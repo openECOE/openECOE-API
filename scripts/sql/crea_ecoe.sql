@@ -1,0 +1,28 @@
+-- SELECT * FROM openECOE_dev.ecoe where id_organization = 2;
+-- Creamos ECOE id = 37
+-- INSERT INTO ecoe (name, id_organization, id_coordinator, status, chrono_token, description, id_job_reports, id_job_csv) VALUES ('ECOE2023', 2, 2, 'DRAFT', NULL, 'Descripción del ECOE', NULL, NULL);
+-- Borramos ECOE
+-- DELETE FROM ecoe WHERE name = 'ECOE2023'   AND id_organization = 2   AND id_coordinator = 2   AND status = 'DRAFT'   AND chrono_token IS NULL   AND description = 'Descripción del ECOE'  AND id_job_reports IS NULL   AND id_job_csv IS NULL;
+-- Creamos AREAS id = 95
+-- INSERT INTO area (name, id_ecoe, code, weith) VALUES ('ANAMNESIS', 37, 'ANAMNESIS', 100);
+-- Creamos Estaciones id 86
+-- INSERT INTO station (name, id_ecoe, `order`, id_parent_station, id_manager) VALUES ('Estación_1', 37, 1, NULL, 1);
+-- Creamos bloques de preguntas para esa estación id= 207
+-- INSERT INTO block (id_station, name, `order`) VALUES (86, 'Bloque A', 1);
+-- creamos preguntas para el bloque 207, la question id es 853
+-- INSERT INTO question (id_area, `order`, id_block, id_station, question_schema, max_points) VALUES (95, 1, 207, 86, '{"type":"radio","reference":"reference name 1","description":"¿Se identifica y se muestra atento y cordial con el paciente?","options":[{"id_option":1,"points":1,"label":"Sí","order":1}]}', 1.00);
+-- Crear cronometros, Añadir fase o stage: id_stage = 11
+-- INSERT INTO stage (duration, `order`, name, id_ecoe) VALUES (420, 1, 'Inicio', 37);
+-- Creamos schedule:
+-- INSERT INTO schedule (id_ecoe, id_stage, id_station) VALUES (37, 11, NULL);
+-- Añadirmos eventos por defecto id_schedule = 14, id_event = 30
+-- INSERT INTO event (`time`, sound, text, id_schedule, is_countdown) VALUES (60, 'beep.mp3', 'Inicio de estación', 14, 0);
+-- Creamos estudiante
+-- INSERT INTO student (name, surnames, dni, id_ecoe, id_planner, planner_order) VALUES ('Alumno1', 'ApellidoAlumno1 ApelidoAlumno1', '12345678A', 37, NULL, NULL);
+-- Creamos ronda / round id round = 6
+-- INSERT INTO round (id_ecoe, round_code, description) VALUES (37, 'Ronda1', 'Ronda de evaluación del ECOE');
+-- Creamos turno / shift id_shift 13
+-- INSERT INTO shift (id_ecoe, shift_code, time_start) VALUES (37, 'TURNO-MAÑANA-1', '2025-12-09 08:00:00');
+-- INSERT INTO planner (id_shift, id_round) VALUES (13, 6);
+-- Insertar respuesta de alumno id 715
+-- INSERT INTO answer (id_student, id_question, answer_schema, points, id_station) VALUES (715, 853, '{"type":"radio","selected":{"id_option":1,"points":1,"label":"Sí","order":1}}', 1, 86); 

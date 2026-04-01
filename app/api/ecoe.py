@@ -33,9 +33,11 @@ from app.model.ECOE import ECOE, ChronoNotFound, ECOEstatus
 from app.model.User import PermissionType
 import os
 from flask import send_file, current_app, request
-from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data
+from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, get_items_score, get_questions_data, results_by_area
 from app.statistics.variables import get_variables
 import tempfile
+
+
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -306,7 +308,46 @@ class EcoeResource(OpenECOEResource):
         dd = defaultdict(list)
         cadena = dataFrame.to_dict('records',into=dd)
         return cadena   
+    #SCT Calcula las notas teniendo en cuenta los pesos            
+    @ItemRoute.GET("/results-areas", rel='results_by_area')
+    def send_results_for_area(self, ecoe):
+        object_permissions = self.manager.get_permissions_for_item(ecoe)
+        if "manage" in object_permissions and object_permissions["manage"] is not True:
+            raise Forbidden
 
+        from collections import defaultdict
+        id_ecoe = str(ecoe.id)
+        df_total = results_by_area(id_ecoe)  # ya devuelve todas las áreas combinadas
+
+        # Creamos lista final de diccionarios
+        results_list = []
+
+        for _, row in df_total.iterrows():
+            student_dict = {
+                "id_student": row["id_student"],
+                "nota_global": row["nota_global"],
+                "areas": {}
+            }
+
+            # Iteramos sobre todas las columnas para extraer métricas de cada área
+            for col in df_total.columns:
+                if col.startswith("punt_"):
+                    area_name = col.replace("punt_", "")
+                    student_dict["areas"][area_name] = {
+                        "punt": row.get(f"punt_{area_name}", 0),
+                        "pos": row.get(f"pos_{area_name}", 0),
+                        "med": row.get(f"med_{area_name}", 0),
+                        "perc": row.get(f"perc_{area_name}", 0),
+                        "weith": row.get(f"weith_{area_name}", 0),
+                        "points": row.get(f"points_{area_name}", 0),
+                        "max_points": row.get(f"maxpoints_{area_name}", 0)
+                    }
+
+            results_list.append(student_dict)
+
+        return results_list
+
+            
     @ItemRoute.GET("/results/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):
         object_permissions = self.manager.get_permissions_for_item(ecoe)

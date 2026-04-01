@@ -1,9 +1,10 @@
-#FROM python:3.9 as base
-FROM nginx:1.24 as base
+#FROM python:3.9 AS base
+FROM nginx:1.24 AS base
 RUN apt-get update && \
-    apt-get install -y python3-pip python3-venv wkhtmltopdf && \
+    apt-get install -y python3-pip python3-venv wkhtmltopdf build-essential libssl-dev libffi-dev python3-dev && \
     python3 -m pip install --upgrade pip && \
-    pip3 install wheel
+    pip3 install wheel && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pip install poetry==1.7
 
@@ -27,15 +28,19 @@ ENV FLASK_APP=openecoe-api.py
 
 ENV ALEMBIC_UPGRADE=DO
 
-FROM base as prod
+#FROM base AS prod
+FROM base AS prod
 # Nginx config
 COPY .docker/deploy/api.conf /etc/nginx/conf.d/default.conf
-ENV FLASK_ENV = production
-ENV FLASK_DEBUG = 0
+ENV FLASK_ENV=production
+ENV FLASK_DEBUG=0
 
 # Pre Start Nginx Scripts
 COPY .docker/deploy/alembic.sh /docker-entrypoint.d/80-alembic.sh
 COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
 COPY .docker/deploy/gunicorn.sh /docker-entrypoint.d/99-gunicorn.sh
+
+# Ensure entrypoint scripts are executable so they run when container starts
+RUN chmod +x /docker-entrypoint.d/*.sh
 
 EXPOSE 8081

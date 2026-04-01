@@ -32,3 +32,7 @@ class AreaResource(EcoeChildResource):
 
     class Schema:
         ecoe = fields.ToOne("ecoes")
+        # SCT
+        """ name = fields.String(required=True)
+        code = fields.String(required=True)
+        weith = fields.Integer(required=True, default=0, min=0, max=100)   """

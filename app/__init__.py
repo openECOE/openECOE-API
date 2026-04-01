@@ -22,6 +22,8 @@ import click
 from flask import Flask, current_app
 from flask_cors import CORS
 
+
+
 from configs import BaseConfig
 
 flask_app = Flask(__name__)

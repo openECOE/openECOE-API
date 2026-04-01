@@ -1,6 +1,6 @@
 from decimal import Decimal
-from flask import json
-
+#from flask import json
+import json  # Cambiamos 'from flask import json' por esto
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):
         if isinstance(o, Decimal):

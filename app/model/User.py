@@ -36,6 +36,7 @@ class User(UserMixin, db.Model):
     registered_on = db.Column(db.DateTime)
     name = db.Column(db.String(255))
     surname = db.Column(db.String(255))
+    language = db.Column(db.Enum('es', 'en', 'va', name='language_types'), nullable=False, default='es')
     is_superadmin = db.Column(db.Boolean(), nullable=False, default=False)  # TODO: Remove is_superadmin when permissions active
     token = db.Column(db.String(255), index=True, unique=True)
     token_expiration = db.Column(db.DateTime)

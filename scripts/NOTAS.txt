@@ -1,0 +1,9 @@
+# Instalas el paquete sin modificar el sistema.
+python3 -m venv venv
+source venv/bin/activate   # En Windows: venv\Scripts\activate
+pip install mysql-connector-python
+
+
+# Cada vez que quieras usarlo:
+
+source venv/bin/activate

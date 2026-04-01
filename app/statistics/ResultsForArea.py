@@ -20,7 +20,7 @@ def get_answer(id_area, id_ecoe):
     df_alumnos = pd.merge(left=df_all_students, right=df_answering_students,how='left', on=['id_student']).fillna(0)
     return df_alumnos
 
-
+#SCT
 def get_results_for_area(area,ecoe) -> pd.DataFrame:
     try:
         total_points = get_total_points(area)
@@ -42,9 +42,13 @@ def get_results_for_area(area,ecoe) -> pd.DataFrame:
         df_answer_area = df_answer_area.assign(med = _med)
         #perc:: Percentil de la columna punt
         df_answer_area['perc'] = df_answer_area['points'].rank(pct=True).map(lambda x: ceil(x*10)*10)
-
-        df_answer_area = df_answer_area.loc[:,['id_student','punt','pos','med','perc']]
+        # Peso relativo del área
+        weith = get_area_weith(area)
+        df_answer_area = df_answer_area.assign(weith=float(weith))
+        # Filtramos columnas finales en el orden deseado e incluimos puntos y total_points
+        df_answer_area = df_answer_area.loc[:,['id_student','punt','pos','med','perc', 'weith','points','total_points']]
         return df_answer_area
+
     except Exception as err:
         for arg in err.args:
             error = ""
@@ -64,7 +68,7 @@ def get_areas_list(id_ecoe) -> list:
             error = ""
             error = error + arg
         return "ko - Error: " + error 
-
+# Fusion de todas las areas en un unico dataframe, pero no calcula
 def results_by_area(idecoe) -> pd.DataFrame:
     try:
         areas = get_areas_list(idecoe)
@@ -75,8 +79,19 @@ def results_by_area(idecoe) -> pd.DataFrame:
             aux = get_results_for_area(area=str(id_area[0]),ecoe=idecoe)
             #Este if esta porque si una Area no tiene preguntas hace que crashee el proceso, por lo que si el area no tiene preguntas, lo ignoramos
             if( isinstance(aux, pd.DataFrame) ):
-                lista_df.append( aux.rename(columns = {'punt':'punt_{}'.format(id_area[1]),'pos':'pos_{}'.format(id_area[1]),
-                'med':'med_{}'.format(id_area[1]),'perc':'perc_{}'.format(id_area[1])}) ) 
+                nombre_area = id_area[1]
+                w = float(get_area_weith(str(id_area[0])))
+                # Añadimos la columna con el peso relativo
+                aux['weith_{}'.format(nombre_area)] = w
+                
+                lista_df.append( aux.rename(columns = {
+                    'punt':'punt_{}'.format(id_area[1]),
+                    'pos':'pos_{}'.format(id_area[1]),
+                    'med':'med_{}'.format(id_area[1]),
+                    'perc':'perc_{}'.format(id_area[1]),
+                    'points':'points_{}'.format(id_area[1]),
+                    'total_points':'maxpoints_{}'.format(id_area[1])
+                }) ) 
         df_total = lista_df[0]
         lista_df.pop(0)
         #df_students = get_students(idecoe)
@@ -87,10 +102,29 @@ def results_by_area(idecoe) -> pd.DataFrame:
                 on=['id_student'])
         
         #id_area = request.args.get('area')
+        #SCT
+        # Crear columna global inicializada a 0
+        df_total['nota_global'] = 0
+
+        for id_area in areas:
+            nombre = id_area[1]  # nombre del área
+            #w = get_area_weith(str(id_area[0]))
+            w = float(get_area_weith(str(id_area[0])))  # fuerza tipo float
+            columna_punt = f"punt_{nombre}"
+            if columna_punt in df_total.columns:
+                df_total['nota_global'] += df_total[columna_punt] * (w / 100)
         return df_total
+        
     except Exception as err:
         for arg in err.args:
             error = ""
             error = error + arg
         return "ko - Error: " + error
+#SCT obtenemos el peso por area 
+def get_area_weith(id_area):
+    conexion = db.engine
+    df = pd.read_sql("SELECT weith FROM area WHERE id=" + id_area, conexion)
+    if df.empty or pd.isna(df.iloc[0]['weith']):
+        return 100  # valor por defecto
+    return df.iloc[0]['weith']
 

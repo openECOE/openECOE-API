@@ -4,18 +4,19 @@ services:
     extends:
       file: .docker/docker-compose.persistence.yml
       service: db
+
   redis:
     extends:
       file: .docker/docker-compose.persistence.yml
       service: redis
+
   api:
-    build: 
+    build:
       context: .
-      dockerfile: Dockerfile
-      target: prod
-    image: openecoe/api:latest
-    ports:
-      - 8081:80
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./:/app/api          # Monta tu código local
+      - /app/api/env         # Evita conflictos con el venv
     environment:
       OPENECOE_SECRET: eiQuain4_aelohKa3_giGh6Fai_reeTh6Ai_Aegeic6l_ekuigo0M_aeph6Qua_uuZaac5n
       OPENECOE_DB_HOST: db
@@ -26,23 +27,16 @@ services:
       OPENECOE_REDIS_HOST: redis
       OPENECOE_REDIS_PORT: 6379
       OPENECOE_REDIS_DB: 0
-      
-      # Usuario por defecto creado la primera vez
       EMAIL: ecoe@umh.es
       PASSWORD: Kui0chee
       FIRSTNAME: Open
       SURNAME: ECOE
       ORGANIZATION: UMH
       ALEMBIC_UPGRADE: DO
-
-      # Configruación debug
       DEBUG: "True"
       LOG_TO_STDOUT: "True"
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
+    ports:
+      - 5001:5000
     depends_on:
       redis:
         condition: service_started
