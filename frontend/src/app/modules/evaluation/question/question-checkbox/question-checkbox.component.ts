@@ -37,6 +37,7 @@ export class QuestionCheckboxComponent extends QuestionBaseComponent implements 
 
   ngOnInit() {
     this._checkBoxes = this.loadQuestion(this.question);
+    this.loadSelected(this.answer);
   }
 
   loadQuestion(question: QuestionCheckBox): Array<CheckBoxOption> {
@@ -47,12 +48,30 @@ export class QuestionCheckboxComponent extends QuestionBaseComponent implements 
     return _cbList;
   }
 
-  loadSelected(answer: Answer) {
+/*   loadSelected(answer: Answer) {
     if (answer) {
       const _selected = (answer.schema as AnswerCheckBox).selected;
       for (const check of this._checkBoxes) {
         check.checked = !!(_selected ? _selected : []).find(value => value.id_option === check.option.id_option);
       }
+    }
+  } */
+
+  loadSelected(answer: Answer) {
+    if (!answer) return;
+
+    const rawSelected = (answer.schema as AnswerCheckBox).selected;
+
+    const selected = Array.isArray(rawSelected)
+      ? rawSelected
+      : rawSelected
+        ? [rawSelected]
+        : [];
+
+    for (const check of this._checkBoxes) {
+      check.checked = selected.some(
+        value => value.id_option === check.option.id_option
+      );
     }
   }
 
