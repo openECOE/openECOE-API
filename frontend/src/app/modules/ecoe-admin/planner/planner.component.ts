@@ -46,7 +46,7 @@ export class PlannerComponent implements OnInit {
   // Import planner from Excel
   showImportModal: boolean = false;
   importFileName: string = 'OrdenEstacion_Plantilla.xlsx';
-  importFields: string[] = ['IGO-POGPSIQ', 'ESTUDIANTE', 'APELLIDOS', 'NOMBRE', 'Estación Inicial'];
+  importFields: string[] = ['DNI', 'ESTUDIANTE', 'APELLIDOS', 'NOMBRE', 'Estación Inicial', 'FECHA_TURNO'];
 
   constructor(private apiService: ApiService,
               private route: ActivatedRoute,
@@ -254,6 +254,19 @@ export class PlannerComponent implements OnInit {
             });
         });
     });
+  }
+
+  formatDate(date: Date): string {
+    const pad = (n: number) => n.toString().padStart(2, '0');
+
+    return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()} ` +
+          `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+  }
+
+  getDefaultDate(shiftIndex: number): string {
+    const base = new Date();
+    base.setHours(8 + (shiftIndex * 2), 0, 0, 0);
+    return this.formatDate(base);
   }
 
   /**
@@ -554,7 +567,7 @@ export class PlannerComponent implements OnInit {
 
   /**
    * Generates and downloads a CSV template file for planner import.
-   * The template includes columns: IGO-POGPSIQ, ESTUDIANTE, APELLIDOS, NOMBRE, Estación Inicial
+   * The template includes columns: DNI, ESTUDIANTE, APELLIDOS, NOMBRE, Estación Inicial
    * Shifts are separated by a marker row: ---TURNO---
    */
   async downloadPlannerTemplate() {
@@ -582,21 +595,28 @@ export class PlannerComponent implements OnInit {
     const sampleData: any[] = [];
     
     allStudents.forEach((student, index) => {
+      const shiftIndex = Math.floor(index / studentsPerRound);
+      const shift = this.shifts[shiftIndex];
+      const fechaTurno = shift
+        ? this.formatDate(shift.timeStart)
+        : this.getDefaultDate(shiftIndex);
+
       // Calculate initial station: cycles through 1 to stationsTotal
       const initialStation = (index % studentsPerRound) + 1;
       sampleData.push({
-        'IGO-POGPSIQ': student.dni || '',
+        'DNI': student.dni || '',
         'ESTUDIANTE': index + 1,
         'APELLIDOS': student.surnames || '',
         'NOMBRE': student.name || '',
-        'Estación Inicial': initialStation
+        'Estación Inicial': initialStation, 
+        'FECHA_TURNO': fechaTurno // Optional: could add a sample date if needed
       });
       
       // Add shift marker after each complete round (when we've filled all stations)
       // Marker goes after student at position that completes a round (index+1 is divisible by studentsPerRound)
       if ((index + 1) % studentsPerRound === 0 && index < allStudents.length - 1) {
         sampleData.push({
-          'IGO-POGPSIQ': '---TURNO---',
+          'DNI': '---TURNO---',
           'ESTUDIANTE': '',
           'APELLIDOS': '',
           'NOMBRE': '',
@@ -611,7 +631,7 @@ export class PlannerComponent implements OnInit {
       // Example round 1
       for (let i = 1; i <= exampleStations; i++) {
         sampleData.push({
-          'IGO-POGPSIQ': `1234567${i}A`,
+          'DNI': `1234567${i}A`,
           'ESTUDIANTE': i,
           'APELLIDOS': `Apellido${i}`,
           'NOMBRE': `Nombre${i}`,
@@ -620,7 +640,7 @@ export class PlannerComponent implements OnInit {
       }
       // Shift marker after round 1
       sampleData.push({
-        'IGO-POGPSIQ': '---TURNO---',
+        'DNI': '---TURNO---',
         'ESTUDIANTE': '',
         'APELLIDOS': '',
         'NOMBRE': '',
@@ -629,7 +649,7 @@ export class PlannerComponent implements OnInit {
       // Example round 2
       for (let i = 1; i <= exampleStations; i++) {
         sampleData.push({
-          'IGO-POGPSIQ': `2345678${i}B`,
+          'DNI': `2345678${i}B`,
           'ESTUDIANTE': exampleStations + i,
           'APELLIDOS': `Apellido${exampleStations + i}`,
           'NOMBRE': `Nombre${exampleStations + i}`,
@@ -641,11 +661,12 @@ export class PlannerComponent implements OnInit {
     const csv = this.papaParser.unparse({
       fields: this.importFields,
       data: sampleData.map(row => [
-        row['IGO-POGPSIQ'],
+        row['DNI'],
         row['ESTUDIANTE'],
         row['APELLIDOS'],
         row['NOMBRE'],
-        row['Estación Inicial']
+        row['Estación Inicial'],
+        row['FECHA_TURNO']
       ])
     }, {
       delimiter: ';',
@@ -740,13 +761,17 @@ export class PlannerComponent implements OnInit {
         }
 
         // Separate rows into shifts based on markers
-        // Each ---TURNO--- marker indicates the END of a shift group
-        const shiftGroups: any[][] = [];
+        // Each ---TURNO--- marker indicates the END of a shift group       
+
+        const shiftGroups: { students: any[], date: Date | null }[] = [];
         let currentShiftStudents: any[] = [];
+        let currentShiftDate: Date | null = null;
+
+        
 
         for (const row of importedRows) {
           // Get DNI value - could be in different column name variations
-          let dniValue = row['IGO-POGPSIQ'];
+          let dniValue = row['DNI'];
           if (dniValue === undefined || dniValue === null) {
             // Try other possible column names
             dniValue = row['DNI'] || row['dni'] || Object.values(row)[0];
@@ -760,22 +785,37 @@ export class PlannerComponent implements OnInit {
             // IMPORTANT: Push current group even if it has students, then reset
             if (currentShiftStudents.length > 0) {
               console.log('Shift marker found, saving group with', currentShiftStudents.length, 'students');
-              shiftGroups.push([...currentShiftStudents]); // Use spread to create a copy
+              
+              shiftGroups.push({
+                students: [...currentShiftStudents],
+                date: currentShiftDate
+              });
+              currentShiftDate = null;
             }
             currentShiftStudents = []; // Reset for next shift
           } else if (dniValue && dniValue !== '') {
             // Regular student row - add to current shift
             currentShiftStudents.push(row);
           }
+          // Leemos la fecha
+          const rawDate = row['FECHA_TURNO'];
+          if (rawDate && !currentShiftDate) {            
+            currentShiftDate = parseDate(rawDate);
+          }
         }
         
         // Don't forget the last shift group (students after last marker or if no markers)
         if (currentShiftStudents.length > 0) {
-          console.log('Adding final group with', currentShiftStudents.length, 'students');
-          shiftGroups.push([...currentShiftStudents]);
+          console.log('Adding final group with', currentShiftStudents.length, 'students');          
+          shiftGroups.push({
+            students: [...currentShiftStudents],
+            date: currentShiftDate
+          });
+          currentShiftDate = null;
         }
         
-        console.log('Total shift groups:', shiftGroups.length, 'Sizes:', shiftGroups.map(g => g.length));
+        //console.log('Total shift groups:', shiftGroups.length, 'Sizes:', shiftGroups.map(g => g.length));
+        console.log('Shift group sizes:', shiftGroups.map(g => g.students.length));
 
         if (shiftGroups.length === 0) {
           this.message.createWarningMsg(this.translate.instant('NO_DATA_TO_IMPORT'));
@@ -821,29 +861,39 @@ export class PlannerComponent implements OnInit {
         const maxRoundsNeeded = 1;
         
         console.log('Shifts needed:', shiftsNeeded, 'Rounds needed:', maxRoundsNeeded);
-        console.log('Shift group sizes:', shiftGroups.map(g => g.length));
+        //console.log('Shift group sizes:', shiftGroups.map(g => g.length));
+        console.log('Shift group sizes:', shiftGroups.map(g => g.students.length));
 
         // Create shifts if needed
         if (this.shifts.length < shiftsNeeded) {
           const shiftsToCreate = shiftsNeeded - this.shifts.length;
           //first shift hour at 8AM, stagger by 2h until 12PM, stagger to 4PM, stagger shifts by 2h until final turn at 6PM
             // Define the allowed shift start hours: 8, 10, 12, 16, 18
-            const shiftHours = [8, 10, 12, 16, 18];
-            let baseDate = new Date();
-            baseDate.setHours(0, 0, 0, 0); // Start at midnight today
+            //const shiftHours = [8, 10, 12, 16, 18];
+
             for (let s = 0; s < shiftsToCreate; s++) {
               const shiftIndex = this.shifts.length + s;
-              // Cycle through shiftHours if more shifts are needed than defined hours
-              const hourIdx = shiftIndex % shiftHours.length;
-              if (shiftIndex > 0 && hourIdx === 0) {
-                // Move to next day after last hour
-                baseDate.setDate(baseDate.getDate() + 1);
+              //const group = shiftGroups[shiftIndex];
+              const group = shiftGroups[s];
+
+              let timeStart: Date;
+
+              if (group?.date) {
+                timeStart = new Date(group.date);
+              } else {
+                // fallback si no viene en CSV
+                console.log('Shift', s, 'date from CSV:', group?.date);
+                timeStart = new Date();
+                timeStart.setHours(8 + (shiftIndex * 2), 0, 0, 0);
               }
-              const timeStart = new Date(baseDate);
-              timeStart.setHours(shiftHours[hourIdx], 0, 0, 0);
+
               const shiftCode = `T${shiftIndex + 1}`;
-              await this.createShift(shiftCode, timeStart);
+              await this.createShift(shiftCode, timeStart); 
             }
+
+            let baseDate = new Date();
+            baseDate.setHours(0, 0, 0, 0); // Start at midnight today
+        
           // Reload shifts
           await this.loadRoundsShifts();
         }
@@ -869,7 +919,9 @@ export class PlannerComponent implements OnInit {
         const plannersCache = new Map<string, Planner>();
 
         for (let shiftIndex = 0; shiftIndex < shiftGroups.length; shiftIndex++) {
-          const shiftStudents = shiftGroups[shiftIndex];
+          //const shiftStudents = shiftGroups[shiftIndex];
+          const shiftGroup = shiftGroups[shiftIndex];
+          const shiftStudents = shiftGroup.students;
           const shift = this.shifts[shiftIndex];
 
           if (!shift) {
@@ -888,7 +940,7 @@ export class PlannerComponent implements OnInit {
           // The shift marker separates shifts, within each shift there's only one round assignment
           for (let studentIndexInShift = 0; studentIndexInShift < shiftStudents.length; studentIndexInShift++) {
             const row = shiftStudents[studentIndexInShift];
-            let studentDni = row['IGO-POGPSIQ'];
+            let studentDni = row['DNI'];
             if (studentDni === undefined || studentDni === null) {
               studentDni = row['DNI'] || row['dni'] || Object.values(row)[0];
             }
@@ -986,6 +1038,19 @@ export class PlannerComponent implements OnInit {
         this.loading = false;
       }
     });
+    
+    function parseDate(dateStr: string): Date | null {
+      if (!dateStr) return null;
+
+      const [datePart, timePart] = dateStr.split(' ');
+      if (!datePart || !timePart) return null;
+
+      const [day, month, year] = datePart.split('/').map(Number);
+      const [hours, minutes] = timePart.split(':').map(Number);
+
+      return new Date(year, month - 1, day, hours, minutes);
+    }
+    
   }
 }
 
