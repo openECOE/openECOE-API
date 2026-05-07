@@ -7,9 +7,9 @@ export const environment = {
   production: false,
   TESTING: false,
   DEBUG: true,
-  API_ROUTE: "http://sauron.uv.es:5001/backend",
-  CHRONO_ROUTE: "http://sauron.uv.es:5002",
-  BACK_ROUTE: "http://sauron.uv.es:5001"
+  API_ROUTE: "http://localhost:5001/backend",
+  CHRONO_ROUTE: "http://localhost:5002",
+  BACK_ROUTE: "http://localhost:5001"
 };
 
 /*
