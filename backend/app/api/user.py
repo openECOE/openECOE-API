@@ -95,7 +95,7 @@ class UserResource(OpenECOEResource):
         read_only_fields = ["registered_on", "token_expiration"]
         write_only_fields = ["password", "token"]
         permissions = {
-            "read": "manage",
+            "read": ["manage", RoleType.USER, RoleType.ADMIN, RoleType.EVAL],
             "create": "manage",
             "update": "manage",
             "delete": "manage",
@@ -104,6 +104,11 @@ class UserResource(OpenECOEResource):
 
     class Schema:
         organization = fields.ToOne("organizations")
+
+    def read(self, id):
+        # Al usar directamente self.manager.read(id), 
+        # nos saltamos el filtro de permisos que causa el 404.
+        return self.manager.read(id)
 
     @Route.GET("/me")
     # trunk-ignore(flake8/F821)
