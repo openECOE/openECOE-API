@@ -6,7 +6,7 @@
 	],
 	"service": "workspace",
 	"workspaceFolder": "/workspaces/openECOE-API",
-	"postCreateCommand": "bash -lc 'poetry config virtualenvs.in-project true --local && poetry install --with dev,api,chrono'",
+	"postCreateCommand": "bash -lc 'poetry config virtualenvs.in-project true --local && poetry install --with dev,api,chrono --no-root'",
 
 	// 👇 Features to add to the Dev Container. More info: https://containers.dev/implementors/features.
 	// "features": {},
