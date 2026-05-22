@@ -295,18 +295,24 @@ class EcoeResource(OpenECOEResource):
         
     @ItemRoute.GET("/results-area", rel='results_by_area')
     def send_results_for_area(self, ecoe):
-        object_permissions = self.manager.get_permissions_for_item(ecoe)
-        if "manage" in object_permissions and object_permissions["manage"] is not True:
-            raise Forbidden
+        try:
+            object_permissions = self.manager.get_permissions_for_item(ecoe)
+            if "manage" in object_permissions and object_permissions["manage"] is not True:
+                raise Forbidden
+                
+            from collections import defaultdict
+            id_area = request.args['area']
+            id_ecoe = str(ecoe.id)
+            dataFrame = get_results_for_area(id_area, id_ecoe)  
             
-        from collections import defaultdict
-        id_area = request.args['area']
-        id_ecoe = str(ecoe.id)
-        dataFrame = get_results_for_area(id_area, id_ecoe)  
-        
-        dd = defaultdict(list)
-        cadena = dataFrame.to_dict('records',into=dd)
-        return cadena   
+            dd = defaultdict(list)
+            cadena = dataFrame.to_dict('records',into=dd)
+            return cadena
+        except AttributeError as err:
+            error = "Error de atributo (Resultados por Área)"
+            for arg in err.args:
+                error = error + arg
+            return "ko - Error: " + error
 
     @ItemRoute.GET("/results/item-score", rel='items_score_by_ecoe')
     def send_items_score(self, ecoe):
@@ -567,7 +573,6 @@ class EcoeResource(OpenECOEResource):
     # Importing XLSX file data in order to add planners to DB
     @ItemRoute.POST("/planners/import")
     def import_planners(self, ecoe):
-        # print("Has llamado a la función import_planners")
         object_permissions = self.manager.get_permissions_for_item(ecoe)
         if "manage" in object_permissions and object_permissions["manage"] is not True:
             raise Forbidden("No tienes permisos para gestionar este elemento.")
@@ -607,8 +612,6 @@ class EcoeResource(OpenECOEResource):
                     "planner_order": int(row["planner_order"]) # Validamos que sea un entero
                 }
 
-                # print(f"SHIFT: {xlsx_data['shift_code']} ROUND: {xlsx_data['round_code']} DNI: {xlsx_data['dni']}")
-
                 if not all([xlsx_data["name"], xlsx_data["shift_code"], xlsx_data["round_code"], xlsx_data["id_planner"], xlsx_data["planner_order"]]):
                     raise ValueError("Las columnas 'name', 'surnames' y 'dni' no pueden estar vacías.")
 
@@ -620,8 +623,7 @@ class EcoeResource(OpenECOEResource):
 
                 if n_rows_students>0 and n_rows_shift>0 and n_rows_round>0 and n_assigned_planner==0:
                     planners_to_import.append(xlsx_data)
-            except (KeyError, ValueError, TypeError) as e:
-            # Agregamos el error a una lista para informar al usuario al final
+            except (KeyError, ValueError, TypeError) as e: # Agregamos el error a una lista para informar al usuario al final
                 errors.append(f"Error en la fila {index + 2}: {e}") # +2 porque la indexación es 0 y la fila 1 es la cabecera
 
         bulk_import_planners(ecoe, planners_to_import)

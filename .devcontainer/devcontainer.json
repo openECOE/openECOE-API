@@ -1,8 +1,12 @@
 {
 	"name": "openECOE_API_dev",
-	"build": {
-		"dockerfile": "Dockerfile"
-	},
+	"dockerComposeFile": [
+		"../.docker/docker-compose.persistence.yml",
+		"docker-compose.devcontainer.yml"
+	],
+	"service": "workspace",
+	"workspaceFolder": "/workspaces/openECOE-API",
+	"postCreateCommand": "bash -lc 'poetry config virtualenvs.in-project true --local && poetry install --with dev,api,chrono --no-root'",
 
 	// 👇 Features to add to the Dev Container. More info: https://containers.dev/implementors/features.
 	// "features": {},
@@ -16,17 +20,24 @@
 	// 👇 Configure tool-specific properties.
 	"customizations": {
         "vscode": {
-            "extensions":["ms-python.python", "njpwerner.autodocstring"]
+            "extensions":["ms-python.python", "njpwerner.autodocstring"],
+			"settings": {
+				"python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+				"python.terminal.activateEnvironment": true
+			}
             }
 		},
-	"features": {
-		// "ghcr.io/devcontainers-contrib/features/mysql-homebrew:1": {
-		// 	"version": "8.0"
-		// },
-		"ghcr.io/itsmechlark/features/redis-server:1": {
-			"version": "7"
-		}
-	},
+	"features": {},
+	"remoteEnv": {
+		"OPENECOE_DB_HOST": "db",
+		"OPENECOE_DB_PORT": "3306",
+		"OPENECOE_DB_USER": "openecoe",
+		"OPENECOE_DB_PASSWORD": "openecoe",
+		"OPENECOE_DB_NAME": "openECOE_dev",
+		"OPENECOE_REDIS_HOST": "redis",
+		"OPENECOE_REDIS_PORT": "6379",
+		"OPENECOE_REDIS_DB": "0"
+	}
 	// 👇 Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }

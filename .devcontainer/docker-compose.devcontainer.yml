@@ -1,0 +1,22 @@
+services:
+  workspace:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ..:/workspaces/openECOE-API:cached
+    command: sleep infinity
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    environment:
+      OPENECOE_DB_HOST: db
+      OPENECOE_DB_PORT: 3306
+      OPENECOE_DB_USER: openecoe
+      OPENECOE_DB_PASSWORD: openecoe
+      OPENECOE_DB_NAME: openECOE_dev
+      OPENECOE_REDIS_HOST: redis
+      OPENECOE_REDIS_PORT: 6379
+      OPENECOE_REDIS_DB: 0
