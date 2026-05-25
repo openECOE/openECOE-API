@@ -11,25 +11,17 @@ Para usarlo, primero se debe abrir el proyecto y abrir el contendor utilizando e
 
 > Si es la primera vez que se abre tardará más ya que se está creando el contenedor
 
-Una vez creado, abrir una terminal y ejecutar el siguiente comando para crear el entorno virtual de python
+Al arrancar el dev container se ejecuta automáticamente Poetry para preparar el entorno:
+
+- Se configura Poetry para crear el entorno virtual dentro del proyecto (`.venv`)
+- Se instalan automáticamente las dependencias necesarias (`dev`, `api` y `chrono`) sin instalar el proyecto como paquete (`--no-root`)
+- El intérprete de Python de VS Code queda apuntando a `${workspaceFolder}/.venv/bin/python`
+
+Si necesitas volver a instalar dependencias manualmente, puedes ejecutar:
 
 ```bash
-poetry shell
+poetry install --with dev,api,chrono
 ```
-
-Una vez creado el entorno virtual, instalar las dependencias
-
-```bash
-poetry install
-```
-
-Seleccionar el interprete de Python de Poetry utilizando el commando de Visual Studio Code `Python: Select Interpreter`, aparecerá una lista de opciones, seleccionar la siguiente:
-
-```
-Python 3.9.19 ('.venv': Poetry) ./venv/bin/python
-```
-
-> En caso de que no se haya seleccionado correctamente, reiniciar el editor y volver a abrir el contenedor
 
 ## Montar Bases de Datos
 

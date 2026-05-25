@@ -1,0 +1,9 @@
+{
+  "features": {
+    "ghcr.io/itsmechlark/features/redis-server:1": {
+      "version": "1.3.0",
+      "resolved": "ghcr.io/itsmechlark/features/redis-server@sha256:c8d037b266640d33eae14bec350a19853a280c1de7667df94b1ab17d0f072153",
+      "integrity": "sha256:c8d037b266640d33eae14bec350a19853a280c1de7667df94b1ab17d0f072153"
+    }
+  }
+}

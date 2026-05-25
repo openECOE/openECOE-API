@@ -1,7 +1,11 @@
 from . import socketio, chrono_app
 from enum import Enum
 import json
+import logging
 import os
+
+
+logger = logging.getLogger(__name__)
 
 class Status(Enum):
     CREATED = 1
@@ -16,6 +20,25 @@ class Status(Enum):
 class Manager:
     path = '/tmp/'
     file_template = path + 'config_ecoe_%d.json'
+
+    @staticmethod
+    def config_filename(ecoe_id):
+        return Manager.file_template % ecoe_id
+
+    @staticmethod
+    def has_config_file(ecoe_id):
+        return os.path.exists(Manager.config_filename(ecoe_id))
+
+    @staticmethod
+    def is_valid_config(config):
+        if not isinstance(config, dict):
+            return False
+
+        required_keys = {'ecoe', 'rounds', 'schedules', 'reruns', 'tfc'}
+        if not required_keys.issubset(config.keys()):
+            return False
+
+        return isinstance(config.get('ecoe'), dict) and 'id' in config.get('ecoe', {})
 
     @staticmethod
     def create_config(config):
@@ -35,8 +58,30 @@ class Manager:
             chrono_app.ecoes.remove(Manager.find_ecoe(ecoe_id))
         except ValueError:
             pass
-        filename = Manager.file_template % ecoe_id
+        filename = Manager.config_filename(ecoe_id)
         Manager.delete_file(filename)
+
+    @staticmethod
+    def cleanup_orphan_runtime(ecoe_id):
+        ecoe = Manager.find_ecoe(ecoe_id)
+        if ecoe is None:
+            return False
+
+        for e_round in ecoe.rounds:
+            try:
+                e_round.abort()
+                e_round.chrono.stop()
+                Manager.delete_file(e_round.status_filename)
+            except Exception as exc:
+                logger.warning(
+                    'Error cleaning orphan chrono runtime for ecoe %s, round %s: %s',
+                    ecoe_id,
+                    e_round.id,
+                    exc,
+                )
+
+        Manager.delete_config(ecoe_id)
+        return True
 
     @staticmethod
     def load_status_from_file(filename):
@@ -45,8 +90,8 @@ class Manager:
         try:
             with open(filename, 'r') as json_file:
                 status = json.load(json_file)
-        except FileNotFoundError:
-            pass
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
 
         return status
 
@@ -55,7 +100,7 @@ class Manager:
 
         try:
             os.remove(filename)
-        except:
+        except OSError:
             pass
 
     @staticmethod
@@ -64,6 +109,10 @@ class Manager:
         ecoe_configs = Manager.get_ecoe_config_files()
 
         for ecoe_config in ecoe_configs:
+            if not Manager.is_valid_config(ecoe_config):
+                logger.warning('Skipping invalid chrono config while reloading status')
+                continue
+
             # 1. Create configuration in app memory
             ecoe = Manager.create_config(ecoe_config)
 
@@ -85,8 +134,13 @@ class Manager:
                                                                                state=round_status['state'],
                                                                                current_rerun=round_status['current_rerun'],
                                                                                idx_schedule=round_status['current_idx_schedule']))
-                except:
-                    pass
+                except (KeyError, TypeError, ValueError) as exc:
+                    logger.warning(
+                        'Skipping round reload for ecoe %s, round %s due to invalid status payload: %s',
+                        ecoe.id,
+                        e_round.id,
+                        exc,
+                    )
 
     @staticmethod
     def get_list_files(path):
@@ -98,7 +152,7 @@ class Manager:
         files = Manager.get_list_files(path)
         configs = []
         if ecoe_id is not None:
-            configs.append(Manager.load_status_from_file(path + Manager.file_template%ecoe_id))
+            configs.append(Manager.load_status_from_file(Manager.config_filename(ecoe_id)))
         else:
             for file in files:
                 if file.endswith('.json'):
