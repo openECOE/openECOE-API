@@ -37,6 +37,10 @@ from app.statistics import  resultados_evaluativo_ecoe, get_results_for_area, ge
 from app.statistics.variables import get_variables
 from app.statistics.import_planners import get_student_rows_number, get_shift_rows_number, get_round_rows_number, get_assigned_planners_rows_number, set_student_in_planner, add_planner, bulk_import_planners
 import tempfile
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 class Location(int, Enum):
     ARCHIVE_ONLY = 1
@@ -395,10 +399,21 @@ class EcoeResource(OpenECOEResource):
     @ItemRoute.POST("/draft", rel="draft")
     def draft(self, ecoe) -> fields.Inline("self"):
         item = self.manager.read(ecoe.id, source=Location.INSTANCES_ONLY)
-        rounds_status = ecoe.chrono_status()
-        for status in rounds_status.values():
-            if status == 'RUNNING' or status == 'PAUSED':
-                raise Conflict(description=f"No se puede poner la ecoe {ecoe.id} en borrador mientras hay un cronometro activo")
+
+        if ecoe.rounds:
+            # If chrono_status fails because the chrono service is unavailable,
+            # allow proceeding to set ECOE to DRAFT. Only block when an active
+            # round is reported by the chrono service.
+            try:
+                rounds_status = ecoe.chrono_status()
+            except (ChronoNotFound, BackendConflict):
+                rounds_status = None
+
+            if rounds_status:
+                for status in rounds_status.values():
+                    if status in ("RUNNING", "PAUSED"):
+                        raise Conflict(description=f"No se puede poner la ecoe {ecoe.id} en borrador mientras hay un cronometro activo")
+
         return self.manager.update(item, {"status": ECOEstatus.DRAFT})
 
     @ItemRoute.POST("/loop", rel="loop")
@@ -654,5 +669,12 @@ def before_update_ecoe(sender, item, changes):
             try:
                 if item.chrono_token:
                     item.delete_config()
-            except (ChronoNotFound, BackendConflict):
+            except ChronoNotFound:
                 pass
+            except BackendConflict as exc:
+                logger.warning(
+                    "Chrono backend conflict while deleting config for ECOE %s on status %s: %s",
+                    item.id,
+                    changes["status"],
+                    exc,
+                )

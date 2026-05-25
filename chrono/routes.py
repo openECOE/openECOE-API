@@ -84,7 +84,23 @@ def has_threads_alive(ecoe_id):
     if ecoe is None:
         return False
     else:
-        return True in [t.is_alive() for t in ecoe.threads]
+        ecoe.threads = [t for t in ecoe.threads if t.is_alive()]
+        return len(ecoe.threads) > 0
+
+
+def reconcile_orphan_runtime(ecoe_id):
+    ecoe = Manager.find_ecoe(ecoe_id)
+    if ecoe is None:
+        return
+
+    if Manager.has_config_file(ecoe_id):
+        return
+
+    chrono_app.logger.warning(
+        'Detected orphan chrono runtime for ecoe %s (missing config file). Cleaning up runtime state.',
+        ecoe_id,
+    )
+    Manager.cleanup_orphan_runtime(ecoe_id)
 
 
 @chrono_app.route('/load', methods=['POST'])
@@ -92,6 +108,8 @@ def load_configuration():
     config = request.get_json()
     if 'ecoe' in config:
         ecoe_id = config['ecoe']['id']
+
+        reconcile_orphan_runtime(ecoe_id)
 
         if not has_threads_alive(ecoe_id):
 
@@ -107,6 +125,8 @@ def load_configuration():
 @chrono_app.route('/<int:ecoe_id>', methods=['DELETE'])
 @requires_tfc
 def delete_configuration(ecoe_id):
+    reconcile_orphan_runtime(ecoe_id)
+
     if not has_threads_alive(ecoe_id):
 
         Manager.delete_config(ecoe_id)
@@ -119,6 +139,8 @@ def delete_configuration(ecoe_id):
 @chrono_app.route('/start/<int:ecoe_id>', methods=['POST'])
 @requires_tfc
 def start_chronos(ecoe_id):
+    reconcile_orphan_runtime(ecoe_id)
+
     if not has_threads_alive(ecoe_id):
 
         ecoe = Manager.find_ecoe(ecoe_id)
