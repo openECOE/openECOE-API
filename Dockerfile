@@ -5,7 +5,7 @@ RUN apt-get update && \
     python3 -m pip install --upgrade pip && \
     pip3 install wheel
 
-RUN pip install poetry==1.7
+RUN pip install poetry==1.8.4 poetry-plugin-export
 
 WORKDIR /app/api
 
