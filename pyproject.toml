@@ -14,6 +14,8 @@ dependencies = [
     "flask-principal (==0.4.0)",
     "flask-httpauth (>=4.8,<5)",
     "flask-bcrypt (>=1.0.1,<2)",
+    # bcrypt 5 da error con contraseñas de más de 72 bytes; la 4 las trunca, como la 3.1 que había antes.
+    "bcrypt (>=4.3,<5)",
     "flask-cors (>=6.0,<7)",
     "flask-socketio (>=5.5,<6)",
     "simple-websocket (>=1.1,<2)",

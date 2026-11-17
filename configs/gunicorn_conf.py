@@ -27,7 +27,9 @@ threads = int(os.getenv("GUNICORN_THREADS", "4"))
 worker_connections = int(os.getenv("GUNICORN_WORKER_CONNECTIONS", str(threads)))
 
 loglevel = os.getenv("LOG_LEVEL", "info")
-keepalive = 120
+# Sin conexiones persistentes: cada hilo atiende una petición y suelta la conexión (nginx no las reutiliza hacia
+# gunicorn). Con worker_connections = threads, gunicorn no podría mantenerlas y avisaría al arrancar.
+keepalive = 0
 timeout = 120
 graceful_timeout = 20
 errorlog = "-"
