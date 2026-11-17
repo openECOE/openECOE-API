@@ -24,12 +24,14 @@ RUN DEBIAN_FRONTEND=noninteractive \
         libxmlsec1-dev \
         libffi-dev \
         liblzma-dev \
-        wkhtmltopdf
+        libpango-1.0-0 \
+        libpangoft2-1.0-0 \
+        libharfbuzz-subset0
 
 # Python and poetry installation
 USER $USER
 ARG HOME="/home/$USER"
-ARG PYTHON_VERSION=3.9
+ARG PYTHON_VERSION=3.15
 # ARG PYTHON_VERSION=3.10
 
 ENV PYENV_ROOT="${HOME}/.pyenv"

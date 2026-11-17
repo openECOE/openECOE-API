@@ -14,13 +14,13 @@ Para usarlo, primero se debe abrir el proyecto y abrir el contendor utilizando e
 Al arrancar el dev container se ejecuta automáticamente Poetry para preparar el entorno:
 
 - Se configura Poetry para crear el entorno virtual dentro del proyecto (`.venv`)
-- Se instalan automáticamente las dependencias necesarias (`dev`, `api` y `chrono`) sin instalar el proyecto como paquete (`--no-root`)
+- Se instalan automáticamente las dependencias (las de la aplicación y el grupo `dev`) sin instalar el proyecto como paquete (`--no-root`)
 - El intérprete de Python de VS Code queda apuntando a `${workspaceFolder}/.venv/bin/python`
 
 Si necesitas volver a instalar dependencias manualmente, puedes ejecutar:
 
 ```bash
-poetry install --with dev,api,chrono
+poetry install --with dev
 ```
 
 ## Montar Bases de Datos

@@ -28,6 +28,24 @@ from sqlalchemy import table, select
 import json
 from decimal import Decimal
 
+
+class _Fila:
+    """Fila que se puede leer por posición, por nombre de columna o como atributo (como en SQLAlchemy 1.3)."""
+
+    def __init__(self, row):
+        self._row = row
+
+    def __getitem__(self, key):
+        return self._row._mapping[key] if isinstance(key, str) else self._row[key]
+
+    def __getattr__(self, name):
+        return getattr(self._row, name)
+
+
+def _execute(conn, sql):
+    """SQL en texto (SQLAlchemy 2 ya no acepta cadenas en conn.execute)."""
+    return [_Fila(r) for r in conn.exec_driver_sql(sql).fetchall()]
+
 # revision identifiers, used by Alembic.
 revision = '5126c6c1a838'
 down_revision = '966e0a3b6e33'
@@ -51,7 +69,7 @@ def upgrade():
                             )
 
     # ### migrate data from qblock to block
-    results = conn.execute("select id, id_station, name, `order` from qblock").fetchall()
+    results = _execute(conn, "select id, id_station, name, `order` from qblock")
     qblocks = [{'id': r[0], 'id_station': r[1], 'name': r[2], 'order': r[3]} for r in results]
 
     op.bulk_insert(block, qblocks)
@@ -70,13 +88,13 @@ def upgrade():
                              )
 
     # ### migrate data from student_options to answer
-    results = conn.execute("select so.student_id, q.id, q.question_type, \
+    results = _execute(conn, "select so.student_id, q.id, q.question_type, \
                             GROUP_CONCAT(o.order) as opt_order, GROUP_CONCAT(o.id) as id_opt, SUM(o.points) as points \
                             from question q, `option` o, students_options so \
                             where q.id = o.id_question \
                             and so.option_id = o.id \
                             group by so.student_id, q.id, q.question_type \
-                            order by so.student_id, id_opt, opt_order;").fetchall()
+                            order by so.student_id, id_opt, opt_order;")
 
     students_options = []
 
@@ -140,21 +158,21 @@ def upgrade():
         sa.Column('question_id', sa.Integer()))
 
     op.execute(question.update().values(
-        id_block=select([qblocks_questions.c.qblock_id]). \
-            where(qblocks_questions.c.question_id == question.c.id)
+        id_block=select(qblocks_questions.c.qblock_id). \
+            where(qblocks_questions.c.question_id == question.c.id).scalar_subquery()
     ))
 
     op.execute(question.update().values(
-        id_station=select([qblock.c.id_station]). \
-            where(qblock.c.id == question.c.id_block)
+        id_station=select(qblock.c.id_station). \
+            where(qblock.c.id == question.c.id_block).scalar_subquery()
     ))
 
     op.create_foreign_key('fk_question_block', 'question', 'block', ['id_block'], ['id'])
     op.create_foreign_key('fk_question_station', 'question', 'station', ['id_station'], ['id'])
 
     # ### Import options to new model
-    results = conn.execute("select q.id, q.question_type, q.reference, q.description \
-                            from question q").fetchall()
+    results = _execute(conn, "select q.id, q.question_type, q.reference, q.description \
+                            from question q")
 
     def max_points(question_type, options):
 
@@ -173,10 +191,10 @@ def upgrade():
         id_question_ = r[0]
         type_ = question_type_dict[r[1]]
 
-        options = conn.execute("select o.id, o.label, o.points, o.order, false as selected \
+        options = _execute(conn, "select o.id, o.label, o.points, o.order, false as selected \
                                 from `option` o \
                                 where o.id_question = %(id_q)s order by o.order" % {'id_q': id_question_}
-                               ).fetchall()
+                               )
 
         question_options = [
             {'id_option': o[0], 'label': o[1], 'points': str(o[2]), 'order': o[3]}
@@ -257,8 +275,8 @@ def downgrade():
         # Other columns not needed for the data migration
     )
 
-    results = conn.execute("select q.id, q.question_schema, q.id_block \
-                                from question q").fetchall()
+    results = _execute(conn, "select q.id, q.question_schema, q.id_block \
+                                from question q")
     options_ = []
     options_range_ = []
     qblocks_questions_ = []
@@ -301,7 +319,7 @@ def downgrade():
                              )
 
     # ### migrate data from qblock to block
-    results = conn.execute("select id, id_station, name, `order` from block").fetchall()
+    results = _execute(conn, "select id, id_station, name, `order` from block")
     blocks_ = [{'id': r[0], 'id_station': r[1], 'name': r[2], 'order': r[3]} for r in results]
     op.bulk_insert(qblock, blocks_)
 
@@ -337,7 +355,7 @@ def downgrade():
                                        mysql_engine='InnoDB'
                                        )
 
-    results = conn.execute("select id, id_student, id_question, answer_schema, points from answer").fetchall()
+    results = _execute(conn, "select id, id_student, id_question, answer_schema, points from answer")
 
     answers = []
     for r in results:
@@ -347,8 +365,8 @@ def downgrade():
         answer_schema_ = json.loads(r['answer_schema'])
 
         if answer_schema_["type"] == 'range':
-            results = conn.execute("select id from option where id_question= %(id_q)s \
-                                   and `points` = %(points)s" % {"id_q": id_question_, "points": points_}).fetchall()
+            results = _execute(conn, "select id from option where id_question= %(id_q)s \
+                                   and `points` = %(points)s" % {"id_q": id_question_, "points": points_})
 
             option_ = results[0]["id"]
 

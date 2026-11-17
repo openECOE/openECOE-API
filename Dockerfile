@@ -1,41 +1,55 @@
-#FROM python:3.9 as base
-FROM nginx:1.24 as base
-RUN apt-get update && \
-    apt-get install -y python3-pip python3-venv wkhtmltopdf && \
-    python3 -m pip install --upgrade pip && \
-    pip3 install wheel
+# openECOE API: Python 3.15 sobre Debian 13 (trixie), sin root.
+#
+# Procesos (cada uno con su comando; la imagen one-for-all los lanza juntos con nginx delante):
+#   API         gunicorn -c configs/gunicorn_conf.py openecoe-api:app              (por defecto, 0.0.0.0:5000)
+#   cronómetro  gunicorn -c configs/gunicorn_conf.py -w 1 --threads 100 openecoe-chrono:app   (un solo proceso)
+#   trabajos    flask rq worker
+# Con el comando del API, la entrada (.docker/deploy/entrypoint.sh) aplica antes las migraciones y crea el usuario
+# inicial (alembic.sh y first-run.sh).
 
-RUN pip install poetry==1.8.4 poetry-plugin-export
+ARG PYTHON_IMAGE=python:3.15-slim-trixie
 
-WORKDIR /app/api
+FROM ${PYTHON_IMAGE} AS build
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1 PIP_NO_CACHE_DIR=1 PIP_ROOT_USER_ACTION=ignore
+RUN pip install poetry==2.5.1 poetry-plugin-export==1.10.1
+WORKDIR /src
+COPY pyproject.toml poetry.lock ./
+# Dependencias exactas del lock, con sus hashes.
+RUN poetry export --only main --format requirements.txt --output requirements.txt \
+ && python -m venv /opt/venv \
+ && /opt/venv/bin/pip install --require-hashes --no-deps -r requirements.txt \
+ && /opt/venv/bin/pip uninstall -y pip
 
-# install dependencies with Poetry
-COPY poetry.lock poetry.lock
-COPY pyproject.toml pyproject.toml
-RUN poetry export --format=requirements.txt --output=requirements.txt --with chrono --with api --without-hashes
+FROM ${PYTHON_IMAGE} AS prod
+ARG GIT_COMMIT="-"
+# Librerías de WeasyPrint (informes PDF) y fuentes; sin binarios setuid/setgid.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 libharfbuzz-subset0 \
+      fonts-dejavu-core fonts-liberation2 \
+ && rm -rf /var/lib/apt/lists/* \
+ && find / -xdev -perm /6000 -type f -exec chmod a-s {} + \
+ && groupadd --system --gid 48 openecoe \
+ && useradd --system --uid 48 --gid 48 --home-dir /nonexistent --no-create-home --shell /usr/sbin/nologin openecoe
 
-# set work directory
+COPY --from=build /opt/venv /opt/venv
+# Código de root y sin escritura para el usuario de la aplicación.
 COPY . /app/api
+WORKDIR /app/api
+RUN python -m compileall -q -j 0 /app/api /opt/venv \
+ && rm -rf /app/api/archive \
+ && PY="$(python -c 'import platform; print(platform.python_version())')" \
+ && OS="$(grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')" \
+ && printf '\nopenecoe-api builded %s [%s] -> %s -> python-%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$GIT_COMMIT" "$OS" "$PY" >> /etc/os-release
 
-# set environment variables
-RUN virtualenv /app/api/env
-ENV PATH=/app/api/env/bin:$PATH
+ENV PATH=/opt/venv/bin:$PATH \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    FLASK_APP=openecoe-api.py \
+    ALEMBIC_UPGRADE=DO \
+    LOG_TO_STDOUT=True \
+    OPENECOE_ARCHIVE_DIR=/tmp/openecoe-archive
 
-RUN /app/api/env/bin/pip install --no-cache -r requirements.txt
-
-ENV FLASK_APP=openecoe-api.py
-
-ENV ALEMBIC_UPGRADE=DO
-
-FROM base as prod
-# Nginx config
-COPY .docker/deploy/api.conf /etc/nginx/conf.d/default.conf
-ENV FLASK_ENV = production
-ENV FLASK_DEBUG = 0
-
-# Pre Start Nginx Scripts
-COPY .docker/deploy/alembic.sh /docker-entrypoint.d/80-alembic.sh
-COPY .docker/deploy/first-run.sh /docker-entrypoint.d/90-first-run.sh
-COPY .docker/deploy/gunicorn.sh /docker-entrypoint.d/99-gunicorn.sh
-
-EXPOSE 8081
+USER 48:48
+EXPOSE 5000
+ENTRYPOINT ["/app/api/.docker/deploy/entrypoint.sh"]
+CMD ["gunicorn", "-c", "configs/gunicorn_conf.py", "openecoe-api:app"]

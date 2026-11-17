@@ -1,5 +1,5 @@
 from decimal import Decimal
-from flask import json
+import json
 
 class DecimalEncoder(json.JSONEncoder):
     def default(self, o):

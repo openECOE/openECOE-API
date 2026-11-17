@@ -12,8 +12,11 @@ chrono_app = Flask(__name__)
 chrono_app.ecoes = []
 chrono_app.config.from_object(BaseConfig)
 
+# Hilos normales (gunicorn gthread + simple-websocket). Los cronómetros emiten en /round<id> sin manejadores
+# propios: python-socketio 5 solo acepta esos espacios de nombres con namespaces="*".
 socketio = SocketIO(chrono_app,
-                    async_mode= "eventlet",
+                    async_mode="threading",
+                    namespaces="*",
                     logger = chrono_app.config["DEBUG"],
                     engineio_logger=chrono_app.config["DEBUG"],
                     cors_allowed_origins="*")

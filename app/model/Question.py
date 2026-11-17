@@ -17,7 +17,7 @@
 from app.model import db
 from sqlalchemy.dialects import mysql
 from app.model.Area import Area
-from flask import json
+import json
 from app.shared import DecimalEncoder
 
 class Question(db.Model):
@@ -104,7 +104,7 @@ class Block(db.Model):
         try:
             area = self.get_or_create_area(id_ecoe, question['area']['name'], question['area']['code'])
             imported_question = Question(id_area = area.id, order = question['order'], id_block = self.id,
-                                             id_station = self.id_station, question_schema = json.dumps(question['question_schema'], cls=DecimalEncoder),
+                                             id_station = self.id_station, question_schema = json.dumps(question['question_schema'], cls=DecimalEncoder, sort_keys=True),
                                              max_points = question['max_points'])
             db.session.add(imported_question)
             db.session.commit()

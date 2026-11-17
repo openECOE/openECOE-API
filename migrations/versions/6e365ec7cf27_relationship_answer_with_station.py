@@ -37,7 +37,7 @@ def upgrade():
     )
 
     op.execute(answer.update().values(
-        id_station=select([question.c.id_station]).where(answer.c.id_question == question.c.id)
+        id_station=select(question.c.id_station).where(answer.c.id_question == question.c.id).scalar_subquery()
     ))
 
     op.drop_constraint('answer_ibfk_1', 'answer', type_='foreignkey')

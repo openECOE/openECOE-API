@@ -70,9 +70,11 @@ class BaseConfig:
     CORS_EXPOSE_HEADERS = "x-total-count"
     EXPORT_FILE_TYPES = ["csv", "tsv", "csvz", "tsvz", "xls", "xlsx", "xlsm", "ods"]
     DEFAULT_EXPORT_FILE_TYPE = "csv"
-    DEFAULT_ARCHIVE_ROUTE = "archive"
+    # Directorio de los ficheros que generan los trabajos (exportaciones, informes). Relativo al código o absoluto.
+    DEFAULT_ARCHIVE_ROUTE = os.environ.get("OPENECOE_ARCHIVE_DIR", "archive")
     DEFAULT_TEMPLATE_ROUTE = "template"
-    CHRONO_ROUTE = "http://localhost:5001"
+    # Cronómetro: en la misma máquina o contenedor (one-for-all) o en otro (OPENECOE_CHRONO_URL).
+    CHRONO_ROUTE = os.environ.get("OPENECOE_CHRONO_URL", "http://localhost:5001")
     
     
     """Potion configuration."""
@@ -94,6 +96,8 @@ class BaseConfig:
     SQLALCHEMY_ECHO = literal_eval(
         os.environ.get("SQLALCHEMY_ECHO")
     )
+    # Comprueba la conexión antes de usarla y la renueva antes del wait_timeout de MySQL.
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_recycle": 3600}
 
     """Redis configuration"""
     OPENECOE_REDIS_HOST = os.environ.get("OPENECOE_REDIS_HOST")

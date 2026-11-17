@@ -17,8 +17,36 @@ import inspect
 from flask import request, current_app
 from flask_potion.exceptions import BadRequest
 
+from urllib.parse import quote
+
+import pyexcel
+from flask import Response
 from pyexcel.exceptions import FileTypeNotSupported
-from app.api import excel
+
+
+_MIME_TYPES = {
+    "csv": "text/csv",
+    "tsv": "text/tab-separated-values",
+    "csvz": "application/zip",
+    "tsvz": "application/zip",
+    "ods": "application/vnd.oasis.opendocument.spreadsheet",
+    "xls": "application/vnd.ms-excel",
+    "xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "xlsm": "application/vnd.ms-excel.sheet.macroenabled.12",
+}
+
+
+def _make_response(content, file_type, file_name=None):
+    """Respuesta con el fichero, como la que daba Flask-Excel (pyexcel-webio 0.1.4)."""
+    if hasattr(content, "read"):
+        content = content.read()
+    response = Response(content, content_type=_MIME_TYPES.get(file_type, "application/octet-stream"), status=200)
+    if file_name:
+        if not file_name.endswith(file_type):
+            file_name = "%s.%s" % (file_name, file_type)
+        encoded = quote(file_name)
+        response.headers["Content-Disposition"] = "attachment; filename=%s;filename*=utf-8''%s" % (encoded, encoded)
+    return response
 
 
 def check_filetype(decorated):
@@ -57,21 +85,21 @@ def book_dict(_book_dict, filename, filetype):
 
     _dict = {key: query2array(items) for key, items in _book_dict.items()}
     # TODO: Investigate if it possible define sheets order for xls in make_response_from_book_dict with pyexcel.
-    return excel.make_response_from_book_dict(adict=_dict, file_type=filetype, file_name=filename)
+    return _make_response(pyexcel.save_book_as(bookdict=_dict, dest_file_type=filetype), filetype, filename)
 
 
 @check_filetype
 def query(_query, columns, filename, filetype):
-    return excel.make_response_from_query_sets(query_sets=_query, column_names=columns,
-                                               sheet_name=filename,
-                                               file_name=filename, file_type=filetype)
+    sheet = pyexcel.get_sheet(query_sets=_query, column_names=columns)
+    sheet.name = filename
+    return _make_response(sheet.save_to_memory(filetype, None), filetype, filename)
 
 
 @check_filetype
 def dictionary(_dictionary, filename, filetype):
-    return excel.make_response_from_dict(adict=_dictionary, file_name=filename, file_type=filetype)
+    return _make_response(pyexcel.save_as(adict=_dictionary, dest_file_type=filetype), filetype, filename)
 
 
 @check_filetype
 def records(_records, filename, filetype):
-    return excel.make_response_from_records(records=_records, file_name=filename, file_type=filetype)
+    return _make_response(pyexcel.save_as(records=_records, dest_file_type=filetype), filetype, filename)

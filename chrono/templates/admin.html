@@ -1,5 +1,5 @@
 <script type="text/javascript" src="//code.jquery.com/jquery-1.4.2.min.js"></script>
-<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.8.1/socket.io.min.js"></script>
 <script type="text/javascript" charset="utf-8">
 
     $(document).ready(function() {
@@ -8,7 +8,7 @@
 
             {% for r in e.rounds %}
 
-                var socket{{ r.id }} = io.connect('http://' + document.domain + ':' + location.port + '/round{{ r.id }}', { reconnectionDelayMax : 1000 });
+                var socket{{ r.id }} = io.connect(location.origin + '/round{{ r.id }}', { reconnectionDelayMax : 1000 });
 
                 socket{{ r.id }}.on('connect', function () {
                     $("#log").append('Conectado para monitorizacion de rueda {{ r.id }}<br>');

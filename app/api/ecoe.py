@@ -293,9 +293,9 @@ class EcoeResource(OpenECOEResource):
         
         ficherotemporal.seek(0)
         
-        return send_file(filename_or_fp = ficherotemporal,
-                                attachment_filename=file_name,
-                                as_attachment=True)
+        return send_file(ficherotemporal,
+                         download_name=file_name,
+                         as_attachment=True)
         
     @ItemRoute.GET("/results-area", rel='results_by_area')
     def send_results_for_area(self, ecoe):
@@ -582,9 +582,9 @@ class EcoeResource(OpenECOEResource):
         fichero_temporal.write(fileContent)
         fichero_temporal.seek(0)
 
-        return send_file(filename_or_fp = fichero_temporal,
-                                attachment_filename=file_name,
-                                as_attachment=True)
+        return send_file(fichero_temporal,
+                         download_name=file_name,
+                         as_attachment=True)
     # Importing XLSX file data in order to add planners to DB
     @ItemRoute.POST("/planners/import")
     def import_planners(self, ecoe):

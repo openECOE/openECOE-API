@@ -27,7 +27,7 @@ while getopts "r:R:t:" opt; do
 done
 
 # Construir la imagen de Docker
-docker build -t "$REPO:$RELEASE" --target prod .
+docker build -t "$REPO:$RELEASE" --target prod --build-arg GIT_COMMIT="$(git rev-parse --short HEAD 2>/dev/null || echo -)" .
 
 # Etiquetar la imagen de Docker
 for tag in "${ADDITIONAL_TAGS[@]}"; do

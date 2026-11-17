@@ -35,7 +35,7 @@ def upgrade():
     )
 
     op.execute(stage.update().values(
-        id_ecoe=sa.select([sa.func.max(schedule.c.id_ecoe, type_=sa.Integer)]).where(schedule.c.id_stage == stage.c.id)
+        id_ecoe=sa.select(sa.func.max(schedule.c.id_ecoe, type_=sa.Integer)).where(schedule.c.id_stage == stage.c.id).scalar_subquery()
     ))
 
     op.create_foreign_key('stage_ibfk_1', 'stage', 'ecoe', ['id_ecoe'], ['id'])

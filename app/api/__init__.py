@@ -17,7 +17,6 @@
 from app import flask_app
 from flask import Blueprint
 from flask_cors import CORS
-import flask_excel as excel
 from flask_potion import Api
 from flask_login import login_required
 
@@ -46,7 +45,6 @@ if flask_app.config.get('API_AUTH'):
 
 CORS(bp, expose_headers='Content-Length, X-Total-Count')
 
-excel.init_excel(bp)
 
 version = 'v1'
 

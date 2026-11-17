@@ -38,7 +38,8 @@ def load_user_from_request(request):
     auth_token = request.headers.get("Authorization")
     user = None
 
-    if request.authorization:
+    # Werkzeug 2.3+ también interpreta "Bearer ..." en request.authorization: aquí solo Basic.
+    if request.authorization and request.authorization.type == "basic":
         username, password = (
             request.authorization.username,
             request.authorization.password,

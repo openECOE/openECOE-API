@@ -54,8 +54,8 @@ class JobResource(OpenECOEResource):
         _archiveroute = os.path.join(os.path.dirname(current_app.instance_path),
                                      current_app.config.get("DEFAULT_ARCHIVE_ROUTE"))
 
-        return send_from_directory(directory=_archiveroute,
-                                   filename=job.file,
+        return send_from_directory(_archiveroute,
+                                   job.file,
                                    as_attachment=True)
 
 

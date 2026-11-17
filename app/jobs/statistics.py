@@ -190,7 +190,7 @@ def get_ecoe_data_csv(ecoe_id: int):
 
 @rq.job(timeout=300)
 def generate_reports(id_ecoe: int):
-    import pdfkit
+    from weasyprint import CSS, HTML
     import os
     from flask import current_app
     from app.statistics.calculations import get_report_data
@@ -227,13 +227,15 @@ def generate_reports(id_ecoe: int):
 
         os.makedirs(urlbase)
 
+        # Página A4 con márgenes de 10 mm, como hacía wkhtmltopdf; un @page de la plantilla tiene prioridad.
+        page_css = CSS(string="@page { size: A4; margin: 10mm; }")
         results_by_student = student_data.transpose().to_dict()
 
         for i, student in enumerate(results_by_student):
             ref_ecoe = results_by_student[student]['ref_ecoe'].replace(" ", "_")
             output_text = template.render(results_by_student[student])
             url = urlbase + "/grades-" + ref_ecoe + ".pdf"
-            pdfkit.from_string(output_text, url)
+            HTML(string=output_text).write_pdf(url, stylesheets=[page_css])
             rq.set_task_progress(round(i/len(student_data)*99))
         
         filename = zipped_reports_filename(id_ecoe, False)

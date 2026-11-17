@@ -73,7 +73,7 @@ def create_app(config_class=BaseConfig):
     return flask_app
 
 
-@flask_app.cli.command()
+@flask_app.cli.command("create_orga")  # nombre explícito: click 8 lo cambiaría a create-orga
 @click.option("--name", prompt="Organization name", help="Organization name")
 def create_orga(name):
     with current_app.app_context():
@@ -94,7 +94,7 @@ def create_orga(name):
             click.echo("Organization {} created".format(name))
 
 
-@flask_app.cli.command()
+@flask_app.cli.command("create_user")  # nombre explícito: click 8 lo cambiaría a create-user
 @click.option("--email", prompt="Your email", help="User email")
 @click.password_option("--password", prompt="Type password", help="User password")
 @click.option("--name", help="User name")

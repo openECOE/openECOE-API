@@ -14,8 +14,8 @@ services:
       target: prod
     image: openecoe/api:latest
     ports:
-      - 8081:80
-    environment:
+      - 8081:5000
+    environment: &api-env
       OPENECOE_SECRET: eiQuain4_aelohKa3_giGh6Fai_reeTh6Ai_Aegeic6l_ekuigo0M_aeph6Qua_uuZaac5n
       OPENECOE_DB_HOST: db
       OPENECOE_DB_PORT: 3306
@@ -25,6 +25,7 @@ services:
       OPENECOE_REDIS_HOST: redis
       OPENECOE_REDIS_PORT: 6379
       OPENECOE_REDIS_DB: 0
+      OPENECOE_CHRONO_URL: http://chrono:5001
       RQ_REDIS_URL: 'redis://redis:6379/0'
       
       # Usuario por defecto creado la primera vez
@@ -39,7 +40,7 @@ services:
       DEBUG: "True"
       LOG_TO_STDOUT: "False"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/status/"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/backend/status/')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -48,3 +49,19 @@ services:
         condition: service_started
       db:
         condition: service_healthy
+
+  # Cronómetro (un solo proceso; websocket en /socket.io) y trabajos en segundo plano, con la misma imagen.
+  chrono:
+    image: openecoe/api:latest
+    command: ["gunicorn", "-c", "configs/gunicorn_conf.py", "-w", "1", "--threads", "100", "--bind", "0.0.0.0:5001", "openecoe-chrono:app"]
+    ports:
+      - 5001:5001
+    environment: *api-env
+    depends_on:
+      - api
+  worker:
+    image: openecoe/api:latest
+    command: ["flask", "rq", "worker"]
+    environment: *api-env
+    depends_on:
+      - api
