@@ -41,13 +41,15 @@ RUN python -m compileall -q -j 0 /app/api /opt/venv \
  && OS="$(grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"')" \
  && printf '\nopenecoe-api builded %s [%s] -> %s -> python-%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$GIT_COMMIT" "$OS" "$PY" >> /etc/os-release
 
+# XDG_CACHE_HOME: caché de fontconfig (WeasyPrint) en /tmp; el HOME no existe y el resto puede ser de solo lectura.
 ENV PATH=/opt/venv/bin:$PATH \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     FLASK_APP=openecoe-api.py \
     ALEMBIC_UPGRADE=DO \
     LOG_TO_STDOUT=True \
-    OPENECOE_ARCHIVE_DIR=/tmp/openecoe-archive
+    OPENECOE_ARCHIVE_DIR=/tmp/openecoe-archive \
+    XDG_CACHE_HOME=/tmp/.cache
 
 USER 48:48
 EXPOSE 5000
