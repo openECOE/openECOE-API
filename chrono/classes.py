@@ -7,6 +7,10 @@ import os
 
 logger = logging.getLogger(__name__)
 
+# Directorio del estado de los cronómetros (configuración de cada ECOE y estado de rondas y cronómetros), que se
+# recupera al arrancar. Para no perderlo al reiniciar el contenedor, tiene que ser persistente (por ejemplo, un EFS).
+CHRONO_DIR = os.path.join(os.environ.get('OPENECOE_CHRONO_DIR', '/tmp'), '')
+
 class Status(Enum):
     CREATED = 1
     RUNNING = 2
@@ -18,7 +22,7 @@ class Status(Enum):
         return f'{self.name}'
 
 class Manager:
-    path = '/tmp/'
+    path = CHRONO_DIR
     file_template = path + 'config_ecoe_%d.json'
 
     @staticmethod
@@ -128,10 +132,12 @@ class Manager:
                         if len(chrono_status) > 0:
                             e_round.chrono.minutes = chrono_status['minutes']
                             e_round.chrono.seconds = chrono_status['seconds']
-                            e_round.chrono.state = chrono_status['state']
+                            # En el fichero el estado está por su nombre: sin convertirlo a Status, un cronómetro
+                            # pausado no se reconocería como tal y seguiría corriendo.
+                            e_round.chrono.state = Status[chrono_status['state']]
 
                         ecoe.threads.append(socketio.start_background_task(target=e_round.start,
-                                                                               state=round_status['state'],
+                                                                               state=Status[round_status['state']],
                                                                                current_rerun=round_status['current_rerun'],
                                                                                idx_schedule=round_status['current_idx_schedule']))
                 except (KeyError, TypeError, ValueError) as exc:
@@ -211,7 +217,7 @@ class Round:
 
     @property
     def status_filename(self):
-        return '/tmp/round.%d.status' % self.id
+        return Manager.path + 'round.%d.status' % self.id
 
     def start(self, state=Status.RUNNING, current_rerun=1, idx_schedule=0):
 
@@ -277,7 +283,7 @@ class Chrono:
 
     @property
     def status_filename(self):
-        return '/tmp/chrono.%d.status' % self.id
+        return Manager.path + 'chrono.%d.status' % self.id
 
     def _create_tic_tac_dict(self, t, current_rerun, total_reruns, schedule):
 

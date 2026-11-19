@@ -50,6 +50,7 @@ juntos con nginx delante.
 * OPENECOE_SECRET: Clave para firmar las cookies de sesión. Obligatoria en producción (el valor por defecto es público)
 * OPENECOE_CHRONO_URL: URL interna del cronómetro (por defecto, `http://localhost:5001`)
 * OPENECOE_ARCHIVE_DIR: Directorio de los ficheros que generan los trabajos (exportaciones, informes). Por defecto, `archive` junto al código; en la imagen, `/tmp/openecoe-archive`
+* OPENECOE_CHRONO_DIR: Directorio donde el cronómetro guarda su estado (configuración de cada ECOE y estado de rondas y cronómetros) para recuperarlo al arrancar. Por defecto, `/tmp`; para no perderlo al reiniciar, tiene que ser persistente (por ejemplo, un EFS)
 * WEB_CONCURRENCY, GUNICORN_THREADS: Procesos e hilos por proceso de gunicorn (por defecto, 2 procesos por núcleo y 4 hilos)
 * BCRYPT_LOG_ROUNDS: Número de rondas de encriptación de la contraseña
 * DEBUG: Si se activa, se mostrarán los errores en la consola
